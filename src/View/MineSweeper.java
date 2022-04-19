@@ -27,7 +27,7 @@ public class MineSweeper extends Application implements Observer {
 
     // game constants
     public static final int ROWS = 20, COLS = 20;
-    public static final int NUM_BOMBS = 40; // i have no clue if this is too many
+    public static final int NUM_BOMBS = 60; // i have no clue if this is too many
 
     // gui constants
     private static final double HEX_RADIUS = 30, HEX_SIZE = Math.sqrt(HEX_RADIUS * HEX_RADIUS * 0.75);
