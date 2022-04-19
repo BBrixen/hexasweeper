@@ -1,23 +1,16 @@
 package View;
 
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import Models.MineSweeperTile;
-import Utils.GUESS_STATUS;
-
 import static Utils.GUESS_STATUS.FLAGGED;
 import static Utils.GUESS_STATUS.GUESSED;
 import static Utils.GUESS_STATUS.UNGUESSED;
@@ -60,7 +53,7 @@ public class MineSweeper extends Application implements Observer {
     @Override
     public void start(Stage stage) {
     	// initialize controller
-        controller = new MineSweeperController(ROWS, COLS, NUM_BOMBS);
+        controller = new MineSweeperController();
     	// add as observer for model (MineSweeperBoard)
         controller.addObserver(this);
         rectGrid = new Hexagon[ROWS][COLS];
@@ -76,9 +69,6 @@ public class MineSweeper extends Application implements Observer {
         stage.setScene(scene);
         stage.setTitle("Mine Sweeper");
         stage.show();
-        
-        // create instance of MouseHandler
-//        scene.setOnMousePressed(new MouseHandler());
     }
 
 
@@ -121,7 +111,6 @@ public class MineSweeper extends Application implements Observer {
 			else if (e.isSecondaryButtonDown()) {
     			controller.updateTileStatus(row, col, FLAGGED);
     			}
-
         });
 
         label.setOnMousePressed(e -> {
@@ -132,7 +121,6 @@ public class MineSweeper extends Application implements Observer {
             else if (e.isSecondaryButtonDown()) {
                 controller.updateTileStatus(row, col, FLAGGED);
             }
-
         });
 
         rectGrid[row][col] = hex;
@@ -140,7 +128,6 @@ public class MineSweeper extends Application implements Observer {
         gridPane.getChildren().add(hex);
         gridPane.getChildren().add(label);
     }
-    
     
     /**
      * Any time the Model calls notifyObservers(), this update()
@@ -174,6 +161,7 @@ public class MineSweeper extends Application implements Observer {
 	            }
 	}
         
+    //Sets grid color according to number of adjacent mines
     private Paint getColor(int mineCount) {
 		if (mineCount == 1) {
 			return Color.rgb(207, 236, 207);

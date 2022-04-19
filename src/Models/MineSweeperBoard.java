@@ -6,8 +6,9 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Random;
 import Utils.GUESS_STATUS;
-
-
+import static View.MineSweeper.COLS;
+import static View.MineSweeper.NUM_BOMBS;
+import static View.MineSweeper.ROWS;
 
 @SuppressWarnings("deprecation")
 public class MineSweeperBoard extends Observable {
@@ -15,9 +16,6 @@ public class MineSweeperBoard extends Observable {
 	// the minesweeper board as a 2D array
 	private MineSweeperTile[][] board;
 	private List<Observer> observers;
-	private final int ROWS;
-	private final int COLS;
-	private final int NUM_BOMBS;
 	
 	/**
 	 * Constructor for MineSweeperBoard model object.
@@ -25,11 +23,8 @@ public class MineSweeperBoard extends Observable {
 	 * @param cols 
 	 * @param rows 
 	 */
-	public MineSweeperBoard(int rows, int cols, int numBombs) {
+	public MineSweeperBoard() {
 		//initializes the board as a ROWS x COLS 2D array with null pointers for now
-		ROWS = rows;
-		COLS = cols;
-		NUM_BOMBS = numBombs;
 		board = new MineSweeperTile[ROWS][COLS];
 		observers = new ArrayList<>();
 	}

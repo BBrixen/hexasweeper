@@ -1,11 +1,9 @@
 package Controllers;
 
 import java.util.Observer;
-
 import Models.MineSweeperBoard;
 import Models.MineSweeperTile;
 import Utils.GUESS_STATUS;
-
 import static View.MineSweeper.COLS;
 import static View.MineSweeper.NUM_BOMBS;
 import static View.MineSweeper.ROWS;
@@ -18,9 +16,6 @@ public class MineSweeperController {
 	// keeps track of the total number of guesses
 	private int numberOfGuesses;
 	// total number of bombs in the board
-	private final int NUM_BOMBS;
-	private final int ROWS;
-	private final int COLS;
 	private boolean win;
 	private MineSweeperTile[][] board;
 	
@@ -31,11 +26,8 @@ public class MineSweeperController {
 	 * @param cols 
 	 * @param rows 
 	 */
-	public MineSweeperController(int rows, int cols, int numBombs) {
-		NUM_BOMBS = numBombs;
-		ROWS = rows;
-		COLS = cols;
-		this.model = new MineSweeperBoard(ROWS, COLS, NUM_BOMBS);
+	public MineSweeperController() {
+		this.model = new MineSweeperBoard();
 		// will change to "false" if a bomb is clicked
 		win = true;
 	}
@@ -169,5 +161,4 @@ public class MineSweeperController {
 	public boolean win() {
 		return win;
 	}
-
 }
