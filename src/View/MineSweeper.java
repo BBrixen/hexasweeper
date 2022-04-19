@@ -9,6 +9,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -168,12 +169,34 @@ public class MineSweeper extends Application implements Observer {
 	                // Reveals minecount of any guessed tiles
 	                if (arg[row][col].getMineCount() > 0 && arg[row][col].getStatus().equals(GUESSED)) {
 	                	labelGrid[row][col].setText(""+arg[row][col].getMineCount());
-	                	
+	                	rectGrid[row][col].setFill(getColor(arg[row][col].getMineCount()));
 	                }
 	            }
 	}
         
-    /**
+    private Paint getColor(int mineCount) {
+		if (mineCount == 1) {
+			return Color.rgb(207, 236, 207);
+		}
+		else if (mineCount == 2) {
+			return Color.rgb(204, 236, 239);
+		}
+		else if (mineCount == 3) {
+			return Color.rgb(221, 212, 232);
+		}
+		else if (mineCount == 4) {
+			return Color.rgb(253, 222, 238);
+		}
+		else if (mineCount == 5) {
+			return Color.rgb(253, 202, 162);
+		}
+		else if (mineCount == 6) {
+			return Color.rgb(255, 105, 97);
+		}
+		return null;
+	}
+
+	/**
      * This method displays the game over message in the middle of the board
      * when the game is over.
      */
@@ -220,5 +243,3 @@ public class MineSweeper extends Application implements Observer {
         }
     }
 }
-
-
