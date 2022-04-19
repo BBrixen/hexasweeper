@@ -98,7 +98,7 @@ public class MineSweeper extends Application implements Observer {
      */
     private void addHex(int row, int col) {
         double yCoord = (row+1) * HEX_HEIGHT * 0.75;
-        double xCoord = (col+1) * HEX_WIDTH + (row %2) * HEX_SIZE;
+        double xCoord = (col+1) * HEX_WIDTH + ((row % 2) * HEX_SIZE);
         Hexagon hex = new Hexagon(xCoord, yCoord);
         hex.setFill(UNGUESSED.getColor());
 
@@ -108,19 +108,25 @@ public class MineSweeper extends Application implements Observer {
         label.setTranslateX(xCoord + LABEL_OFFSETX);
         label.setTranslateY(yCoord + LABEL_OFFSETY);
 
+        // TODO: compact these into the same event
         hex.setOnMousePressed(e -> {
         	
             if (e.isPrimaryButtonDown()) {
-            	int y = (int) ((e.getY()/.75/HEX_HEIGHT)-1);
-                int x = (int) (((e.getX()-(y%2*HEX_SIZE))/HEX_WIDTH)-1); // casting to int rounds down, finds coord of click
-    			controller.updateTileStatus(y, x, GUESSED);}
+    			controller.updateTileStatus(row, col, GUESSED);}
 
 			else if (e.isSecondaryButtonDown()) {
-				
-				int y = (int) ((e.getY()/.75/HEX_HEIGHT)-1);
-                int x = (int) (((e.getX()-(y%2*HEX_SIZE))/HEX_WIDTH)-1);
-    			controller.updateTileStatus(y, x, FLAGGED);
-                }
+    			controller.updateTileStatus(row, col, FLAGGED);
+            }
+
+        });
+
+        label.setOnMousePressed(e -> {
+            if (e.isPrimaryButtonDown()) {
+                controller.updateTileStatus(row, col, GUESSED);}
+
+            else if (e.isSecondaryButtonDown()) {
+                controller.updateTileStatus(row, col, FLAGGED);
+            }
 
         });
 
@@ -168,6 +174,12 @@ public class MineSweeper extends Application implements Observer {
     		msg = "YOU LOSE!!".split("");
 		int row = COLS/2;
 		int i = 0;
+
+        for (int r = 0; r < ROWS; r++) {
+            for (int c = 0; c < COLS; c++) {
+                labelGrid[r][c].setText(""); // clear the text
+            }
+        }
 
         for (int col = (COLS/4); col < COLS*((double)3/4); col++) {
             rectGrid[row][col].setFill(Color.WHITE);
