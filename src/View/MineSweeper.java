@@ -7,9 +7,11 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -35,12 +37,14 @@ public class MineSweeper extends Application implements Observer {
 
     // gui constants
     private static final int GRID_SIZE = 40;
-    private static final int RECTS_SIZE = (int) (0.9 * GRID_SIZE);
     private static final int SCENE_WIDTH = (COLS + 2) * GRID_SIZE, SCENE_HEIGHT = (ROWS + 2) * GRID_SIZE;
+    private static final double HEX_RADIUS = 38, HEX_SIZE = Math.sqrt(HEX_RADIUS * HEX_RADIUS * 0.75);
+    private static final double HEX_HEIGHT = 2* HEX_RADIUS, HEX_WIDTH = 2*HEX_SIZE;
+
 
     // gui variables
-    private Rectangle[][] rectGrid;
-    private Group gridGroup;
+    private Hexagon[][] rectGrid;
+    private AnchorPane gridPane;
     
     // controller variable
     private MineSweeperController c;
@@ -55,14 +59,14 @@ public class MineSweeper extends Application implements Observer {
     	c = new MineSweeperController(NUM_BOMBS);
     	// add as observer for model (MineSweeperBoard)
     	c.addObserver(this);
-        rectGrid = new Rectangle[ROWS][COLS];
-        gridGroup = new Group();
+        rectGrid = new Hexagon[ROWS][COLS];
+        gridPane = new AnchorPane();
 
         // creates the initial blank board
         createBoard();
 
         BorderPane pane = new BorderPane();
-        pane.setCenter(gridGroup);
+        pane.setCenter(gridPane);
         Scene scene = new Scene(pane, SCENE_WIDTH, SCENE_HEIGHT);
         stage.setScene(scene);
         stage.setTitle("Mine Sweeper");
@@ -79,8 +83,7 @@ public class MineSweeper extends Application implements Observer {
     public void createBoard() {
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLS; col++) {
-                addLabel(row, col);
-                addLabel(row, col);
+                addHex(row, col);
             }
         }
     }
@@ -91,15 +94,14 @@ public class MineSweeper extends Application implements Observer {
      * @param row is the y coord
      * @param col is the x coord
      */
-    private void addLabel(int row, int col) {
-        Rectangle rect = new Rectangle(RECTS_SIZE, RECTS_SIZE);
-        rect.setFill(UNGUESSED.getColor());
-        rect.setStyle("-fx-border-style: solid; -fx-border-width: 5; -fx-border-color: black;");
-        rect.setTranslateX(col * GRID_SIZE);
-        rect.setTranslateY(row * GRID_SIZE);
+    private void addHex(int row, int col) {
+        double yCoord = row * HEX_HEIGHT * 0.75;
+        double xCoord = col * HEX_WIDTH + (row %2) * HEX_SIZE;
+        Hexagon hex = new Hexagon(xCoord, yCoord);
+        hex.setFill(UNGUESSED.getColor());
 
-        rectGrid[row][col] = rect;
-        gridGroup.getChildren().add(rect);
+        rectGrid[row][col] = hex;
+        gridPane.getChildren().add(hex);
     }
     
     
@@ -150,7 +152,7 @@ public class MineSweeper extends Application implements Observer {
             	text.setFont(new Font(20));
             	text.setTextAlignment(TextAlignment.CENTER);
                 stackPane.getChildren().add(text); 
-                gridGroup.getChildren().add(stackPane);
+                gridPane.getChildren().add(stackPane);
                 text.toFront();
                 }
             i++;
@@ -178,4 +180,26 @@ public class MineSweeper extends Application implements Observer {
 	        }
 		}
     }
+
+    private static class Hexagon extends Polygon {
+        Hexagon(double x, double y) {
+            // creates the polygon using the corner coordinates
+            getPoints().addAll(
+                    x, y,
+                    x, y + HEX_RADIUS,
+                    x + HEX_SIZE, y + HEX_RADIUS * 1.5,
+                    x + HEX_WIDTH, y + HEX_RADIUS,
+                    x + HEX_WIDTH, y,
+                    x + HEX_SIZE, y - HEX_RADIUS * 0.5
+            );
+
+            // set up the visuals and a click listener for the tile
+            setFill(Color.ANTIQUEWHITE);
+            setStrokeWidth(1);
+            setStroke(Color.BLACK);
+            setOnMouseClicked(e -> System.out.println("Clicked: " + this));
+        }
+    }
 }
+
+
