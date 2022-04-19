@@ -40,7 +40,7 @@ public class MineSweeper extends Application implements Observer {
     private AnchorPane gridPane;
     
     // controller variable
-    private MineSweeperController c;
+    private MineSweeperController controller;
 
     public static void main(String[] args) {
         launch(args);
@@ -49,9 +49,9 @@ public class MineSweeper extends Application implements Observer {
     @Override
     public void start(Stage stage) {
     	// initialize controller
-    	c = new MineSweeperController(NUM_BOMBS);
+        controller = new MineSweeperController(NUM_BOMBS);
     	// add as observer for model (MineSweeperBoard)
-    	c.addObserver(this);
+        controller.addObserver(this);
         rectGrid = new Hexagon[ROWS][COLS];
         gridPane = new AnchorPane();
 
@@ -115,7 +115,7 @@ public class MineSweeper extends Application implements Observer {
      * @param arg is the MineSweeperTile[][] board from the Model
      */
     private void changeBoard(MineSweeperTile[][] arg) {
-    	if (c.isGameOver()) { // checks with Controller if game is over
+    	if (controller.isGameOver()) { // checks with Controller if game is over
     		displayGameOver(); // calls the method to display the game over msg if true
          }
     	else // if the game isn't over, all the tiles are updated according to their enum
@@ -131,7 +131,7 @@ public class MineSweeper extends Application implements Observer {
      */
     public void displayGameOver() {
     	String[] msg = "YOU WIN!!".split("");
-    	if (!c.win()) // checks with the controller if the player didn't win
+    	if (!controller.win()) // checks with the controller if the player didn't win
     		msg = "YOU LOSE!".split("");
 		int row = COLS/2;
 		int i = -1;
@@ -166,10 +166,10 @@ public class MineSweeper extends Application implements Observer {
 			int x = (int) (me.getX()/GRID_SIZE)-1; // casting to int rounds down, finds coord of click
 			int y = (int) (me.getY()/GRID_SIZE)-1;
 			if (me.isPrimaryButtonDown()) {
-	            c.updateTileStatus(y, x, GUESSED);
+                controller.updateTileStatus(y, x, GUESSED);
 	        }
 			else if (me.isSecondaryButtonDown()) {
-	            c.updateTileStatus(y, x, FLAGGED);
+                controller.updateTileStatus(y, x, FLAGGED);
 	        }
 		}
     }

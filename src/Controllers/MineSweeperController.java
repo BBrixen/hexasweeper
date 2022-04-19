@@ -7,7 +7,7 @@ import Models.MineSweeperTile;
 import Utils.GUESS_STATUS;
 
 public class MineSweeperController {
-	private MineSweeperBoard m;
+	private MineSweeperBoard model;
 	// tracks if game is over
 	private boolean gameOver;
 	// keeps track of the total number of guesses
@@ -23,7 +23,7 @@ public class MineSweeperController {
 	 */
 	public MineSweeperController(int numBombs) {
 		NUM_BOMBS = numBombs;
-		this.m = new MineSweeperBoard(numBombs);
+		this.model = new MineSweeperBoard(numBombs);
 		// will change to "false" if a bomb is clicked
 		win = true;
 	}
@@ -38,13 +38,13 @@ public class MineSweeperController {
 	 */
 	public void updateTileStatus(int row, int col, GUESS_STATUS status) {
 		if (!gameOver) { // first determines if the game is over
-			MineSweeperTile[][] board = m.getBoard(); // gets the board from the model
+			MineSweeperTile[][] board = model.getBoard(); // gets the board from the model
 			
 			/* determines if the board is still null (indicates that this is the player's
 			 * first click of the game.
 			 */
 			if (board[row][col] == null) {
-				m.createBoard(row, col); // creates the board and places all bombs
+				model.createBoard(row, col); // creates the board and places all bombs
 				updateTileStatus(row, col, status); // updates the board with the player's click
 				numberOfGuesses++; 
 				}
@@ -54,7 +54,7 @@ public class MineSweeperController {
 			 */
 			else if (board[row][col].getStatus().equals(GUESS_STATUS.FLAGGED)) { 
 				if (status.equals(GUESS_STATUS.FLAGGED))
-						m.updateTileStatus(row, col, GUESS_STATUS.UNGUESSED);
+					model.updateTileStatus(row, col, GUESS_STATUS.UNGUESSED);
 			}
 			/* If the player clicks on a tile that is a bomb, win is set to false and
 			 * all bombs are shown. 
@@ -67,7 +67,7 @@ public class MineSweeperController {
 			 * GUESSED or FLAGGED, depending on which button the player clicked.
 			 */
 			else if (board[row][col].getStatus().equals(GUESS_STATUS.UNGUESSED)) {
-				m.updateTileStatus(row, col, status);
+				model.updateTileStatus(row, col, status);
 				numberOfGuesses++;
 				}
 			/*
@@ -87,13 +87,13 @@ public class MineSweeperController {
 	 */
 	private void showAllBombs() {
 		// gets the current board from the model
-		MineSweeperTile[][] board = m.getBoard();
+		MineSweeperTile[][] board = model.getBoard();
 		for (int row = 0; row < board.length; row++) {
             for (int col = 0; col < board.length; col++) {
             	// checks if the tile is a bomb
             	if (board[row][col].isBomb())
             		// sets the bomb tile color if true
-            		m.updateTileStatus(row, col, GUESS_STATUS.BOMB);
+					model.updateTileStatus(row, col, GUESS_STATUS.BOMB);
 		}
       } // sets gameOver to true
 		gameIsOver();
@@ -104,7 +104,7 @@ public class MineSweeperController {
 	 * @param o is the observer to be added. Most likely a view object
 	 */
 	public void addObserver(Observer o) {
-		m.addObserver(o);
+		model.addObserver(o);
 	}
 	
 	/**
@@ -120,7 +120,7 @@ public class MineSweeperController {
 	 */
 	public void gameIsOver() {
 		gameOver = true;
-		m.notifyObservers();
+		model.notifyObservers();
 	}
 
 	/**
