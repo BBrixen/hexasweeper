@@ -29,9 +29,9 @@ public class MineSweeper extends Application implements Observer {
     private static final int NUM_BOMBS = 80; // i have no clue if this is too many
 
     // gui constants
-    private static final int GRID_SIZE = 40;
-    private static final int SCENE_WIDTH = (COLS + 2) * GRID_SIZE, SCENE_HEIGHT = (ROWS + 2) * GRID_SIZE;
-    private static final double HEX_RADIUS = 38, HEX_SIZE = Math.sqrt(HEX_RADIUS * HEX_RADIUS * 0.75);
+    private static final double HEX_RADIUS = 30, HEX_SIZE = Math.sqrt(HEX_RADIUS * HEX_RADIUS * 0.75);
+    private static final int SCENE_WIDTH = (int) (1.75*(COLS + 2) * HEX_RADIUS),
+                SCENE_HEIGHT = (int) (1.5*(ROWS + 2) * HEX_RADIUS);
     private static final double HEX_HEIGHT = 2* HEX_RADIUS, HEX_WIDTH = 2*HEX_SIZE;
 
 
@@ -66,7 +66,7 @@ public class MineSweeper extends Application implements Observer {
         stage.show();
         
         // create instance of MouseHandler
-        scene.setOnMousePressed(new MouseHandler());
+//        scene.setOnMousePressed(new MouseHandler());
     }
 
 
@@ -88,10 +88,19 @@ public class MineSweeper extends Application implements Observer {
      * @param col is the x coord
      */
     private void addHex(int row, int col) {
-        double yCoord = row * HEX_HEIGHT * 0.75;
-        double xCoord = col * HEX_WIDTH + (row %2) * HEX_SIZE;
+        double yCoord = (row+1) * HEX_HEIGHT * 0.75;
+        double xCoord = (col+1) * HEX_WIDTH + (row %2) * HEX_SIZE;
         Hexagon hex = new Hexagon(xCoord, yCoord);
         hex.setFill(UNGUESSED.getColor());
+
+        hex.setOnMousePressed(e -> {
+            if (e.isPrimaryButtonDown())
+                controller.updateTileStatus(row, col, GUESSED);
+
+			else if (e.isSecondaryButtonDown())
+                controller.updateTileStatus(row, col, FLAGGED);
+
+        });
 
         rectGrid[row][col] = hex;
         gridPane.getChildren().add(hex);
@@ -115,9 +124,9 @@ public class MineSweeper extends Application implements Observer {
      * @param arg is the MineSweeperTile[][] board from the Model
      */
     private void changeBoard(MineSweeperTile[][] arg) {
-    	if (controller.isGameOver()) { // checks with Controller if game is over
+    	if (controller.isGameOver())  // checks with Controller if game is over
     		displayGameOver(); // calls the method to display the game over msg if true
-         }
+
     	else // if the game isn't over, all the tiles are updated according to their enum
 	    	for (int row = 0; row < ROWS; row++) 
 	            for (int col = 0; col < COLS; col++) {
@@ -138,8 +147,8 @@ public class MineSweeper extends Application implements Observer {
         for (int col = (COLS/4); col < COLS*((double)3/4); col++) {
             rectGrid[row][col].setFill(Color.WHITE);
             StackPane stackPane = new StackPane(); 
-            stackPane.setTranslateX(col * GRID_SIZE);
-            stackPane.setTranslateY(row * GRID_SIZE);
+            stackPane.setTranslateX(col * HEX_SIZE);
+            stackPane.setTranslateY(row * HEX_SIZE);
             if (i >= 0 && i < msg.length) {
             	Text text = new Text(msg[i]); 
             	text.setFont(new Font(20));
@@ -152,28 +161,11 @@ public class MineSweeper extends Application implements Observer {
         }
     }
 
-	/**
-     * 
-     * This inner class creates MouseHandler objects that determine when a mouse button is clicked.
-     *
+    /**
+     * This inner class creates a hexagon which can be places on the board with an x and y position
+     * We calculate this x and y position inside the addHex method
+     * This generates a new polygon with the needed hex points
      */
-    class MouseHandler implements EventHandler<MouseEvent> {
-		/**
-		 * Checks if left or right mouse button clicked
-		 */
-		@Override
-		public void handle(MouseEvent me) {
-			int x = (int) (me.getX()/GRID_SIZE)-1; // casting to int rounds down, finds coord of click
-			int y = (int) (me.getY()/GRID_SIZE)-1;
-			if (me.isPrimaryButtonDown()) {
-                controller.updateTileStatus(y, x, GUESSED);
-	        }
-			else if (me.isSecondaryButtonDown()) {
-                controller.updateTileStatus(y, x, FLAGGED);
-	        }
-		}
-    }
-
     private static class Hexagon extends Polygon {
         Hexagon(double x, double y) {
             // creates the polygon using the corner coordinates
@@ -186,11 +178,7 @@ public class MineSweeper extends Application implements Observer {
                     x + HEX_SIZE, y - HEX_RADIUS * 0.5
             );
 
-            // set up the visuals and a click listener for the tile
-            setFill(Color.ANTIQUEWHITE);
-            setStrokeWidth(1);
             setStroke(Color.BLACK);
-            setOnMouseClicked(e -> System.out.println("Clicked: " + this));
         }
     }
 }
