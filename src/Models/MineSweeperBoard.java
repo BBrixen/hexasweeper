@@ -109,13 +109,11 @@ public class MineSweeperBoard extends Observable {
 	/**
 	 * This method places bombs in random locations if the tile is null.
 	 */
-	public void createBombs() {
-		Random rand = new Random();
+	public void createBombs() {		
 		int i = 0;
-
 		while (i < NUM_BOMBS) {
-			int r = rand.nextInt(ROWS);
-			int c = rand.nextInt(COLS);
+			int r = (int)(Math.random() * ROWS );
+			int c = (int)(Math.random() * COLS);
 
 			if (board[r][c] != null)
 				continue;
