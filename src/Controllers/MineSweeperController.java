@@ -91,6 +91,7 @@ public class MineSweeperController {
 			 */
 			if (numberOfGuesses == (board.length*board.length) - NUM_BOMBS) {
 				gameIsOver();
+				showAllBombs();
 			}
 		}
 		}
@@ -167,5 +168,5 @@ public class MineSweeperController {
 	public boolean win() {
 		return win;
 	}
-
+	
 }
