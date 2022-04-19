@@ -102,7 +102,8 @@ public class MineSweeper extends Application implements Observer {
         Hexagon hex = new Hexagon(xCoord, yCoord);
         hex.setFill(UNGUESSED.getColor());
 
-        Label label = new Label(""); // making them completely empty to start
+        Label label = new Label("1");
+        // this is temporary. later the text will start empty and will be determined by the tile
         label.setFont(MAIN_FONT);
         label.setTranslateX(xCoord + LABEL_OFFSETX);
         label.setTranslateY(yCoord + LABEL_OFFSETY);
