@@ -26,8 +26,8 @@ import Controllers.MineSweeperController;
 public class MineSweeper extends Application implements Observer {
 
     // game constants
-    private static final int ROWS = 20, COLS = 20;
-    private static final int NUM_BOMBS = 80; // i have no clue if this is too many
+    public static final int ROWS = 20, COLS = 20;
+    public static final int NUM_BOMBS = 40; // i have no clue if this is too many
 
     // gui constants
     private static final double HEX_RADIUS = 30, HEX_SIZE = Math.sqrt(HEX_RADIUS * HEX_RADIUS * 0.75);
@@ -57,7 +57,7 @@ public class MineSweeper extends Application implements Observer {
     @Override
     public void start(Stage stage) {
     	// initialize controller
-        controller = new MineSweeperController(NUM_BOMBS);
+        controller = new MineSweeperController();
     	// add as observer for model (MineSweeperBoard)
         controller.addObserver(this);
         rectGrid = new Hexagon[ROWS][COLS];

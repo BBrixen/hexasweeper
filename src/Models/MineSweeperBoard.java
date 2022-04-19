@@ -5,27 +5,25 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Random;
-
 import Utils.GUESS_STATUS;
+import static View.MineSweeper.*;
 
 
 @SuppressWarnings("deprecation")
 public class MineSweeperBoard extends Observable {
-	private static final int ROWS = 20, COLS = 20;
+
 	// the minesweeper board as a 2D array
 	private MineSweeperTile[][] board;
 	private List<Observer> observers;
-	private final int NUM_BOMBS;
 	
 	/**
 	 * Constructor for MineSweeperBoard model object.
 	 * @param numBombs is the number of mines that will be placed.
 	 */
-	public MineSweeperBoard(int numBombs) {
+	public MineSweeperBoard() {
 		//initializes the board as a ROWS x COLS 2D array with null pointers for now
 		board = new MineSweeperTile[ROWS][COLS];
-		observers = new ArrayList<Observer>();
-		NUM_BOMBS = numBombs;
+		observers = new ArrayList<>();
 	}
 	
 	/**
@@ -88,16 +86,19 @@ public class MineSweeperBoard extends Observable {
 	 * This method places bombs in random locations if the tile is null.
 	 */
 	public void createBombs() {
+		Random rand = new Random();
 		int i = 0;
+
 		while (i < NUM_BOMBS) {
-			Random rand = new Random();
 			int r = rand.nextInt(ROWS);
 			int c = rand.nextInt(COLS);
-			if (board[r][c] == null) {
-				board[r][c] = new MineSweeperTile(r, c, GUESS_STATUS.UNGUESSED);
-				board[r][c].setBomb();
-				i++;
-			}
-			}
+
+			if (board[r][c] != null)
+				continue;
+			board[r][c] = new MineSweeperTile(r, c, GUESS_STATUS.UNGUESSED);
+			board[r][c].setBomb();
+			i++;
+
+		}
 	}
 }
