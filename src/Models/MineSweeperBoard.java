@@ -1,0 +1,101 @@
+package Models;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.Random;
+
+import Utils.GUESS_STATUS;
+
+
+@SuppressWarnings("deprecation")
+public class MineSweeperBoard extends Observable {
+	private static final int ROWS = 20, COLS = 20;
+	// the minesweeper board as a 2D array
+	private MineSweeperTile[][] board;
+	private List<Observer> observers;
+	private final int NUM_BOMBS;
+	
+	/**
+	 * Constructor for MineSweeperBoard model object.
+	 * @param numBombs is the number of mines that will be placed.
+	 */
+	public MineSweeperBoard(int numBombs) {
+		//initializes the board as a ROWS x COLS 2D array with null pointers for now
+		board = new MineSweeperTile[ROWS][COLS];
+		observers = new ArrayList<Observer>();
+		NUM_BOMBS = numBombs;
+	}
+	
+	/**
+	 * Places all the mines and unmined tiles once the player clicks the
+	 * first tile.
+	 * 
+	 * @param row is the y coord of the first tile clicked
+	 * @param col is the x coord of the first tile clicked
+	 */
+	public void createBoard(int row, int col) {
+		/* row and col are for the first clicked tile to
+		 * make sure a bomb isn't placed there */
+		board[row][col] = new MineSweeperTile(row, col, GUESS_STATUS.UNGUESSED);
+		createBombs(); // places all the bombs in the board first
+		// now places unguessed tiles without bombs
+        for (int r= 0; r < ROWS; r++) 
+            for (int c = 0; c < COLS; c++) {
+            	if (board[r][c] == null)
+            		board[r][c] = new MineSweeperTile(r, c);
+            }
+    }
+	
+	/**
+	 * Updates the tile to the indicated status parameter.
+	 * 
+	 * @param row is the y coord of the tile to be updated
+	 * @param col is the x coord of the tile to be updated
+	 * @param status is the new status of the tile
+	 */
+	public void updateTileStatus(int row, int col, GUESS_STATUS status) {
+		board[row][col].setStatus(status);
+		notifyObservers();
+	}
+	
+	/**
+	 * Method to return the entire board
+	 * @return the board object as a MineSweeperTile 2D array
+	 */
+	public MineSweeperTile[][] getBoard() {
+		return board;
+	}
+	
+	/**
+	 * Adds any observers to notify of changes
+	 */
+	public void addObserver(Observer o) {
+		observers.add(o);
+	}
+	
+	/**
+	 * This method notifies observers when the board has changed
+	 */
+	public void notifyObservers() {
+		for (Observer o : observers) {
+			o.update(this, this.board);
+		}
+	}
+	
+	/**
+	 * This method places bombs in random locations if the tile is null.
+	 */
+	public void createBombs() {
+		for (int i = 0; i < NUM_BOMBS; i++) {
+			Random rand = new Random();
+			int r = rand.nextInt(ROWS);
+			int c = rand.nextInt(COLS);
+			if (board[r][c] == null) {
+				board[r][c] = new MineSweeperTile(r, c, GUESS_STATUS.UNGUESSED);
+				board[r][c].setBomb();
+			}
+			}
+	}
+}
