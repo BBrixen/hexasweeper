@@ -6,7 +6,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Random;
 import Utils.GUESS_STATUS;
-import static View.MineSweeper.*;
+
 
 
 @SuppressWarnings("deprecation")
@@ -15,12 +15,21 @@ public class MineSweeperBoard extends Observable {
 	// the minesweeper board as a 2D array
 	private MineSweeperTile[][] board;
 	private List<Observer> observers;
+	private final int ROWS;
+	private final int COLS;
+	private final int NUM_BOMBS;
 	
 	/**
 	 * Constructor for MineSweeperBoard model object.
+	 * @param numBombs 
+	 * @param cols 
+	 * @param rows 
 	 */
-	public MineSweeperBoard() {
+	public MineSweeperBoard(int rows, int cols, int numBombs) {
 		//initializes the board as a ROWS x COLS 2D array with null pointers for now
+		ROWS = rows;
+		COLS = cols;
+		NUM_BOMBS = numBombs;
 		board = new MineSweeperTile[ROWS][COLS];
 		observers = new ArrayList<>();
 	}
@@ -49,7 +58,7 @@ public class MineSweeperBoard extends Observable {
 			for (MineSweeperTile tile : tileRow) {
 				tile.updateCount(board);
 			}
-		}
+		}updateAllMineCounts();
     }
 
 	/**
@@ -120,5 +129,30 @@ public class MineSweeperBoard extends Observable {
 			i++;
 
 		}
+	} 
+	
+	public void updateAllMineCounts() {
+		for (int row = 0; row < ROWS; row++) 
+			for (int col = 0; col < COLS; col++) {
+				int[] adjR = {0,0,1,1,-1,-1};
+				int[] adjC = {-1,1,0,1,0,1};
+				if (row%2 == 0) {
+					adjC[2] = -1;
+					adjC[3] = 0;
+					adjC[4] = -1;
+					adjC[5] = 0;
+					}
+				for (int i = 0; i < adjR.length; i++) {
+					updateCount(row, adjR[i], col, adjC[i]);
+				}
+			}
+	}
+
+	private void updateCount(int r, int a, int c, int b) {
+		if (r+a >= 0 && r+a < ROWS && c+b >= 0 && c+b < COLS) {
+			if (board[r+a][c+b].isBomb()) {
+			board[r][c].addMineCount();}
+		}
+		
 	}
 }

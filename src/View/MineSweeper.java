@@ -15,6 +15,8 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import Models.MineSweeperTile;
+import Utils.GUESS_STATUS;
+
 import static Utils.GUESS_STATUS.FLAGGED;
 import static Utils.GUESS_STATUS.GUESSED;
 import static Utils.GUESS_STATUS.UNGUESSED;
@@ -57,7 +59,7 @@ public class MineSweeper extends Application implements Observer {
     @Override
     public void start(Stage stage) {
     	// initialize controller
-        controller = new MineSweeperController();
+        controller = new MineSweeperController(ROWS, COLS, NUM_BOMBS);
     	// add as observer for model (MineSweeperBoard)
         controller.addObserver(this);
         rectGrid = new Hexagon[ROWS][COLS];
@@ -102,7 +104,7 @@ public class MineSweeper extends Application implements Observer {
         Hexagon hex = new Hexagon(xCoord, yCoord);
         hex.setFill(UNGUESSED.getColor());
 
-        Label label = new Label("1");
+        Label label = new Label("");
         // this is temporary. later the text will start empty and will be determined by the tile
         label.setFont(MAIN_FONT);
         label.setTranslateX(xCoord + LABEL_OFFSETX);
@@ -112,17 +114,19 @@ public class MineSweeper extends Application implements Observer {
         hex.setOnMousePressed(e -> {
         	
             if (e.isPrimaryButtonDown()) {
-    			controller.updateTileStatus(row, col, GUESSED);}
+    			controller.updateTileStatus(row, col, GUESSED);
+    			}
 
 			else if (e.isSecondaryButtonDown()) {
     			controller.updateTileStatus(row, col, FLAGGED);
-            }
+    			}
 
         });
 
         label.setOnMousePressed(e -> {
             if (e.isPrimaryButtonDown()) {
-                controller.updateTileStatus(row, col, GUESSED);}
+                controller.updateTileStatus(row, col, GUESSED);
+                }
 
             else if (e.isSecondaryButtonDown()) {
                 controller.updateTileStatus(row, col, FLAGGED);
@@ -161,6 +165,11 @@ public class MineSweeper extends Application implements Observer {
 	    	for (int row = 0; row < ROWS; row++) 
 	            for (int col = 0; col < COLS; col++) {
 	                rectGrid[row][col].setFill(arg[row][col].getStatus().getColor());
+	                // Reveals minecount of any guessed tiles
+	                if (arg[row][col].getMineCount() > 0 && arg[row][col].getStatus().equals(GUESSED)) {
+	                	labelGrid[row][col].setText(""+arg[row][col].getMineCount());
+	                	
+	                }
 	            }
 	}
         

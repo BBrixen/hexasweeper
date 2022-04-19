@@ -16,6 +16,7 @@ public class MineSweeperTile {
     	this.col = col;
     	this.status = status;
         displayNum = false;
+        mineCount = 0;
 
         // now we calculate the number of bombs around this tile
     }
@@ -67,5 +68,12 @@ public class MineSweeperTile {
 //        if (! displayNum || mineCount == 0)
 //            return ""; // we dont want to display it
         return ""+mineCount;
+    }
+    public int getMineCount() {
+    	return mineCount;
+    }
+    
+    public void addMineCount() {
+    	mineCount = mineCount + 1;
     }
 }
