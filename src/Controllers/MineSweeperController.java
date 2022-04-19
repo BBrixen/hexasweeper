@@ -6,24 +6,24 @@ import Models.MineSweeperBoard;
 import Models.MineSweeperTile;
 import Utils.GUESS_STATUS;
 
+import static View.MineSweeper.NUM_BOMBS;
+
 public class MineSweeperController {
+
 	private MineSweeperBoard model;
 	// tracks if game is over
 	private boolean gameOver;
 	// keeps track of the total number of guesses
 	private int numberOfGuesses;
 	// total number of bombs in the board
-	private final int NUM_BOMBS;
 	private boolean win;
 	
 	/**
 	 * Contructor for the controller.
 	 * numBombs is used as a parameter for constructing the model.
-	 * @param numBombs the total number of bombs to be placed in the board.
 	 */
-	public MineSweeperController(int numBombs) {
-		NUM_BOMBS = numBombs;
-		this.model = new MineSweeperBoard(numBombs);
+	public MineSweeperController() {
+		this.model = new MineSweeperBoard();
 		// will change to "false" if a bomb is clicked
 		win = true;
 	}

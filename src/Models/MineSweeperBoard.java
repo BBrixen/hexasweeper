@@ -5,27 +5,24 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Random;
-
 import Utils.GUESS_STATUS;
+import static View.MineSweeper.*;
 
 
 @SuppressWarnings("deprecation")
 public class MineSweeperBoard extends Observable {
-	private static final int ROWS = 20, COLS = 20;
+
 	// the minesweeper board as a 2D array
 	private MineSweeperTile[][] board;
 	private List<Observer> observers;
-	private final int NUM_BOMBS;
 	
 	/**
 	 * Constructor for MineSweeperBoard model object.
-	 * @param numBombs is the number of mines that will be placed.
 	 */
-	public MineSweeperBoard(int numBombs) {
+	public MineSweeperBoard() {
 		//initializes the board as a ROWS x COLS 2D array with null pointers for now
 		board = new MineSweeperTile[ROWS][COLS];
-		observers = new ArrayList<Observer>();
-		NUM_BOMBS = numBombs;
+		observers = new ArrayList<>();
 	}
 	
 	/**
@@ -38,15 +35,36 @@ public class MineSweeperBoard extends Observable {
 	public void createBoard(int row, int col) {
 		/* row and col are for the first clicked tile to
 		 * make sure a bomb isn't placed there */
-		board[row][col] = new MineSweeperTile(row, col, GUESS_STATUS.UNGUESSED);
+		board[row][col] = new MineSweeperTile(row, col);
 		createBombs(); // places all the bombs in the board first
+
 		// now places unguessed tiles without bombs
         for (int r= 0; r < ROWS; r++) 
             for (int c = 0; c < COLS; c++) {
             	if (board[r][c] == null)
             		board[r][c] = new MineSweeperTile(r, c);
-            }
+			}
+
+		for (MineSweeperTile[] tileRow : board) {
+			for (MineSweeperTile tile : tileRow) {
+				tile.updateCount(board);
+			}
+		}
     }
+
+	/**
+	 * This creates a grid of strings representing the mine count on each tile. We
+	 * @return
+	 */
+	public String[][] generateCounts() {
+		String[][] mineCounts = new String[ROWS][COLS];
+		for (int row = 0; row < ROWS; row++) {
+			for (int col = 0; col < COLS; col++) {
+				mineCounts[row][col] = board[row][col].getMineLabel();
+			}
+		}
+		return mineCounts;
+	}
 	
 	/**
 	 * Updates the tile to the indicated status parameter.
@@ -88,16 +106,19 @@ public class MineSweeperBoard extends Observable {
 	 * This method places bombs in random locations if the tile is null.
 	 */
 	public void createBombs() {
+		Random rand = new Random();
 		int i = 0;
+
 		while (i < NUM_BOMBS) {
-			Random rand = new Random();
 			int r = rand.nextInt(ROWS);
 			int c = rand.nextInt(COLS);
-			if (board[r][c] == null) {
-				board[r][c] = new MineSweeperTile(r, c, GUESS_STATUS.UNGUESSED);
-				board[r][c].setBomb();
-				i++;
-			}
-			}
+
+			if (board[r][c] != null)
+				continue;
+			board[r][c] = new MineSweeperTile(r, c, GUESS_STATUS.UNGUESSED);
+			board[r][c].setBomb();
+			i++;
+
+		}
 	}
 }
