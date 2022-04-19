@@ -25,8 +25,29 @@ public class MineSweeperTile {
     	this(row, col, GUESS_STATUS.UNGUESSED);
 	}
 
+    
+    /* I did some strange math here. adjR and adjC together make
+	 * a coord pair for all adjacent tiles. I'm sure there is a cleaner/
+	 * more logical way to do this. I'll try to format it differently.
+	 * This method is used to update each tile's mineCount.
+	 * 
+	 * (I used similar math in the controller in the checkAdjacent() method)
+	 */
     public void updateCount(MineSweeperTile[][] board) {
-        // TODO: this will count the number of bombs around this tile on the board
+    	int[] adjR = {0,0,1,1,-1,-1};
+		int[] adjC = {-1,1,0,1,0,1};
+		if (row%2 == 0) {
+			adjC[2] = -1;
+			adjC[3] = 0;
+			adjC[4] = -1;
+			adjC[5] = 0;
+			}
+		for (int i = 0; i < adjR.length; i++) {
+			if (row+adjR[i] >= 0 && row+adjR[i] < board.length && col+adjC[i] >= 0 && col+adjC[i] < board.length) {
+				if (board[row+adjR[i]][col+adjC[i]].isBomb()) {
+				board[row][col].addMineCount();}
+			}
+		}
     }
 
 	public void setStatus(GUESS_STATUS status) {
