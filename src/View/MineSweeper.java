@@ -3,6 +3,7 @@ package View;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
@@ -33,6 +34,7 @@ public class MineSweeper extends Application implements Observer {
     private static final int SCENE_WIDTH = (int) (1.75*(COLS + 2) * HEX_RADIUS),
                 SCENE_HEIGHT = (int) (1.5*(ROWS + 2) * HEX_RADIUS);
     private static final double HEX_HEIGHT = 2* HEX_RADIUS, HEX_WIDTH = 2*HEX_SIZE;
+    private static final double LABEL_OFFSETX = HEX_WIDTH/2.5, LABEL_OFFSETY = HEX_HEIGHT/6;
 
 
     // gui variables
@@ -93,6 +95,10 @@ public class MineSweeper extends Application implements Observer {
         Hexagon hex = new Hexagon(xCoord, yCoord);
         hex.setFill(UNGUESSED.getColor());
 
+        Label label = new Label("1");
+        label.setTranslateX(xCoord + LABEL_OFFSETX);
+        label.setTranslateY(yCoord + LABEL_OFFSETY);
+
         hex.setOnMousePressed(e -> {
             if (e.isPrimaryButtonDown())
                 controller.updateTileStatus(row, col, GUESSED);
@@ -104,6 +110,7 @@ public class MineSweeper extends Application implements Observer {
 
         rectGrid[row][col] = hex;
         gridPane.getChildren().add(hex);
+        gridPane.getChildren().add(label);
     }
     
     
@@ -144,11 +151,13 @@ public class MineSweeper extends Application implements Observer {
     		msg = "YOU LOSE!".split("");
 		int row = COLS/2;
 		int i = -1;
+
         for (int col = (COLS/4); col < COLS*((double)3/4); col++) {
             rectGrid[row][col].setFill(Color.WHITE);
             StackPane stackPane = new StackPane(); 
             stackPane.setTranslateX(col * HEX_SIZE);
             stackPane.setTranslateY(row * HEX_SIZE);
+
             if (i >= 0 && i < msg.length) {
             	Text text = new Text(msg[i]); 
             	text.setFont(new Font(20));
@@ -156,7 +165,8 @@ public class MineSweeper extends Application implements Observer {
                 stackPane.getChildren().add(text); 
                 gridPane.getChildren().add(stackPane);
                 text.toFront();
-                }
+            }
+
             i++;
         }
     }
