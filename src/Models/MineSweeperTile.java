@@ -15,13 +15,18 @@ public class MineSweeperTile {
     	this.row = row;
     	this.col = col;
     	this.status = status;
+        displayNum = false;
+
+        // now we calculate the number of bombs around this tile
     }
     
     public MineSweeperTile(int row, int col) {
-    	this.row = row;
-    	this.col = col;
-    	status = GUESS_STATUS.UNGUESSED;
+    	this(row, col, GUESS_STATUS.UNGUESSED);
 	}
+
+    public void updateCount(MineSweeperTile[][] board) {
+        // TODO: this will count the number of bombs around this tile on the board
+    }
 
 	public void setStatus(GUESS_STATUS status) {
     	this.status = status;
@@ -45,6 +50,22 @@ public class MineSweeperTile {
     
     public void setBomb() {
     	bomb = true;
+        mineCount = 0; // 0 means it wont be displayed
+        displayNum = false;
     }
 
+    public boolean isDisplayNum() {
+        return displayNum;
+    }
+
+    public void setDisplayNum(boolean displayNum) {
+        this.displayNum = displayNum;
+    }
+
+    public String getMineLabel() {
+        // TODO: this conditional is turned off for testing, turn it back on later for proper minesweeper displays
+//        if (! displayNum || mineCount == 0)
+//            return ""; // we dont want to display it
+        return ""+mineCount;
+    }
 }
