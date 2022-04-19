@@ -90,8 +90,8 @@ public class MineSweeperController {
 			 * that have not been bombs or flagging clicks.
 			 */
 			if (numberOfGuesses == (board.length*board.length) - NUM_BOMBS) {
-				gameIsOver();
 				showAllBombs();
+				gameIsOver();
 			}
 		}
 		}
@@ -135,6 +135,7 @@ public class MineSweeperController {
 		}
       } // sets gameOver to true
 		gameIsOver();
+		
 	}
 
 	/**
@@ -168,5 +169,5 @@ public class MineSweeperController {
 	public boolean win() {
 		return win;
 	}
-	
+
 }
