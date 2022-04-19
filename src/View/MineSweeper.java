@@ -41,6 +41,7 @@ public class MineSweeper extends Application implements Observer {
 
     // gui variables
     private Hexagon[][] rectGrid;
+    private Label[][] labelGrid;
     private AnchorPane gridPane;
     
     // controller variable
@@ -57,6 +58,7 @@ public class MineSweeper extends Application implements Observer {
     	// add as observer for model (MineSweeperBoard)
         controller.addObserver(this);
         rectGrid = new Hexagon[ROWS][COLS];
+        labelGrid = new Label[ROWS][COLS];
         gridPane = new AnchorPane();
 
         // creates the initial blank board
@@ -112,6 +114,7 @@ public class MineSweeper extends Application implements Observer {
         });
 
         rectGrid[row][col] = hex;
+        labelGrid[row][col] = label;
         gridPane.getChildren().add(hex);
         gridPane.getChildren().add(label);
     }
