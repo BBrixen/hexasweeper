@@ -34,7 +34,9 @@ public class MineSweeper extends Application implements Observer {
     private static final int SCENE_WIDTH = (int) (1.75*(COLS + 2) * HEX_RADIUS),
                 SCENE_HEIGHT = (int) (1.5*(ROWS + 2) * HEX_RADIUS);
     private static final double HEX_HEIGHT = 2* HEX_RADIUS, HEX_WIDTH = 2*HEX_SIZE;
-    private static final double LABEL_OFFSETX = HEX_WIDTH/2.5, LABEL_OFFSETY = HEX_HEIGHT/6;
+    private static final double MAIN_FONT_SIZE = HEX_HEIGHT/2.5;
+    private static final Font MAIN_FONT = new Font("Helvetica", MAIN_FONT_SIZE);
+    private static final double LABEL_OFFSETX = HEX_WIDTH/2.5 - MAIN_FONT_SIZE/6, LABEL_OFFSETY = HEX_HEIGHT/6 - MAIN_FONT_SIZE/2.5;
 
 
     // gui variables
@@ -96,6 +98,7 @@ public class MineSweeper extends Application implements Observer {
         hex.setFill(UNGUESSED.getColor());
 
         Label label = new Label("1");
+        label.setFont(MAIN_FONT);
         label.setTranslateX(xCoord + LABEL_OFFSETX);
         label.setTranslateY(yCoord + LABEL_OFFSETY);
 
