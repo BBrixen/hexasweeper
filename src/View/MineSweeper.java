@@ -109,11 +109,18 @@ public class MineSweeper extends Application implements Observer {
         label.setTranslateY(yCoord + LABEL_OFFSETY);
 
         hex.setOnMousePressed(e -> {
-            if (e.isPrimaryButtonDown())
-                controller.updateTileStatus(row, col, GUESSED);
+        	
+            if (e.isPrimaryButtonDown()) {
+            	int y = (int) ((e.getY()/.75/HEX_HEIGHT)-1);
+                int x = (int) (((e.getX()-((double)y%2*HEX_SIZE))/HEX_WIDTH)-1); // casting to int rounds down, finds coord of click
+    			controller.updateTileStatus(y, x, GUESSED);}
 
-			else if (e.isSecondaryButtonDown())
-                controller.updateTileStatus(row, col, FLAGGED);
+			else if (e.isSecondaryButtonDown()) {
+				
+				int y = (int) ((e.getY()/.75/HEX_HEIGHT)-1);
+                int x = (int) (((e.getX()-((double)y%2*HEX_SIZE))/HEX_WIDTH)-1);
+    			controller.updateTileStatus(y, x, FLAGGED);
+                }
 
         });
 
