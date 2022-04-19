@@ -6,8 +6,8 @@ public class MineSweeperTile {
 
     private GUESS_STATUS status;
     private int mineCount; // the number of mines around this
-    private int row, col;
-    private boolean bomb; // indicates if the tile contains a bomb
+    private final int row, col;
+    private boolean bomb, displayNum; // indicates if the tile contains a bomb
 
     public MineSweeperTile(int row, int col, GUESS_STATUS status) {
     	this.row = row;
