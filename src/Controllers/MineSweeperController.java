@@ -17,6 +17,7 @@ public class MineSweeperController {
 	private int numberOfGuesses;
 	// total number of bombs in the board
 	private boolean win;
+	private MineSweeperTile[][] board;
 	
 	/**
 	 * Contructor for the controller.
@@ -38,15 +39,14 @@ public class MineSweeperController {
 	 */
 	public void updateTileStatus(int row, int col, GUESS_STATUS status) {
 		if (!gameOver) { // first determines if the game is over
-			MineSweeperTile[][] board = model.getBoard(); // gets the board from the model
+			board = model.getBoard(); // gets the board from the model
 			
 			/* determines if the board is still null (indicates that this is the player's
 			 * first click of the game.
 			 */
 			if (board[row][col] == null) {
 				model.createBoard(row, col); // creates the board and places all bombs
-				updateTileStatus(row, col, status); // updates the board with the player's click
-				numberOfGuesses++; 
+				updateTileStatus(row, col, status); // updates the board with the player's click 
 				}
 			
 			/* If the tile is already flagged and the player right clicks again, the tile
@@ -68,7 +68,8 @@ public class MineSweeperController {
 			 */
 			else if (board[row][col].getStatus().equals(GUESS_STATUS.UNGUESSED)) {
 				model.updateTileStatus(row, col, status);
-				numberOfGuesses++;
+				if (status.equals(GUESS_STATUS.GUESSED))
+					numberOfGuesses++;
 				}
 			/*
 			 * Checks if the game is over by checking the number of player clicks
@@ -87,7 +88,7 @@ public class MineSweeperController {
 	 */
 	private void showAllBombs() {
 		// gets the current board from the model
-		MineSweeperTile[][] board = model.getBoard();
+		board = model.getBoard();
 		for (int row = 0; row < board.length; row++) {
             for (int col = 0; col < board.length; col++) {
             	// checks if the tile is a bomb
