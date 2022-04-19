@@ -2,30 +2,23 @@ package View;
 
 import javafx.application.Application;
 import javafx.event.EventHandler;
-import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import Models.MineSweeperTile;
-
 import static Utils.GUESS_STATUS.FLAGGED;
 import static Utils.GUESS_STATUS.GUESSED;
 import static Utils.GUESS_STATUS.UNGUESSED;
-
 import java.util.Observable;
 import java.util.Observer;
-
 import Controllers.MineSweeperController;
 
 @SuppressWarnings("deprecation")
