@@ -158,25 +158,15 @@ public class MineSweeper extends Application implements Observer {
     public void displayGameOver() {
     	String[] msg = "YOU WIN!!".split("");
     	if (!controller.win()) // checks with the controller if the player didn't win
-    		msg = "YOU LOSE!".split("");
+    		msg = "YOU LOSE!!".split("");
 		int row = COLS/2;
-		int i = -1;
+		int i = 0;
 
         for (int col = (COLS/4); col < COLS*((double)3/4); col++) {
             rectGrid[row][col].setFill(Color.WHITE);
-            StackPane stackPane = new StackPane(); 
-            stackPane.setTranslateX(col * HEX_SIZE);
-            stackPane.setTranslateY(row * HEX_SIZE);
-
             if (i >= 0 && i < msg.length) {
-            	Text text = new Text(msg[i]); 
-            	text.setFont(new Font(20));
-            	text.setTextAlignment(TextAlignment.CENTER);
-                stackPane.getChildren().add(text); 
-                gridPane.getChildren().add(stackPane);
-                text.toFront();
+            	labelGrid[row][col].setText(msg[i]);
             }
-
             i++;
         }
     }

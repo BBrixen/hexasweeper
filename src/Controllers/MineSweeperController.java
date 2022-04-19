@@ -59,7 +59,7 @@ public class MineSweeperController {
 			/* If the player clicks on a tile that is a bomb, win is set to false and
 			 * all bombs are shown. 
 			 */
-			else if (board[row][col].isBomb()) {
+			else if (status.equals(GUESS_STATUS.GUESSED) && board[row][col].isBomb()) {
 				win = false;
 				showAllBombs();
 			}
