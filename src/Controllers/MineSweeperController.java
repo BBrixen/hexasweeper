@@ -88,10 +88,18 @@ public class MineSweeperController {
 		}
 		}
 	
+	/* I did some strange math here. adjR and adjC together make
+	 * a coord pair for all adjacent tiles. I'm sure there is a cleaner/
+	 * more logical way to do this. I'll try to format it differently.
+	 * This method is used to reveal adjacent tiles. updateAdjacentTiles()
+	 * will continue to call this method automatically until there are no
+	 * longer adjacent tiles with a mineCount of 0.
+	 */
 	private void checkAdjacent(int row, int col) {
 		int[] adjR = {0,0,1,1,-1,-1};
 		int[] adjC = {-1,1,0,1,0,1};
 		if (row%2 == 0) {
+			// the adjacent column coord differs in the even rows.
 			adjC[2] = -1;
 			adjC[3] = 0;
 			adjC[4] = -1;
@@ -102,6 +110,9 @@ public class MineSweeperController {
 		}	
 	}
 
+	/* Checks if adjacent tiles are bombs. If they are not, 
+	 * the tiles are revealed. 
+	 */
 	private void checkNonBomb(int r, int a, int c, int b) {
 		if (r+a >= 0 && r+a < ROWS && c+b >= 0 && c+b < COLS) {
 			if (!(board[r+a][c+b].isBomb())){
