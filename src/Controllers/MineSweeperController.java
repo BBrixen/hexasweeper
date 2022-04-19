@@ -167,8 +167,5 @@ public class MineSweeperController {
 	public boolean win() {
 		return win;
 	}
-	
-	public int bombCount(int row, int col) {
-		return board[row][col].getMineCount();
-	}
+
 }
