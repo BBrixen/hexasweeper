@@ -31,14 +31,20 @@ public class MineSweeper extends Application implements Observer {
 
     // gui constants
     private static final double HEX_RADIUS = 30, HEX_SIZE = Math.sqrt(HEX_RADIUS * HEX_RADIUS * 0.75);
-    private static final int SCENE_WIDTH = (int) (1.75*(COLS + 2) * HEX_RADIUS),
-                SCENE_HEIGHT = (int) (1.5*(ROWS + 2) * HEX_RADIUS);
+    private static final int
+            SCENE_WIDTH = (int) (1.75*(COLS + 2) * HEX_RADIUS),
+            SCENE_HEIGHT = (int) (1.5*(ROWS + 2) * HEX_RADIUS);
     private static final double HEX_HEIGHT = 2* HEX_RADIUS, HEX_WIDTH = 2*HEX_SIZE;
-    private static final double LABEL_OFFSETX = HEX_WIDTH/2.5, LABEL_OFFSETY = HEX_HEIGHT/6;
+    private static final double MAIN_FONT_SIZE = HEX_HEIGHT/2.5;
+    private static final Font MAIN_FONT = new Font("Helvetica", MAIN_FONT_SIZE);
+    private static final double
+            LABEL_OFFSETX = HEX_WIDTH/2.5 - MAIN_FONT_SIZE/6,
+            LABEL_OFFSETY = HEX_HEIGHT/6 - MAIN_FONT_SIZE/2.5;
 
 
     // gui variables
     private Hexagon[][] rectGrid;
+    private Label[][] labelGrid;
     private AnchorPane gridPane;
     
     // controller variable
@@ -55,6 +61,7 @@ public class MineSweeper extends Application implements Observer {
     	// add as observer for model (MineSweeperBoard)
         controller.addObserver(this);
         rectGrid = new Hexagon[ROWS][COLS];
+        labelGrid = new Label[ROWS][COLS];
         gridPane = new AnchorPane();
 
         // creates the initial blank board
@@ -96,6 +103,8 @@ public class MineSweeper extends Application implements Observer {
         hex.setFill(UNGUESSED.getColor());
 
         Label label = new Label("1");
+        // this is temporary. later the text will start empty and will be determined by the tile
+        label.setFont(MAIN_FONT);
         label.setTranslateX(xCoord + LABEL_OFFSETX);
         label.setTranslateY(yCoord + LABEL_OFFSETY);
 
@@ -109,6 +118,7 @@ public class MineSweeper extends Application implements Observer {
         });
 
         rectGrid[row][col] = hex;
+        labelGrid[row][col] = label;
         gridPane.getChildren().add(hex);
         gridPane.getChildren().add(label);
     }
