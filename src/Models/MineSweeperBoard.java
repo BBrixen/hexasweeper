@@ -99,7 +99,7 @@ public class MineSweeperBoard extends Observable {
 
 			int diffRow = Math.abs(startRow - r);
 			int diffCol = Math.abs(startCol - c); // make sure we start with a 0
-			if (board[r][c] != null || diffRow < 1 || diffCol < 1)
+			if (board[r][c] != null || (diffRow < 2 && diffCol < 2))
 				continue;
 			board[r][c] = new MineSweeperTile(r, c, GUESS_STATUS.UNGUESSED);
 			board[r][c].setBomb();
