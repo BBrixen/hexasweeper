@@ -26,25 +26,22 @@ public class MineSweeperTile {
 	}
 
     
-    /* I did some strange math here. adjR and adjC together make
-	 * a coord pair for all adjacent tiles. I'm sure there is a cleaner/
+    /* I did some strange math here. adj is cardinal directions for
+	 * coord pairs for all adjacent tiles in odd rows. 
+	 * adjEven is for even rows. I'm sure there is a cleaner/
 	 * more logical way to do this. I'll try to format it differently.
 	 * This method is used to update each tile's mineCount.
 	 * 
 	 * (I used similar math in the controller in the checkAdjacent() method)
 	 */
     public void updateCount(MineSweeperTile[][] board) {
-    	int[] adjR = {0,0,1,1,-1,-1};
-		int[] adjC = {-1,1,0,1,0,1};
-		if (row%2 == 0) {
-			adjC[2] = -1;
-			adjC[3] = 0;
-			adjC[4] = -1;
-			adjC[5] = 0;
-			}
-		for (int i = 0; i < adjR.length; i++) {
-			if (row+adjR[i] >= 0 && row+adjR[i] < board.length && col+adjC[i] >= 0 && col+adjC[i] < board.length) {
-				if (board[row+adjR[i]][col+adjC[i]].isBomb()) {
+    	int[][] adj = {{0, -1},{0, 1},{1, 0},{1, 1},{-1, 0},{-1, 1}};
+    	int[][] adjEven = {{0, -1},{0, 1},{1, -1},{1, 0},{-1, -1},{-1, 0}};
+		if (row%2 == 0) 
+			adj = adjEven;
+		for (int i = 0; i < adj.length; i++) {
+			if (row+adj[i][0] >= 0 && row+adj[i][0] < board.length && col+adj[i][1] >= 0 && col+adj[i][1] < board.length) {
+				if (board[row+adj[i][0]][col+adj[i][1]].isBomb()) {
 				board[row][col].addMineCount();}
 			}
 		}
