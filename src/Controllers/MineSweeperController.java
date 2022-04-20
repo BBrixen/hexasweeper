@@ -1,5 +1,13 @@
 package Controllers;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Observer;
 import Models.MineSweeperBoard;
 import Models.MineSweeperTile;
@@ -8,8 +16,10 @@ import static View.MineSweeper.COLS;
 import static View.MineSweeper.NUM_BOMBS;
 import static View.MineSweeper.ROWS;
 
-public class MineSweeperController {
+public class MineSweeperController implements Serializable {
 
+	private static final long serialVersionUID = 100L;
+	
 	private MineSweeperBoard model;
 	// tracks if game is over
 	private boolean gameOver;
@@ -164,5 +174,52 @@ public class MineSweeperController {
 	 */
 	public boolean win() {
 		return win;
+	}
+	
+	/**
+	 * Saves the game by outputting the current state of the board and the instance variables to a file.
+	 * @throws IOException 
+	 */
+	public void saveGame(File f) throws IOException {
+		FileOutputStream fos = new FileOutputStream(f);
+		ObjectOutputStream oos = new ObjectOutputStream(fos);
+		
+		oos.writeObject(this.model.getBoard());
+		// We have no need to serialize the model's observers and should not try,
+		// but unfortunately that means breaking things up a bit instead of just serializing the whole Controller.
+		
+		oos.writeBoolean(this.gameOver);
+		oos.writeInt(this.numberOfGuesses);
+		oos.writeBoolean(this.win);
+		oos.writeObject(this.board);
+		
+		oos.close();
+	}
+	
+	/**
+	 * Loads the game by reading off parameters from the Controller object stored in the chosen file.
+	 */
+	public void loadGame(File f) throws IOException, ClassNotFoundException {
+		FileInputStream fis = new FileInputStream(f);
+		ObjectInputStream ois = new ObjectInputStream(fis);
+		
+		MineSweeperTile[][] newBoard = (MineSweeperTile[][]) ois.readObject();
+		model.setBoard(newBoard);
+		this.gameOver = ois.readBoolean();
+		this.numberOfGuesses = ois.readInt();
+		this.win = ois.readBoolean();
+		this.board = (MineSweeperTile[][]) ois.readObject();
+		
+		ois.close();
+		
+		model.notifyObservers();
+	}
+	
+	/**
+	 * Returns the current board state from the model.
+	 * @return
+	 */
+	public MineSweeperTile[][] getBoard() {
+		return model.getBoard();
 	}
 }

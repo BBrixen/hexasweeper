@@ -1,10 +1,14 @@
 package View;
 
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polygon;
@@ -15,8 +19,15 @@ import Models.MineSweeperTile;
 import static Utils.GUESS_STATUS.FLAGGED;
 import static Utils.GUESS_STATUS.GUESSED;
 import static Utils.GUESS_STATUS.UNGUESSED;
+
 import java.util.Observable;
 import java.util.Observer;
+
+import java.io.File;
+import java.io.IOException;
+
+import javax.swing.JFileChooser;
+
 import Controllers.MineSweeperController;
 
 @SuppressWarnings("deprecation")
@@ -33,7 +44,7 @@ public class MineSweeper extends Application implements Observer {
     private static final double HEX_RADIUS = Math.min(SCREEN_HEIGHT/40, 30), HEX_SIZE = Math.sqrt(HEX_RADIUS * HEX_RADIUS * 0.75);
     private static final int
             SCENE_WIDTH = (int) (1.75*(COLS + 2) * HEX_RADIUS),
-            SCENE_HEIGHT = (int) (1.5*(ROWS + 2) * HEX_RADIUS);
+            SCENE_HEIGHT = (int) (1.5*(ROWS + 2) * HEX_RADIUS + 30);
     private static final double HEX_HEIGHT = 2* HEX_RADIUS, HEX_WIDTH = 2*HEX_SIZE;
     private static final double MAIN_FONT_SIZE = HEX_HEIGHT/2.5;
     private static final Font MAIN_FONT = new Font("Helvetica", MAIN_FONT_SIZE);
@@ -46,6 +57,11 @@ public class MineSweeper extends Application implements Observer {
     private Hexagon[][] rectGrid;
     private Label[][] labelGrid;
     private AnchorPane gridPane;
+    
+    private VBox vBox;
+    private HBox buttonRow;
+    private Button saveButton;
+    private Button loadButton;
     
     // controller variable
     private MineSweeperController controller;
@@ -63,16 +79,70 @@ public class MineSweeper extends Application implements Observer {
         rectGrid = new Hexagon[ROWS][COLS];
         labelGrid = new Label[ROWS][COLS];
         gridPane = new AnchorPane();
+        
+        saveButton = new Button("Save");        
+        loadButton = new Button("Load");
+        
+        setButtonActions();
+        
+        buttonRow = new HBox(15);
+        buttonRow.getChildren().addAll(saveButton, loadButton);
+        buttonRow.setPadding(new Insets(5, 15, 5, 40));
+        
+        vBox = new VBox(15);
+        vBox.getChildren().addAll(gridPane, buttonRow);
+        
 
         // creates the initial blank board
         createBoard();
 
         BorderPane pane = new BorderPane();
-        pane.setCenter(gridPane);
+        pane.setCenter(vBox);
         Scene scene = new Scene(pane, SCENE_WIDTH, SCENE_HEIGHT);
         stage.setScene(scene);
         stage.setTitle("Mine Sweeper");
         stage.show();
+    }
+    
+    
+    /**
+     * Sets the functionality of the buttons on the screen.
+     */
+    public void setButtonActions() {
+        saveButton.setOnAction(e -> {
+        	if (!controller.isGameOver()) {
+	        	// Should stop the clock when the user clicks save, so as not to rush them
+	        	
+	        	JFileChooser chooser = new JFileChooser();
+	        	if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+	        		File f = chooser.getSelectedFile();
+	        		
+	        		try {
+						controller.saveGame(f);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+	        	}
+	        	// Restart the clock, since saving is either done or failed
+        	}
+        });
+    	
+        loadButton.setOnAction(e -> {
+        	// Unlike save, you should be able to load a game even after having ended another one
+        	
+        	JFileChooser chooser = new JFileChooser();
+        	if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+        		File f = chooser.getSelectedFile();
+        		
+        		try {
+					controller.loadGame(f);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				} catch (ClassNotFoundException e1) {
+					e1.printStackTrace();
+				}
+        	}
+        });
     }
 
 
@@ -161,6 +231,9 @@ public class MineSweeper extends Application implements Observer {
 	                if (arg[row][col].getMineCount() > 0 && arg[row][col].getStatus().equals(GUESSED)) {
 	                	labelGrid[row][col].setText(""+arg[row][col].getMineCount());
 	                	rectGrid[row][col].setFill(getColor(arg[row][col].getMineCount()));
+	                }
+	                else {
+	                	labelGrid[row][col].setText("");
 	                }
 	            }
 	}

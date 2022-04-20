@@ -1,10 +1,15 @@
 package Models;
 
+import java.io.Serializable;
+
 import Utils.GUESS_STATUS;
 
-public class MineSweeperTile {
+public class MineSweeperTile implements Serializable {
 
-    private GUESS_STATUS status;
+	private static final long serialVersionUID = 100L;
+	
+	
+	private GUESS_STATUS status;
     private int mineCount; // the number of mines around this
     private final int row, col;
     // indicates if the tile contains a bomb,
