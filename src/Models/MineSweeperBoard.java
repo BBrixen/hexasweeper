@@ -6,8 +6,9 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Random;
 import Utils.GUESS_STATUS;
-import static View.MineSweeper.*;
-
+import static View.MineSweeper.COLS;
+import static View.MineSweeper.NUM_BOMBS;
+import static View.MineSweeper.ROWS;
 
 @SuppressWarnings("deprecation")
 public class MineSweeperBoard extends Observable {
@@ -18,6 +19,9 @@ public class MineSweeperBoard extends Observable {
 	
 	/**
 	 * Constructor for MineSweeperBoard model object.
+	 * @param numBombs 
+	 * @param cols 
+	 * @param rows 
 	 */
 	public MineSweeperBoard() {
 		//initializes the board as a ROWS x COLS 2D array with null pointers for now
@@ -105,13 +109,11 @@ public class MineSweeperBoard extends Observable {
 	/**
 	 * This method places bombs in random locations if the tile is null.
 	 */
-	public void createBombs() {
-		Random rand = new Random();
+	public void createBombs() {		
 		int i = 0;
-
 		while (i < NUM_BOMBS) {
-			int r = rand.nextInt(ROWS);
-			int c = rand.nextInt(COLS);
+			int r = (int)(Math.random() * ROWS );
+			int c = (int)(Math.random() * COLS);
 
 			if (board[r][c] != null)
 				continue;
@@ -120,5 +122,5 @@ public class MineSweeperBoard extends Observable {
 			i++;
 
 		}
-	}
+	} 
 }
