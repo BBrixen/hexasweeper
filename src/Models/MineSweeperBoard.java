@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Random;
 import Utils.GUESS_STATUS;
 import static View.MineSweeper.COLS;
 import static View.MineSweeper.NUM_BOMBS;
@@ -19,9 +18,6 @@ public class MineSweeperBoard extends Observable {
 	
 	/**
 	 * Constructor for MineSweeperBoard model object.
-	 * @param numBombs 
-	 * @param cols 
-	 * @param rows 
 	 */
 	public MineSweeperBoard() {
 		//initializes the board as a ROWS x COLS 2D array with null pointers for now
@@ -40,7 +36,7 @@ public class MineSweeperBoard extends Observable {
 		/* row and col are for the first clicked tile to
 		 * make sure a bomb isn't placed there */
 		board[row][col] = new MineSweeperTile(row, col);
-		createBombs(); // places all the bombs in the board first
+		createBombs(row, col); // places all the bombs in the board first
 
 		// now places unguessed tiles without bombs
         for (int r= 0; r < ROWS; r++) 
@@ -55,20 +51,6 @@ public class MineSweeperBoard extends Observable {
 			}
 		}
     }
-
-	/**
-	 * This creates a grid of strings representing the mine count on each tile. We
-	 * @return
-	 */
-	public String[][] generateCounts() {
-		String[][] mineCounts = new String[ROWS][COLS];
-		for (int row = 0; row < ROWS; row++) {
-			for (int col = 0; col < COLS; col++) {
-				mineCounts[row][col] = board[row][col].getMineLabel();
-			}
-		}
-		return mineCounts;
-	}
 	
 	/**
 	 * Updates the tile to the indicated status parameter.
@@ -109,18 +91,20 @@ public class MineSweeperBoard extends Observable {
 	/**
 	 * This method places bombs in random locations if the tile is null.
 	 */
-	public void createBombs() {		
+	public void createBombs(int startRow, int startCol) {
 		int i = 0;
 		while (i < NUM_BOMBS) {
 			int r = (int)(Math.random() * ROWS );
 			int c = (int)(Math.random() * COLS);
 
-			if (board[r][c] != null)
+			int diffRow = Math.abs(startRow - r);
+			int diffCol = Math.abs(startCol - c); // make sure we start with a 0
+			if (board[r][c] != null || diffRow < 1 || diffCol < 1)
 				continue;
 			board[r][c] = new MineSweeperTile(r, c, GUESS_STATUS.UNGUESSED);
 			board[r][c].setBomb();
 			i++;
 
 		}
-	} 
+	}
 }

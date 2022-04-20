@@ -22,9 +22,6 @@ public class MineSweeperController {
 	/**
 	 * Contructor for the controller.
 	 * numBombs is used as a parameter for constructing the model.
-	 * @param numBombs 
-	 * @param cols 
-	 * @param rows 
 	 */
 	public MineSweeperController() {
 		this.model = new MineSweeperBoard();
@@ -86,7 +83,7 @@ public class MineSweeperController {
 				gameIsOver();
 			}
 		}
-		}
+	}
 	
     /* I did some strange math here. adj is cardinal directions for
 	 * coord pairs for all adjacent tiles in odd rows. 
