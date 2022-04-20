@@ -16,6 +16,7 @@ public class MineSweeperTile {
     	this.col = col;
     	this.status = status;
         displayNum = false;
+        mineCount = 0;
 
         // now we calculate the number of bombs around this tile
     }
@@ -24,8 +25,26 @@ public class MineSweeperTile {
     	this(row, col, GUESS_STATUS.UNGUESSED);
 	}
 
+    
+    /* I did some strange math here. adj is cardinal directions for
+	 * coord pairs for all adjacent tiles in odd rows. 
+	 * adjEven is for even rows. I'm sure there is a cleaner/
+	 * more logical way to do this. I'll try to format it differently.
+	 * This method is used to update each tile's mineCount.
+	 * 
+	 * (I used similar math in the controller in the checkAdjacent() method)
+	 */
     public void updateCount(MineSweeperTile[][] board) {
-        // TODO: this will count the number of bombs around this tile on the board
+    	int[][] adj = {{0, -1},{0, 1},{1, 0},{1, 1},{-1, 0},{-1, 1}};
+    	int[][] adjEven = {{0, -1},{0, 1},{1, -1},{1, 0},{-1, -1},{-1, 0}};
+		if (row%2 == 0) 
+			adj = adjEven;
+		for (int i = 0; i < adj.length; i++) {
+			if (row+adj[i][0] >= 0 && row+adj[i][0] < board.length && col+adj[i][1] >= 0 && col+adj[i][1] < board.length) {
+				if (board[row+adj[i][0]][col+adj[i][1]].isBomb()) {
+				board[row][col].addMineCount();}
+			}
+		}
     }
 
 	public void setStatus(GUESS_STATUS status) {
@@ -67,5 +86,12 @@ public class MineSweeperTile {
 //        if (! displayNum || mineCount == 0)
 //            return ""; // we dont want to display it
         return ""+mineCount;
+    }
+    public int getMineCount() {
+    	return mineCount;
+    }
+    
+    public void addMineCount() {
+    	mineCount = mineCount + 1;
     }
 }

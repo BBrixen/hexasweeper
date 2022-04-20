@@ -6,9 +6,11 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.stage.Screen;
 import Models.MineSweeperTile;
 import static Utils.GUESS_STATUS.FLAGGED;
 import static Utils.GUESS_STATUS.GUESSED;
@@ -25,7 +27,10 @@ public class MineSweeper extends Application implements Observer {
     public static final int NUM_BOMBS = 60; // i have no clue if this is too many
 
     // gui constants
-    private static final double HEX_RADIUS = 30, HEX_SIZE = Math.sqrt(HEX_RADIUS * HEX_RADIUS * 0.75);
+    private static final double SCREEN_WIDTH = Screen.getPrimary().getVisualBounds().getWidth();
+    private static final double SCREEN_HEIGHT = Screen.getPrimary().getVisualBounds().getHeight();
+    
+    private static final double HEX_RADIUS = Math.min(SCREEN_HEIGHT/40, 30), HEX_SIZE = Math.sqrt(HEX_RADIUS * HEX_RADIUS * 0.75);
     private static final int
             SCENE_WIDTH = (int) (1.75*(COLS + 2) * HEX_RADIUS),
             SCENE_HEIGHT = (int) (1.5*(ROWS + 2) * HEX_RADIUS);
@@ -68,9 +73,6 @@ public class MineSweeper extends Application implements Observer {
         stage.setScene(scene);
         stage.setTitle("Mine Sweeper");
         stage.show();
-        
-        // create instance of MouseHandler
-//        scene.setOnMousePressed(new MouseHandler());
     }
 
 
@@ -97,7 +99,7 @@ public class MineSweeper extends Application implements Observer {
         Hexagon hex = new Hexagon(xCoord, yCoord);
         hex.setFill(UNGUESSED.getColor());
 
-        Label label = new Label("1");
+        Label label = new Label("");
         // this is temporary. later the text will start empty and will be determined by the tile
         label.setFont(MAIN_FONT);
         label.setTranslateX(xCoord + LABEL_OFFSETX);
@@ -107,22 +109,22 @@ public class MineSweeper extends Application implements Observer {
         hex.setOnMousePressed(e -> {
         	
             if (e.isPrimaryButtonDown()) {
-    			controller.updateTileStatus(row, col, GUESSED);}
+    			controller.updateTileStatus(row, col, GUESSED);
+    			}
 
 			else if (e.isSecondaryButtonDown()) {
     			controller.updateTileStatus(row, col, FLAGGED);
-            }
-
+    			}
         });
 
         label.setOnMousePressed(e -> {
             if (e.isPrimaryButtonDown()) {
-                controller.updateTileStatus(row, col, GUESSED);}
+                controller.updateTileStatus(row, col, GUESSED);
+                }
 
             else if (e.isSecondaryButtonDown()) {
                 controller.updateTileStatus(row, col, FLAGGED);
             }
-
         });
 
         rectGrid[row][col] = hex;
@@ -130,7 +132,6 @@ public class MineSweeper extends Application implements Observer {
         gridPane.getChildren().add(hex);
         gridPane.getChildren().add(label);
     }
-    
     
     /**
      * Any time the Model calls notifyObservers(), this update()
@@ -156,10 +157,38 @@ public class MineSweeper extends Application implements Observer {
 	    	for (int row = 0; row < ROWS; row++) 
 	            for (int col = 0; col < COLS; col++) {
 	                rectGrid[row][col].setFill(arg[row][col].getStatus().getColor());
+	                // Reveals minecount of any guessed tiles
+	                if (arg[row][col].getMineCount() > 0 && arg[row][col].getStatus().equals(GUESSED)) {
+	                	labelGrid[row][col].setText(""+arg[row][col].getMineCount());
+	                	rectGrid[row][col].setFill(getColor(arg[row][col].getMineCount()));
+	                }
 	            }
 	}
         
-    /**
+    //Sets grid color according to number of adjacent mines
+    private Paint getColor(int mineCount) {
+		if (mineCount == 1) {
+			return Color.rgb(207, 236, 207);
+		}
+		else if (mineCount == 2) {
+			return Color.rgb(204, 236, 239);
+		}
+		else if (mineCount == 3) {
+			return Color.rgb(221, 212, 232);
+		}
+		else if (mineCount == 4) {
+			return Color.rgb(253, 222, 238);
+		}
+		else if (mineCount == 5) {
+			return Color.rgb(253, 202, 162);
+		}
+		else if (mineCount == 6) {
+			return Color.rgb(255, 105, 97);
+		}
+		return null;
+	}
+
+	/**
      * This method displays the game over message in the middle of the board
      * when the game is over.
      */
@@ -206,5 +235,3 @@ public class MineSweeper extends Application implements Observer {
         }
     }
 }
-
-

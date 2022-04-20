@@ -1,12 +1,12 @@
 package Controllers;
 
 import java.util.Observer;
-
 import Models.MineSweeperBoard;
 import Models.MineSweeperTile;
 import Utils.GUESS_STATUS;
-
+import static View.MineSweeper.COLS;
 import static View.MineSweeper.NUM_BOMBS;
+import static View.MineSweeper.ROWS;
 
 public class MineSweeperController {
 
@@ -17,10 +17,14 @@ public class MineSweeperController {
 	private int numberOfGuesses;
 	// total number of bombs in the board
 	private boolean win;
+	private MineSweeperTile[][] board;
 	
 	/**
 	 * Contructor for the controller.
 	 * numBombs is used as a parameter for constructing the model.
+	 * @param numBombs 
+	 * @param cols 
+	 * @param rows 
 	 */
 	public MineSweeperController() {
 		this.model = new MineSweeperBoard();
@@ -38,15 +42,14 @@ public class MineSweeperController {
 	 */
 	public void updateTileStatus(int row, int col, GUESS_STATUS status) {
 		if (!gameOver) { // first determines if the game is over
-			MineSweeperTile[][] board = model.getBoard(); // gets the board from the model
+			board = model.getBoard(); // gets the board from the model
 			
 			/* determines if the board is still null (indicates that this is the player's
 			 * first click of the game.
 			 */
 			if (board[row][col] == null) {
 				model.createBoard(row, col); // creates the board and places all bombs
-				updateTileStatus(row, col, status); // updates the board with the player's click
-				numberOfGuesses++; 
+				updateTileStatus(row, col, status); // updates the board with the player's click 
 				}
 			
 			/* If the tile is already flagged and the player right clicks again, the tile
@@ -68,18 +71,52 @@ public class MineSweeperController {
 			 */
 			else if (board[row][col].getStatus().equals(GUESS_STATUS.UNGUESSED)) {
 				model.updateTileStatus(row, col, status);
-				numberOfGuesses++;
+				if (status.equals(GUESS_STATUS.GUESSED)) {
+					if (board[row][col].getMineCount() == 0)
+						checkAdjacent(row, col);
+					numberOfGuesses++;
+					}
 				}
 			/*
 			 * Checks if the game is over by checking the number of player clicks
 			 * that have not been bombs or flagging clicks.
 			 */
 			if (numberOfGuesses == (board.length*board.length) - NUM_BOMBS) {
+				showAllBombs();
 				gameIsOver();
 			}
 		}
 		}
 	
+    /* I did some strange math here. adj is cardinal directions for
+	 * coord pairs for all adjacent tiles in odd rows. 
+	 * adjEven is for even rows. I'm sure there is a cleaner/
+	 * more logical way to do this. I'll try to format it differently.
+	 * This method is used to reveal adjacent tiles. updateAdjacentTiles()
+	 * will continue to call this method automatically until there are no
+	 * longer adjacent tiles with a mineCount of 0.
+	 */
+	private void checkAdjacent(int row, int col) {
+		int[][] adj = {{0, -1},{0, 1},{1, 0},{1, 1},{-1, 0},{-1, 1}};
+    	int[][] adjEven = {{0, -1},{0, 1},{1, -1},{1, 0},{-1, -1},{-1, 0}};
+		if (row%2 == 0) 
+			adj = adjEven;
+		for (int i = 0; i < adj.length; i++) {
+			checkNonBomb(row, adj[i][0], col, adj[i][1]);
+		}	
+	}
+
+	/* Checks if adjacent tiles are bombs. If they are not, 
+	 * the tiles are revealed. 
+	 */
+	private void checkNonBomb(int r, int a, int c, int b) {
+		if (r+a >= 0 && r+a < ROWS && c+b >= 0 && c+b < COLS) {
+			if (!(board[r+a][c+b].isBomb())){
+				updateTileStatus(r+a, c+b, GUESS_STATUS.GUESSED);}
+		}
+		
+	}
+
 	/**
 	 *  Shows all bombs by iterating through the board. If the tile returns
 	 *  true when isBomb() is called, the enum for the tile is changed to
@@ -87,7 +124,7 @@ public class MineSweeperController {
 	 */
 	private void showAllBombs() {
 		// gets the current board from the model
-		MineSweeperTile[][] board = model.getBoard();
+		board = model.getBoard();
 		for (int row = 0; row < board.length; row++) {
             for (int col = 0; col < board.length; col++) {
             	// checks if the tile is a bomb
@@ -97,6 +134,7 @@ public class MineSweeperController {
 		}
       } // sets gameOver to true
 		gameIsOver();
+		
 	}
 
 	/**
