@@ -10,6 +10,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.stage.Screen;
 import Models.MineSweeperTile;
 import static Utils.GUESS_STATUS.FLAGGED;
 import static Utils.GUESS_STATUS.GUESSED;
@@ -26,7 +27,10 @@ public class MineSweeper extends Application implements Observer {
     public static final int NUM_BOMBS = 60; // i have no clue if this is too many
 
     // gui constants
-    private static final double HEX_RADIUS = 30, HEX_SIZE = Math.sqrt(HEX_RADIUS * HEX_RADIUS * 0.75);
+    private static final double SCREEN_WIDTH = Screen.getPrimary().getVisualBounds().getWidth();
+    private static final double SCREEN_HEIGHT = Screen.getPrimary().getVisualBounds().getHeight();
+    
+    private static final double HEX_RADIUS = Math.min(SCREEN_HEIGHT/40, 30), HEX_SIZE = Math.sqrt(HEX_RADIUS * HEX_RADIUS * 0.75);
     private static final int
             SCENE_WIDTH = (int) (1.75*(COLS + 2) * HEX_RADIUS),
             SCENE_HEIGHT = (int) (1.5*(ROWS + 2) * HEX_RADIUS);
