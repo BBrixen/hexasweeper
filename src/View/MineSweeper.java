@@ -77,6 +77,7 @@ public class MineSweeper extends Application implements Observer {
     private HBox buttonRow;
     private Button saveButton;
     private Button loadButton;
+    private Button resetButton;
     
     // controller variable
     private MineSweeperController controller;
@@ -104,18 +105,21 @@ public class MineSweeper extends Application implements Observer {
 
         saveButton = new Button("Save");        
         loadButton = new Button("Load");
+        resetButton = new Button("Reset");
         
         setButtonActions();
 
         buttonRow = new HBox(15);
-        buttonRow.getChildren().addAll(saveButton, loadButton);
+        buttonRow.getChildren().addAll(saveButton, loadButton, resetButton);
         buttonRow.setPadding(new Insets(5, 15, 5, 40));
+        buttonRow.setAlignment(Pos.CENTER);
         
         Text timer = createTimer();
         
         vBox = new VBox(15);
         vBox.getChildren().addAll(timer, gridPane, buttonRow);
         vBox.setPadding(new Insets(10,0,0,0));
+        vBox.setAlignment(Pos.CENTER);
         
         // creates the initial blank board
         createBoard(controller.getBoard());
@@ -173,6 +177,12 @@ public class MineSweeper extends Application implements Observer {
                     }
                 }
         });
+        
+        resetButton.setOnAction(e -> {
+        	stage.close();
+			this.start(new Stage());
+        });
+        
     }
 
     /**
@@ -379,6 +389,6 @@ public class MineSweeper extends Application implements Observer {
     }
 
     private void updateTimer(Text timer) {
-        timer.setText("Time: "+ controller.getSecondsElapsed());
+        timer.setText("Time: "+ String.format("%.2f", controller.getSecondsElapsed()));
     }
 }
