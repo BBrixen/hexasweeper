@@ -86,7 +86,6 @@ public class MineSweeperController implements Serializable {
 		 */
 		if (numberOfGuesses == (board.length*board[0].length) - NUM_BOMBS) {
 			showAllBombs();
-			gameIsOver();
 		}
 
 	}
