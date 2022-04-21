@@ -46,7 +46,7 @@ public class MineSweeper extends Application implements Observer {
 
     // game constants
     public static final int ROWS = 25, COLS = 45;
-    public static final int NUM_BOMBS = 200; // i have no clue if this is too many
+    public static int NUM_BOMBS = 200; // i have no clue if this is too many
     private static ScheduledExecutorService executor = null;
     public static final int DELTA_TIME_MS = 10;
 
@@ -65,6 +65,11 @@ public class MineSweeper extends Application implements Observer {
             LABEL_OFFSETX = HEX_WIDTH/2.5 - MAIN_FONT_SIZE/6,
             LABEL_OFFSETY = HEX_HEIGHT/6 - MAIN_FONT_SIZE/2.5;
     private static final HashMap<Integer, Color> MINE_COUNT_TO_COLOR = new HashMap<>();
+    private static final int VERY_HARD_DIFF = 600;
+    private static final int HARD_DIFF = 400;
+    private static final int MEDIUM_DIFF = 200;
+    private static final int EASY_DIFF = 100;
+    private static final int VERY_EASY_DIFF = 50;
 
 
     // gui variables
@@ -134,6 +139,7 @@ public class MineSweeper extends Application implements Observer {
                 if (executor != null)
                     executor.shutdown();
         });
+        chooseDiff();
     }
 
     /**
@@ -320,8 +326,8 @@ public class MineSweeper extends Application implements Observer {
 		label.setMaxWidth(Double.MAX_VALUE);
 		label.setAlignment(Pos.BOTTOM_CENTER);
 		
-		Button btn = new Button();
-		btn.setText("Play again");
+		Button btn = new Button("Play again");
+		
 		
 		// play again scene (might want to make this a new function)
 		BorderPane root = new BorderPane();
@@ -342,6 +348,64 @@ public class MineSweeper extends Application implements Observer {
 			stage.close();
 			this.start(new Stage());
 			popUp.close();
+        });
+    }
+   
+    public void chooseDiff() {
+    	Stage diffPop = new Stage();
+		Label label = new Label();
+	
+		label.setText("Choose Difficulty");
+		label.setFont(Font.font("Helvetica", 30));
+		label.setMaxWidth(Double.MAX_VALUE);
+		label.setAlignment(Pos.BOTTOM_CENTER);
+		label.setPadding(new Insets(20, 0, 0, 0));
+		
+		Button veryEasy = new Button("Very Easy");
+		Button easy = new Button("Easy");
+		Button normal = new Button("Normal");
+		Button hard = new Button("Hard");
+		Button veryHard = new Button("Very Hard");
+		
+		HBox buttonBox = new HBox();
+		buttonBox.getChildren().addAll(veryEasy, easy, normal, hard, veryHard);
+		buttonBox.setPadding(new Insets(10, 10, 10, 10));
+		buttonBox.setAlignment(Pos.CENTER);
+		
+		
+		BorderPane diff = new BorderPane();
+		diff.setBackground(
+				new Background(new BackgroundFill(Color.WHITE, new CornerRadii(6.0), Insets.EMPTY)));
+		diff.setTop(label);
+		diff.setBottom(buttonBox);
+		diff.setAlignment(label, Pos.CENTER);
+		diff.setAlignment(buttonBox, Pos.CENTER);
+		
+		Scene diffScene = new Scene(diff, 400, 120);
+
+		diffPop.setScene(diffScene);
+		diffPop.setTitle("New Game");
+		diffPop.show();
+		
+		veryEasy.setOnMousePressed(me -> {
+			NUM_BOMBS = VERY_EASY_DIFF;
+			diffPop.close();
+        });
+		easy.setOnMousePressed(me -> {
+			NUM_BOMBS = EASY_DIFF;
+			diffPop.close();
+        });
+		normal.setOnMousePressed(me -> {
+			NUM_BOMBS = MEDIUM_DIFF;
+			diffPop.close();
+        });
+		hard.setOnMousePressed(me -> {
+			NUM_BOMBS = HARD_DIFF;
+			diffPop.close();
+        });
+		veryHard.setOnMousePressed(me -> {
+			NUM_BOMBS = VERY_HARD_DIFF;
+			diffPop.close();
         });
     }
     
