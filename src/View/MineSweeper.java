@@ -1,20 +1,20 @@
 package View;
 
+import Models.MineSweeperTile;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.Screen;
-import Models.MineSweeperTile;
 import static Utils.GUESS_STATUS.FLAGGED;
 import static Utils.GUESS_STATUS.GUESSED;
 import static Utils.GUESS_STATUS.UNGUESSED;
+import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 import Controllers.MineSweeperController;
@@ -40,6 +40,7 @@ public class MineSweeper extends Application implements Observer {
     private static final double
             LABEL_OFFSETX = HEX_WIDTH/2.5 - MAIN_FONT_SIZE/6,
             LABEL_OFFSETY = HEX_HEIGHT/6 - MAIN_FONT_SIZE/2.5;
+    private static final HashMap<Integer, Color> MINE_COUNT_TO_COLOR = new HashMap<>();
 
 
     // gui variables
@@ -51,15 +52,21 @@ public class MineSweeper extends Application implements Observer {
     private MineSweeperController controller;
 
     public static void main(String[] args) {
+        // filling hashmap, this only needs to be done once
+        MINE_COUNT_TO_COLOR.put(1, Color.rgb(207, 236, 207));
+        MINE_COUNT_TO_COLOR.put(2, Color.rgb(204, 236, 239));
+        MINE_COUNT_TO_COLOR.put(3, Color.rgb(221, 212, 232));
+        MINE_COUNT_TO_COLOR.put(4, Color.rgb(253, 222, 238));
+        MINE_COUNT_TO_COLOR.put(5, Color.rgb(253, 202, 162));
+        MINE_COUNT_TO_COLOR.put(6, Color.rgb(255, 105, 97));
         launch(args);
     }
 
     @Override
     public void start(Stage stage) {
-    	// initialize controller
+    	// initialize game
         controller = new MineSweeperController();
-    	// add as observer for model (MineSweeperBoard)
-        controller.addObserver(this);
+        controller.addObserver(this); // add as observer for model (MineSweeperBoard)
         rectGrid = new Hexagon[ROWS][COLS];
         labelGrid = new Label[ROWS][COLS];
         gridPane = new AnchorPane();
@@ -77,7 +84,7 @@ public class MineSweeper extends Application implements Observer {
 
 
     /**
-     *  Creates the blank game board of 20 x 20 rectangles
+     *  Creates the blank game board of ROW x COL hexagons
      */
     public void createBoard() {
         for (int row = 0; row < ROWS; row++) {
@@ -100,7 +107,6 @@ public class MineSweeper extends Application implements Observer {
         hex.setFill(UNGUESSED.getColor());
 
         Label label = new Label("");
-        // this is temporary. later the text will start empty and will be determined by the tile
         label.setFont(MAIN_FONT);
         label.setTranslateX(xCoord + LABEL_OFFSETX);
         label.setTranslateY(yCoord + LABEL_OFFSETY);
@@ -126,65 +132,37 @@ public class MineSweeper extends Application implements Observer {
             }
         });
 
+        // adding it to the grids and groups
         rectGrid[row][col] = hex;
         labelGrid[row][col] = label;
         gridPane.getChildren().add(hex);
         gridPane.getChildren().add(label);
     }
-    
+
     /**
-     * Any time the Model calls notifyObservers(), this update()
-     * method is called. 
-     * This method calls the below changeBoard() method with
-     * the entire game board as a parameter.
+     *
+     * @param o     the model
+     * @param arg   the MineSweeperTile[][] board from the model
      */
     public void update(Observable o, Object arg) {
-		changeBoard((MineSweeperTile[][])arg);
-	}
-    
-    /**
-     * Updates the game board with the corresponding enum colors for
-     * each tile
-     * 
-     * @param arg is the MineSweeperTile[][] board from the Model
-     */
-    private void changeBoard(MineSweeperTile[][] arg) {
-    	if (controller.isGameOver())  // checks with Controller if game is over
-    		displayGameOver(); // calls the method to display the game over msg if true
+        if (controller.isGameOver())  {// checks with Controller if game is over
+            displayGameOver(); // calls the method to display the game over msg if true
+            return;
+        }
 
-    	else // if the game isn't over, all the tiles are updated according to their enum
-	    	for (int row = 0; row < ROWS; row++) 
-	            for (int col = 0; col < COLS; col++) {
-	                rectGrid[row][col].setFill(arg[row][col].getStatus().getColor());
-	                // Reveals minecount of any guessed tiles
-	                if (arg[row][col].getMineCount() > 0 && arg[row][col].getStatus().equals(GUESSED)) {
-	                	labelGrid[row][col].setText(""+arg[row][col].getMineCount());
-	                	rectGrid[row][col].setFill(getColor(arg[row][col].getMineCount()));
-	                }
-	            }
-	}
-        
-    //Sets grid color according to number of adjacent mines
-    private Paint getColor(int mineCount) {
-		if (mineCount == 1) {
-			return Color.rgb(207, 236, 207);
-		}
-		else if (mineCount == 2) {
-			return Color.rgb(204, 236, 239);
-		}
-		else if (mineCount == 3) {
-			return Color.rgb(221, 212, 232);
-		}
-		else if (mineCount == 4) {
-			return Color.rgb(253, 222, 238);
-		}
-		else if (mineCount == 5) {
-			return Color.rgb(253, 202, 162);
-		}
-		else if (mineCount == 6) {
-			return Color.rgb(255, 105, 97);
-		}
-		return null;
+        // if the game isn't over, all the tiles are updated according to their enum
+        MineSweeperTile[][] board = (MineSweeperTile[][]) arg;
+        for (int row = 0; row < ROWS; row++)
+            for (int col = 0; col < COLS; col++) {
+
+                rectGrid[row][col].setFill(board[row][col].getStatus().getColor());
+
+                // Reveals minecount of any guessed tiles
+                if (board[row][col].getMineCount() > 0 && board[row][col].getStatus().equals(GUESSED)) {
+                    labelGrid[row][col].setText(""+board[row][col].getMineCount());
+                    rectGrid[row][col].setFill(MINE_COUNT_TO_COLOR.get(board[row][col].getMineCount()));
+                }
+            }
 	}
 
 	/**
@@ -195,8 +173,6 @@ public class MineSweeper extends Application implements Observer {
     	String[] msg = "YOU WIN!!".split("");
     	if (!controller.win()) // checks with the controller if the player didn't win
     		msg = "YOU LOSE!!".split("");
-		int row = COLS/2;
-		int i = 0;
 
         for (int r = 0; r < ROWS; r++) {
             for (int c = 0; c < COLS; c++) {
@@ -204,6 +180,9 @@ public class MineSweeper extends Application implements Observer {
             }
         }
 
+        // creating lose message
+        int row = ROWS/2;
+        int i = 0;
         for (int col = (COLS/4); col < COLS*((double)3/4); col++) {
             rectGrid[row][col].setFill(Color.WHITE);
             if (i >= 0 && i < msg.length) {

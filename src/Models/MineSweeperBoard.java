@@ -13,8 +13,8 @@ import static View.MineSweeper.ROWS;
 public class MineSweeperBoard extends Observable {
 
 	// the minesweeper board as a 2D array
-	private MineSweeperTile[][] board;
-	private List<Observer> observers;
+	private final MineSweeperTile[][] board;
+	private final List<Observer> observers;
 	
 	/**
 	 * Constructor for MineSweeperBoard model object.
