@@ -220,7 +220,7 @@ public class MineSweeperController implements Serializable {
 	 * from the model
 	 * @return The number of seconds that the game has been going for
 	 */
-	public int getSecondsElapsed() {
+	public double getSecondsElapsed() {
 		return model.getSecondsElapsed();
 	}
 }

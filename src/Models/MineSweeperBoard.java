@@ -5,9 +5,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*; // TODO: dont import *
 import Utils.GUESS_STATUS;
-import static View.MineSweeper.COLS;
-import static View.MineSweeper.NUM_BOMBS;
-import static View.MineSweeper.ROWS;
+
+import static View.MineSweeper.*;
 
 @SuppressWarnings("deprecation")
 public class MineSweeperBoard extends Observable implements Serializable {
@@ -15,7 +14,7 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	// the minesweeper board as a 2D array
 	private MineSweeperTile[][] board;
 	private final List<Observer> observers; // do we need a list?
-	private Instant startTime;
+	private int ms_elapsed;
 	
 	/**
 	 * Constructor for MineSweeperBoard model object.
@@ -24,7 +23,6 @@ public class MineSweeperBoard extends Observable implements Serializable {
 		//initializes the board as a ROWS x COLS 2D array with null pointers for now
 		board = new MineSweeperTile[ROWS][COLS];
 		observers = new ArrayList<>();
-		startTime = null;
 	}
 	
 	/**
@@ -36,7 +34,7 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 */
 	public void createBoard(int row, int col) {
 		// Start the timer
-		startTime = Instant.now();
+		ms_elapsed = 1;
 		/* row and col are for the first clicked tile to
 		 * make sure a bomb isn't placed there */
 		board[row][col] = new MineSweeperTile(row, col);
@@ -119,11 +117,9 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 * Calculates the number of seconds that have elapsed in the game
 	 * @return the number of seconds elapsed
 	 */
-	public int getSecondsElapsed() {
-		if (startTime == null) {
-			return 0;
-		}
-		Duration dur = Duration.between(startTime, Instant.now());
-		return (int) dur.getSeconds();
+	public double getSecondsElapsed() {
+		if (ms_elapsed == 0) return 0;
+		ms_elapsed += DELTA_TIME_MS;
+		return ms_elapsed/1000.0;
 	}
 }

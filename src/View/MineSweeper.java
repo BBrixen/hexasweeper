@@ -34,6 +34,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import Controllers.MineSweeperController;
 
 @SuppressWarnings("deprecation")
@@ -42,6 +46,8 @@ public class MineSweeper extends Application implements Observer {
     // game constants
     public static final int ROWS = 25, COLS = 45;
     public static final int NUM_BOMBS = 200; // i have no clue if this is too many
+    private static ScheduledExecutorService executor = null;
+    public static final int DELTA_TIME_MS = 10;
 
     // gui constants
     private static final double SCREEN_WIDTH = Screen.getPrimary().getVisualBounds().getWidth();
@@ -104,10 +110,10 @@ public class MineSweeper extends Application implements Observer {
         buttonRow.getChildren().addAll(saveButton, loadButton);
         buttonRow.setPadding(new Insets(5, 15, 5, 40));
         
-        Text timer = createTimer(controller);
+//        Text timer = createTimer(controller);
         
         vBox = new VBox(15);
-        vBox.getChildren().addAll(timer, gridPane, buttonRow);
+        vBox.getChildren().addAll(gridPane, buttonRow);
         vBox.setPadding(new Insets(10,0,0,0));
         
         // creates the initial blank board
@@ -119,6 +125,10 @@ public class MineSweeper extends Application implements Observer {
         stage.setScene(scene);
         stage.setTitle("Mine Sweeper");
         stage.show();
+        stage.setOnCloseRequest(e -> {
+                if (executor != null)
+                    executor.shutdown();
+        });
     }
 
     /**
@@ -284,6 +294,7 @@ public class MineSweeper extends Application implements Observer {
      * when the game is over.
      */
     public void displayGameOver(MineSweeperTile[][] board) {
+        executor.shutdown();
     	String msg = "YOU WIN!!";
     	Paint p = Color.GREEN;
     	if (!controller.win()) { // checks with the controller if the player didn't win
@@ -356,13 +367,11 @@ public class MineSweeper extends Application implements Observer {
     	Text timer = new Text();
     	timer.setFont(MAIN_FONT);
 
-    	Thread timeUpdate = new Thread( () -> {
-    		while (true) {
-    			timer.setText("Time: "+ String.valueOf(controller.getSecondsElapsed()));
-    		}
-    	});
-    	timeUpdate.start();
+        executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(() -> {
+            timer.setText("Time: "+ controller.getSecondsElapsed());
+        }, 0, DELTA_TIME_MS, TimeUnit.MILLISECONDS);
+
     	return timer;
-    	
     }
 }
