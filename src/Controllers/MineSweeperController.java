@@ -106,9 +106,9 @@ public class MineSweeperController implements Serializable {
 	}
 
 	/**
-	 * Make sure the tiles around this tile are not bombs
-	 * If they are, mark them as not guessed
-	 * NOTE TO ERIC: I (bennett) do not actually know what this is supposed to do, maybe update the javadoc here
+	 * This method reveals all tiles adjacent to a zero tile.
+	 * This method will continue to be called by updateTileStatus() until all chained
+	 * zero tiles are revealed and all tiles that are adjacent to that chain.
 	 * @param row - the row of the tile to check
 	 * @param col - the col of the tile to check
 	 */
