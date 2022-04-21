@@ -1,6 +1,8 @@
 package View;
 
 import Models.MineSweeperTile;
+import javafx.animation.RotateTransition;
+import javafx.animation.ScaleTransition;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -10,6 +12,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import javafx.stage.Screen;
 import static Utils.GUESS_STATUS.FLAGGED;
 import static Utils.GUESS_STATUS.GUESSED;
@@ -162,7 +165,37 @@ public class MineSweeper extends Application implements Observer {
                     labelGrid[row][col].setText(""+board[row][col].getMineCount());
                     rectGrid[row][col].setFill(MINE_COUNT_TO_COLOR.get(board[row][col].getMineCount()));
                 }
+                if (board[row][col].getStatus().getColor() == Color.WHITE) {
+                	animateTiles(row, col);
+        		}
+                
+                if (board[row][col].getStatus().getColor() == Color.BLACK) {
+                	animateBombs(row, col);
+                }
             }
+	}
+
+	private void animateBombs(int row, int col) {
+		rectGrid[row][col].toFront();
+    	ScaleTransition big = new ScaleTransition(Duration.millis(400), rectGrid[row][col]);
+    	RotateTransition rt = new RotateTransition(Duration.millis(1000), rectGrid[row][col]);
+        rt.setByAngle(360);
+        rt.setCycleCount(1);
+        big.setByX(.2f);
+    	big.setByY(.2f);
+    	big.setCycleCount(1);
+    	rectGrid[row][col].toFront();
+    	big.play();
+    	rt.play();
+	}
+
+	private void animateTiles(int row, int col) {
+		ScaleTransition big = new ScaleTransition(Duration.millis(300), rectGrid[row][col]);
+    	big.setByX(.1f);
+    	big.setByY(.1f);
+    	big.setAutoReverse(true);
+    	big.setCycleCount(2);
+    	big.play();	
 	}
 
 	/**
@@ -187,6 +220,7 @@ public class MineSweeper extends Application implements Observer {
             rectGrid[row][col].setFill(Color.WHITE);
             if (i >= 0 && i < msg.length) {
             	labelGrid[row][col].setText(msg[i]);
+            	labelGrid[row][col].toFront();
             }
             i++;
         }
