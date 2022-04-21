@@ -1,5 +1,6 @@
 package Models;
 
+import java.io.Serializable;
 import java.util.*; // TODO: dont import *
 import Utils.GUESS_STATUS;
 import static View.MineSweeper.COLS;
@@ -7,10 +8,10 @@ import static View.MineSweeper.NUM_BOMBS;
 import static View.MineSweeper.ROWS;
 
 @SuppressWarnings("deprecation")
-public class MineSweeperBoard extends Observable {
+public class MineSweeperBoard extends Observable implements Serializable {
 
 	// the minesweeper board as a 2D array
-	private final MineSweeperTile[][] board;
+	private MineSweeperTile[][] board;
 	private final List<Observer> observers; // do we need a list?
 	
 	/**
@@ -64,6 +65,13 @@ public class MineSweeperBoard extends Observable {
 	 */
 	public MineSweeperTile[][] getBoard() {
 		return board;
+	}
+	
+	/**
+	 * Sets the board to an existing board, from a loaded file.
+	 */
+	public void setBoard(MineSweeperTile[][] newBoard) {
+		board = newBoard;
 	}
 	
 	/**

@@ -3,9 +3,10 @@ package Models;
 import Utils.GUESS_STATUS;
 import javafx.util.Pair;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class MineSweeperTile {
+public class MineSweeperTile implements Serializable{
 
     private GUESS_STATUS status;
     private int mineCount; // the number of mines around this

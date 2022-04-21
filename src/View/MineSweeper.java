@@ -14,16 +14,22 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import static Utils.GUESS_STATUS.FLAGGED;
 import static Utils.GUESS_STATUS.GUESSED;
 import static Utils.GUESS_STATUS.UNGUESSED;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
@@ -43,7 +49,7 @@ public class MineSweeper extends Application implements Observer {
     private static final double HEX_RADIUS = Math.min(SCREEN_HEIGHT/(ROWS*2), 30), HEX_SIZE = Math.sqrt(HEX_RADIUS * HEX_RADIUS * 0.75);
     private static final int
             SCENE_WIDTH = (int) (1.75*(COLS + 2) * HEX_RADIUS),
-            SCENE_HEIGHT = (int) (1.5*(ROWS + 2) * HEX_RADIUS);
+            SCENE_HEIGHT = (int) (1.5*(ROWS + 3) * HEX_RADIUS);
     private static final double HEX_HEIGHT = 2* HEX_RADIUS, HEX_WIDTH = 2*HEX_SIZE;
     private static final double MAIN_FONT_SIZE = HEX_HEIGHT/2.5;
     private static final Font MAIN_FONT = new Font("Helvetica", MAIN_FONT_SIZE);
@@ -58,6 +64,11 @@ public class MineSweeper extends Application implements Observer {
     private Label[][] labelGrid;
     private AnchorPane gridPane;
     private Stage stage;
+    
+    private VBox vBox;
+    private HBox buttonRow;
+    private Button saveButton;
+    private Button loadButton;
     
     // controller variable
     private MineSweeperController controller;
@@ -83,17 +94,73 @@ public class MineSweeper extends Application implements Observer {
         labelGrid = new Label[ROWS][COLS];
         gridPane = new AnchorPane();
 
+        saveButton = new Button("Save");        
+        loadButton = new Button("Load");
+        
+        setButtonActions();
+
+        buttonRow = new HBox(15);
+        buttonRow.getChildren().addAll(saveButton, loadButton);
+        buttonRow.setPadding(new Insets(5, 15, 5, 40));
+        
+        vBox = new VBox(15);
+        vBox.getChildren().addAll(gridPane, buttonRow);
+        
         // creates the initial blank board
         createBoard(controller.getBoard());
 
         BorderPane pane = new BorderPane();
-        pane.setCenter(gridPane);
+        pane.setCenter(vBox);
         Scene scene = new Scene(pane, SCENE_WIDTH, SCENE_HEIGHT);
         stage.setScene(scene);
         stage.setTitle("Mine Sweeper");
         stage.show();
     }
 
+    /**
+     * Sets the functionality of the buttons on the screen.
+     */
+    public void setButtonActions() {
+        saveButton.setOnAction(e -> {
+        	if (!controller.isGameOver()) {
+	        	// Should stop the clock when the user clicks save, so as not to rush them
+	        	
+        		FileChooser fileChooser = new FileChooser();
+        		 
+                //Set extension filter for text files
+                FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
+                fileChooser.getExtensionFilters().add(extFilter);
+     
+                //Show save file dialog
+                File f = fileChooser.showSaveDialog(stage);
+     
+                if (f != null) {
+                	try {
+						controller.saveGame(f);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+	        	}
+                }
+        });
+    	
+        loadButton.setOnAction(e -> {
+        	// Unlike save, you should be able to load a game even after having ended another one
+        	
+        	FileChooser chooser = new FileChooser();
+        	
+        		File f = chooser.showOpenDialog(stage);
+        		if (f != null) {
+        		try {
+					controller.loadGame(f);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				} catch (ClassNotFoundException e1) {
+					e1.printStackTrace();
+				}
+        		}
+        });
+    }
 
     /**
      *  Creates the blank game board of ROW x COL hexagons
