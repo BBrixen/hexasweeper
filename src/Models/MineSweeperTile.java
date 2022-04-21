@@ -9,16 +9,13 @@ public class MineSweeperTile {
     private final int row, col;
     // indicates if the tile contains a bomb,
     // and whether or not the number of bombs around it should be shown or hidden
-    private boolean bomb, displayNum;
+    private boolean bomb;
 
     public MineSweeperTile(int row, int col, GUESS_STATUS status) {
     	this.row = row;
     	this.col = col;
     	this.status = status;
-        displayNum = false;
         mineCount = 0;
-
-        // now we calculate the number of bombs around this tile
     }
     
     public MineSweeperTile(int row, int col) {
@@ -36,15 +33,13 @@ public class MineSweeperTile {
 	 */
     public void updateCount(MineSweeperTile[][] board) {
     	int[][] adj = {{0, -1},{0, 1},{1, 0},{1, 1},{-1, 0},{-1, 1}};
-    	int[][] adjEven = {{0, -1},{0, 1},{1, -1},{1, 0},{-1, -1},{-1, 0}};
-		if (row%2 == 0) 
-			adj = adjEven;
-		for (int i = 0; i < adj.length; i++) {
-			if (row+adj[i][0] >= 0 && row+adj[i][0] < board.length && col+adj[i][1] >= 0 && col+adj[i][1] < board.length) {
-				if (board[row+adj[i][0]][col+adj[i][1]].isBomb()) {
-				board[row][col].addMineCount();}
-			}
-		}
+		if (row%2 == 0)
+            adj = new int[][]{{0, -1}, {0, 1}, {1, -1}, {1, 0}, {-1, -1}, {-1, 0}};
+
+        for (int[] ints : adj)
+            if (row + ints[0] >= 0 && row + ints[0] < board.length && col + ints[1] >= 0
+                    && col + ints[1] < board.length && board[row + ints[0]][col + ints[1]].isBomb())
+                board[row][col].addMineCount();
     }
 
 	public void setStatus(GUESS_STATUS status) {
@@ -55,38 +50,15 @@ public class MineSweeperTile {
     	return status;
     }
     
-    public int getRow() {
-    	return row;
-    }
-    
-    public int getCol() {
-    	return col;
-    }
-    
     public boolean isBomb() {
     	return bomb;
     }
     
     public void setBomb() {
     	bomb = true;
-        mineCount = 0; // 0 means it wont be displayed
-        displayNum = false;
+        mineCount = 0; // 0 because we dont count the number of bombs around other bombs
     }
 
-    public boolean isDisplayNum() {
-        return displayNum;
-    }
-
-    public void setDisplayNum(boolean displayNum) {
-        this.displayNum = displayNum;
-    }
-
-    public String getMineLabel() {
-        // TODO: this conditional is turned off for testing, turn it back on later for proper minesweeper displays
-//        if (! displayNum || mineCount == 0)
-//            return ""; // we dont want to display it
-        return ""+mineCount;
-    }
     public int getMineCount() {
     	return mineCount;
     }
