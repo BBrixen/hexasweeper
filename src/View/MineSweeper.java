@@ -23,14 +23,14 @@ import Controllers.MineSweeperController;
 public class MineSweeper extends Application implements Observer {
 
     // game constants
-    public static final int ROWS = 20, COLS = 20;
-    public static final int NUM_BOMBS = 80; // i have no clue if this is too many
+    public static final int ROWS = 15, COLS = 15;
+    public static final int NUM_BOMBS = 30; // i have no clue if this is too many
 
     // gui constants
     private static final double SCREEN_WIDTH = Screen.getPrimary().getVisualBounds().getWidth();
     private static final double SCREEN_HEIGHT = Screen.getPrimary().getVisualBounds().getHeight();
     
-    private static final double HEX_RADIUS = Math.min(SCREEN_HEIGHT/40, 30), HEX_SIZE = Math.sqrt(HEX_RADIUS * HEX_RADIUS * 0.75);
+    private static final double HEX_RADIUS = Math.min(SCREEN_HEIGHT/(ROWS*2), 30), HEX_SIZE = Math.sqrt(HEX_RADIUS * HEX_RADIUS * 0.75);
     private static final int
             SCENE_WIDTH = (int) (1.75*(COLS + 2) * HEX_RADIUS),
             SCENE_HEIGHT = (int) (1.5*(ROWS + 2) * HEX_RADIUS);
@@ -107,22 +107,21 @@ public class MineSweeper extends Application implements Observer {
 
         // TODO: compact these into the same event
         hex.setOnMousePressed(e -> {
-        	
-            if (e.isPrimaryButtonDown()) {
+            if (e.getClickCount() == 2) {
+                controller.updateTilesAround(row, col, GUESSED);
+            } else if (e.isPrimaryButtonDown()) {
     			controller.updateTileStatus(row, col, GUESSED);
-    			}
-
-			else if (e.isSecondaryButtonDown()) {
+            } else if (e.isSecondaryButtonDown()) {
     			controller.updateTileStatus(row, col, FLAGGED);
-    			}
+            }
         });
 
         label.setOnMousePressed(e -> {
-            if (e.isPrimaryButtonDown()) {
+            if (e.getClickCount() == 2) {
+                controller.updateTilesAround(row, col, GUESSED);
+            } else if (e.isPrimaryButtonDown()) {
                 controller.updateTileStatus(row, col, GUESSED);
-                }
-
-            else if (e.isSecondaryButtonDown()) {
+            } else if (e.isSecondaryButtonDown()) {
                 controller.updateTileStatus(row, col, FLAGGED);
             }
         });

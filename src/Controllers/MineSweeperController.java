@@ -38,6 +38,8 @@ public class MineSweeperController {
 	 * @param status is an enum either GUESSED or FLAGGED, depending on the mouse button clicked.
 	 */
 	public void updateTileStatus(int row, int col, GUESS_STATUS status) {
+		if (board != null && (row >= board.length || row < 0 || col >= board[row].length || col < 0)) return;
+
 		if (!gameOver) { // first determines if the game is over
 			board = model.getBoard(); // gets the board from the model
 			
@@ -78,10 +80,21 @@ public class MineSweeperController {
 			 * Checks if the game is over by checking the number of player clicks
 			 * that have not been bombs or flagging clicks.
 			 */
-			if (numberOfGuesses == (board.length*board.length) - NUM_BOMBS) {
+			if (numberOfGuesses == (board.length*board[0].length) - NUM_BOMBS) {
 				showAllBombs();
 				gameIsOver();
 			}
+		}
+	}
+
+	public void updateTilesAround(int row, int col, GUESS_STATUS status) {
+		// TODO: make this better
+		int[][] adj = {{0, -1},{0, 1},{1, 0},{1, 1},{-1, 0},{-1, 1}};
+		int[][] adjEven = {{0, -1},{0, 1},{1, -1},{1, 0},{-1, -1},{-1, 0}};
+		if (row%2 == 0)
+			adj = adjEven;
+		for (int i = 0; i < adj.length; i++) {
+			updateTileStatus(row + adj[i][0], col + adj[i][1], status);
 		}
 	}
 	
@@ -111,7 +124,6 @@ public class MineSweeperController {
 			if (!(board[r+a][c+b].isBomb())){
 				updateTileStatus(r+a, c+b, GUESS_STATUS.GUESSED);}
 		}
-		
 	}
 
 	/**
