@@ -325,6 +325,7 @@ public class MineSweeper extends Application implements Observer {
 		label.setFont(Font.font("Helvetica", 50));
 		label.setMaxWidth(Double.MAX_VALUE);
 		label.setAlignment(Pos.BOTTOM_CENTER);
+		label.setPadding(new Insets(20, 0, 0, 0));
 		
 		Button btn = new Button("Play again");
 		
