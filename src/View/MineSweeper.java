@@ -166,28 +166,36 @@ public class MineSweeper extends Application implements Observer {
                     rectGrid[row][col].setFill(MINE_COUNT_TO_COLOR.get(board[row][col].getMineCount()));
                 }
                 if (board[row][col].getStatus().getColor() == Color.WHITE) {
-                	ScaleTransition big = new ScaleTransition(Duration.millis(300), rectGrid[row][col]);
-                	big.setByX(.1f);
-                	big.setByY(.1f);
-                	big.setAutoReverse(true);
-                	big.setCycleCount(2);
-                	big.play();
+                	animateTiles(row, col);
         		}
                 
                 if (board[row][col].getStatus().getColor() == Color.BLACK) {
-                	rectGrid[row][col].toFront();
-                	ScaleTransition big = new ScaleTransition(Duration.millis(400), rectGrid[row][col]);
-                	RotateTransition rt = new RotateTransition(Duration.millis(1000), rectGrid[row][col]);
-                    rt.setByAngle(360);
-                    rt.setCycleCount(1);
-                    big.setByX(.2f);
-                	big.setByY(.2f);
-                	big.setCycleCount(1);
-                	rectGrid[row][col].toFront();
-                	big.play();
-                	rt.play();
+                	animateBombs(row, col);
                 }
             }
+	}
+
+	private void animateBombs(int row, int col) {
+		rectGrid[row][col].toFront();
+    	ScaleTransition big = new ScaleTransition(Duration.millis(400), rectGrid[row][col]);
+    	RotateTransition rt = new RotateTransition(Duration.millis(1000), rectGrid[row][col]);
+        rt.setByAngle(360);
+        rt.setCycleCount(1);
+        big.setByX(.2f);
+    	big.setByY(.2f);
+    	big.setCycleCount(1);
+    	rectGrid[row][col].toFront();
+    	big.play();
+    	rt.play();
+	}
+
+	private void animateTiles(int row, int col) {
+		ScaleTransition big = new ScaleTransition(Duration.millis(300), rectGrid[row][col]);
+    	big.setByX(.1f);
+    	big.setByY(.1f);
+    	big.setAutoReverse(true);
+    	big.setCycleCount(2);
+    	big.play();	
 	}
 
 	/**
