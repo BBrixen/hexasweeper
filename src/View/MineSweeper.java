@@ -319,7 +319,8 @@ public class MineSweeper extends Application implements Observer {
 
     	Stage popUp = new Stage();
 		Label label = new Label();
-		
+		Button btn = new Button("Play again");
+		BorderPane root = new BorderPane();
 		label.setText(msg);
 		label.setTextFill(Color.WHITE);
 		label.setFont(Font.font("Helvetica", 50));
@@ -327,11 +328,10 @@ public class MineSweeper extends Application implements Observer {
 		label.setAlignment(Pos.BOTTOM_CENTER);
 		label.setPadding(new Insets(20, 0, 0, 0));
 		
-		Button btn = new Button("Play again");
-		
-		
-		// play again scene (might want to make this a new function)
-		BorderPane root = new BorderPane();
+		playAgainPop(root, label, btn, popUp, p);
+    }
+   
+    private void playAgainPop(BorderPane root, Label label, Button btn, Stage popUp, Paint p) {
 		root.setBackground(
 				new Background(new BackgroundFill(p, new CornerRadii(6.0), Insets.EMPTY)));
 		root.setTop(label);
@@ -350,9 +350,10 @@ public class MineSweeper extends Application implements Observer {
 			this.start(new Stage());
 			popUp.close();
         });
-    }
-   
-    public void chooseDiff() {
+		
+	}
+
+	public void chooseDiff() {
     	Stage diffPop = new Stage();
 		Label label = new Label();
 	
@@ -367,9 +368,15 @@ public class MineSweeper extends Application implements Observer {
 		Button normal = new Button("Normal");
 		Button hard = new Button("Hard");
 		Button veryHard = new Button("Very Hard");
-		
 		HBox buttonBox = new HBox();
 		buttonBox.getChildren().addAll(veryEasy, easy, normal, hard, veryHard);
+		
+		diffPopUp(buttonBox, label, diffPop);
+		diffListener(veryEasy, easy, normal, hard, veryHard, diffPop);
+    }
+    
+	private void diffPopUp(HBox buttonBox, Label label, Stage diffPop) {
+		
 		buttonBox.setPadding(new Insets(10, 10, 10, 10));
 		buttonBox.setAlignment(Pos.CENTER);
 		
@@ -386,8 +393,10 @@ public class MineSweeper extends Application implements Observer {
 
 		diffPop.setScene(diffScene);
 		diffPop.setTitle("New Game");
-		diffPop.show();
-		
+		diffPop.show();		
+	}
+	
+    private void diffListener(Button veryEasy, Button easy, Button normal, Button hard, Button veryHard, Stage diffPop) {
 		veryEasy.setOnMousePressed(me -> {
 			NUM_BOMBS = VERY_EASY_DIFF;
 			diffPop.close();
@@ -408,10 +417,10 @@ public class MineSweeper extends Application implements Observer {
 			NUM_BOMBS = VERY_HARD_DIFF;
 			diffPop.close();
         });
-    }
-    
+	}
 
-    /**
+
+	/**
      * This inner class creates a hexagon which can be places on the board with an x and y position
      * We calculate this x and y position inside the addHex method
      * This generates a new polygon with the needed hex points
