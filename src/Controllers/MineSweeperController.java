@@ -192,6 +192,7 @@ public class MineSweeperController implements Serializable {
 		oos.writeInt(this.numberOfGuesses);
 		oos.writeBoolean(this.win);
 		oos.writeObject(this.board);
+		oos.writeInt((int)getSecondsElapsed());
 		
 		oos.close();
 	}
@@ -209,6 +210,7 @@ public class MineSweeperController implements Serializable {
 		this.numberOfGuesses = ois.readInt();
 		this.win = ois.readBoolean();
 		this.board = (MineSweeperTile[][]) ois.readObject();
+		model.setSecondsElapsed(ois.readInt());
 		
 		ois.close();
 		
@@ -223,4 +225,5 @@ public class MineSweeperController implements Serializable {
 	public double getSecondsElapsed() {
 		return model.getSecondsElapsed();
 	}
+	
 }

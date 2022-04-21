@@ -115,7 +115,7 @@ public class MineSweeper extends Application implements Observer {
         buttonRow.setAlignment(Pos.CENTER);
         
         Text timer = createTimer();
-        
+                
         vBox = new VBox(15);
         vBox.getChildren().addAll(timer, gridPane, buttonRow);
         vBox.setPadding(new Insets(10,0,0,0));

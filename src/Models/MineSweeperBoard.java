@@ -121,4 +121,12 @@ public class MineSweeperBoard extends Observable implements Serializable {
 		ms_elapsed += DELTA_TIME_MS;
 		return ms_elapsed/1000.0;
 	}
+	
+	/**
+	 * Calculates the number of seconds that have elapsed in the game
+	 * @return the number of seconds elapsed
+	 */
+	public void setSecondsElapsed(int elapsed) {
+		ms_elapsed = (int) (elapsed*1000.0);
+	}
 }
