@@ -199,13 +199,14 @@ public class MineSweeper extends Application implements Observer {
             } else if (e.isSecondaryButtonDown()) {
     			controller.updateTileStatus(row, col, FLAGGED);
             }
-            if (board[row][col].getStatus().getColor() == Color.WHITE) {
-                animateTiles(row, col);
-            }
-
-            if (board[row][col].getStatus().getColor() == Color.BLACK) {
-                animateBombs(row, col);
-            }
+            if (board[row][col] != null)
+	            if (board[row][col].getStatus().getColor() == Color.WHITE) {
+	                animateTiles(row, col);
+	            }
+            if (board[row][col] != null)
+	            if (board[row][col].getStatus().getColor() == Color.BLACK) {
+	                animateBombs(row, col);
+	            }
         });
 
         label.setOnMousePressed(e -> {
