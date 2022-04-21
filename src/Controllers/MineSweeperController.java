@@ -51,8 +51,10 @@ public class MineSweeperController implements Serializable {
 		//determines if the board is still null (indicates that this is the player's first click of the game.
 
 		if (board[row][col] == null) {
-			model.createBoard(row, col); // creates the board and places all bombs
-			updateTileStatus(row, col, status); // updates the board with the player's click
+			if (!(status.equals(GUESS_STATUS.FLAGGED))) {
+				model.createBoard(row, col); // creates the board and places all bombs
+				updateTileStatus(row, col, status); // updates the board with the player's click
+				}
 		}
 
 		/* If the tile is already flagged and the player right clicks again, the tile
@@ -96,10 +98,11 @@ public class MineSweeperController implements Serializable {
 	 * @param col - the col of the tile updating its neihbors
 	 */
 	public void updateTilesAround(int row, int col) {
-		for (Pair<Integer, Integer> coord : this.model.getBoard()[row][col].getAdjacentTiles()) {
-			if (this.model.getBoard()[row][col].getStatus() != GUESS_STATUS.FLAGGED)
-				updateTileStatus(coord.getKey(), coord.getValue(), GUESS_STATUS.GUESSED);
-		}
+		if (this.model.getBoard()[row][col] != null)
+			for (Pair<Integer, Integer> coord : this.model.getBoard()[row][col].getAdjacentTiles()) {
+				if (this.model.getBoard()[row][col].getStatus() != GUESS_STATUS.FLAGGED)
+					updateTileStatus(coord.getKey(), coord.getValue(), GUESS_STATUS.GUESSED);
+			}
 	}
 
 	/**
