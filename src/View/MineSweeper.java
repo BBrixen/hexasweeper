@@ -59,6 +59,7 @@ public class MineSweeper extends Application implements Observer {
     private Hexagon[][] rectGrid;
     private Label[][] labelGrid;
     private AnchorPane gridPane;
+    private Stage stage;
     
     // controller variable
     private MineSweeperController controller;
@@ -76,6 +77,7 @@ public class MineSweeper extends Application implements Observer {
 
     @Override
     public void start(Stage stage) {
+    	this.stage = stage;
     	// initialize game
         controller = new MineSweeperController();
         controller.addObserver(this); // add as observer for model (MineSweeperBoard)
@@ -246,7 +248,10 @@ public class MineSweeper extends Application implements Observer {
 		popUp.show();
 		
 		btn.setOnMousePressed(me -> {
+			stage.close();
 			this.start(new Stage());
+			popUp.close();
+			
 		});
         }
     
