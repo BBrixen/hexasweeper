@@ -14,6 +14,7 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -222,17 +223,31 @@ public class MineSweeper extends Application implements Observer {
 		
 		label.setText(msg);
 		label.setTextFill(Color.WHITE);
-		label.setBackground(
-				new Background(new BackgroundFill(p, new CornerRadii(6.0), Insets.EMPTY)));
 		label.setFont(Font.font("Helvetica", 50));
 		label.setMaxWidth(Double.MAX_VALUE);
-		label.setAlignment(Pos.CENTER);
+		label.setAlignment(Pos.BOTTOM_CENTER);
 		
-		Scene popScene = new Scene(label, 400, 90);
+		Button btn = new Button();
+		btn.setText("Play again");
+		
+		
+		BorderPane root = new BorderPane();
+		root.setBackground(
+				new Background(new BackgroundFill(p, new CornerRadii(6.0), Insets.EMPTY)));
+		root.setTop(label);
+		root.setBottom(btn);
+		root.setAlignment(label, Pos.CENTER);
+		root.setAlignment(btn, Pos.CENTER);
+		
+		Scene popScene = new Scene(root, 400, 120);
 
 		popUp.setScene(popScene);
 		popUp.setTitle("Game Over");
 		popUp.show();
+		
+		btn.setOnMousePressed(me -> {
+			this.start(new Stage());
+		});
         }
     
 
