@@ -20,6 +20,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.stage.FileChooser;
@@ -49,7 +50,7 @@ public class MineSweeper extends Application implements Observer {
     private static final double HEX_RADIUS = Math.min(SCREEN_HEIGHT/(ROWS*2), 30), HEX_SIZE = Math.sqrt(HEX_RADIUS * HEX_RADIUS * 0.75);
     private static final int
             SCENE_WIDTH = (int) (1.75*(COLS + 2) * HEX_RADIUS),
-            SCENE_HEIGHT = (int) (1.5*(ROWS + 3) * HEX_RADIUS);
+            SCENE_HEIGHT = (int) (1.5*(ROWS + 5) * HEX_RADIUS);
     private static final double HEX_HEIGHT = 2* HEX_RADIUS, HEX_WIDTH = 2*HEX_SIZE;
     private static final double MAIN_FONT_SIZE = HEX_HEIGHT/2.5;
     private static final Font MAIN_FONT = new Font("Helvetica", MAIN_FONT_SIZE);
@@ -103,8 +104,11 @@ public class MineSweeper extends Application implements Observer {
         buttonRow.getChildren().addAll(saveButton, loadButton);
         buttonRow.setPadding(new Insets(5, 15, 5, 40));
         
+        Text timer = createTimer(controller);
+        
         vBox = new VBox(15);
-        vBox.getChildren().addAll(gridPane, buttonRow);
+        vBox.getChildren().addAll(timer, gridPane, buttonRow);
+        vBox.setPadding(new Insets(10,0,0,0));
         
         // creates the initial blank board
         createBoard(controller.getBoard());
@@ -341,5 +345,24 @@ public class MineSweeper extends Application implements Observer {
 
             setStroke(Color.BLACK);
         }
+    }
+    /**
+     * TODO: Change from while true to a Scheduled Executor
+     * Creates a timer that continually updates 
+     * @param controller
+     * @return
+     */
+    private Text createTimer(MineSweeperController controller) {
+    	Text timer = new Text();
+    	timer.setFont(MAIN_FONT);
+
+    	Thread timeUpdate = new Thread( () -> {
+    		while (true) {
+    			timer.setText("Time: "+ String.valueOf(controller.getSecondsElapsed()));
+    		}
+    	});
+    	timeUpdate.start();
+    	return timer;
+    	
     }
 }

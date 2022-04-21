@@ -214,4 +214,13 @@ public class MineSweeperController implements Serializable {
 		
 		model.notifyObservers();
 	}
+
+	/**
+	 * Gets the number of seconds elapsed in the game
+	 * from the model
+	 * @return The number of seconds that the game has been going for
+	 */
+	public int getSecondsElapsed() {
+		return model.getSecondsElapsed();
+	}
 }
