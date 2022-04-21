@@ -1,9 +1,6 @@
 package Models;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.*; // TODO: dont import *
 import Utils.GUESS_STATUS;
 import static View.MineSweeper.COLS;
 import static View.MineSweeper.NUM_BOMBS;

@@ -40,11 +40,20 @@ public class MineSweeperTile {
             int col = pair.getValue();
 
             if (row >= 0 && row < board.length && col  >= 0
-                    && col < board.length && board[row][col].isBomb())
+                    && col < board[row].length && board[row][col].isBomb())
                 board[this.row][this.col].addMineCount();
         }
     }
 
+    /**
+     * This gets the coordinates of all the tile adjacent to this current tile
+     * These coordinates CAN be outside the bounds of the board,
+     * so it is best to always check whether or not they are in bounds or not
+     *
+     * TODO: maybe make this check the bounds of the board first, that way we dont have to check each other time.
+     *  idk this might be needed tho
+     * @return - a list of (x, y) coordinates which are the sourrounding tiles
+     */
     public ArrayList<Pair<Integer, Integer>> getAdjacentTiles() {
         // creating variables
         ArrayList<Pair<Integer, Integer>> adjacents = new ArrayList<>();

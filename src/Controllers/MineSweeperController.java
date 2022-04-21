@@ -5,7 +5,6 @@ import Models.MineSweeperBoard;
 import Models.MineSweeperTile;
 import Utils.GUESS_STATUS;
 import javafx.util.Pair;
-
 import static View.MineSweeper.COLS;
 import static View.MineSweeper.NUM_BOMBS;
 import static View.MineSweeper.ROWS;
@@ -71,8 +70,8 @@ public class MineSweeperController {
 				if (board[row][col].getMineCount() == 0)
 					checkAdjacent(row, col);
 				numberOfGuesses++;
-				}
 			}
+		}
 		/*
 		 * Checks if the game is over by checking the number of player clicks
 		 * that have not been bombs or flagging clicks.
@@ -91,7 +90,8 @@ public class MineSweeperController {
 	 */
 	public void updateTilesAround(int row, int col) {
 		for (Pair<Integer, Integer> coord : this.model.getBoard()[row][col].getAdjacentTiles()) {
-			updateTileStatus(coord.getKey(), coord.getValue(), GUESS_STATUS.GUESSED);
+			if (this.model.getBoard()[row][col].getStatus() != GUESS_STATUS.FLAGGED)
+				updateTileStatus(coord.getKey(), coord.getValue(), GUESS_STATUS.GUESSED);
 		}
 	}
 
@@ -123,7 +123,7 @@ public class MineSweeperController {
 		MineSweeperTile[][] board = model.getBoard();
 
 		for (int row = 0; row < board.length; row++) {
-            for (int col = 0; col < board.length; col++) {
+            for (int col = 0; col < board[row].length; col++) {
             	if (board[row][col].isBomb())
             		// if the tile is a bomb, set the color of the tile to a bomb
 					model.updateTileStatus(row, col, GUESS_STATUS.BOMB);

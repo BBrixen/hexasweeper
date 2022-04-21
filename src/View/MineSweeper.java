@@ -23,8 +23,8 @@ import Controllers.MineSweeperController;
 public class MineSweeper extends Application implements Observer {
 
     // game constants
-    public static final int ROWS = 15, COLS = 15;
-    public static final int NUM_BOMBS = 30; // i have no clue if this is too many
+    public static final int ROWS = 15, COLS = 30;
+    public static final int NUM_BOMBS = 60; // i have no clue if this is too many
 
     // gui constants
     private static final double SCREEN_WIDTH = Screen.getPrimary().getVisualBounds().getWidth();
