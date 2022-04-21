@@ -4,11 +4,19 @@ import Models.MineSweeperTile;
 import javafx.animation.RotateTransition;
 import javafx.animation.ScaleTransition;
 import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -203,28 +211,30 @@ public class MineSweeper extends Application implements Observer {
      * when the game is over.
      */
     public void displayGameOver() {
-    	String[] msg = "YOU WIN!!".split("");
-    	if (!controller.win()) // checks with the controller if the player didn't win
-    		msg = "YOU LOSE!!".split("");
+    	String msg = "YOU WIN!!";
+    	Paint p = Color.GREEN;
+    	if (!controller.win()) { // checks with the controller if the player didn't win
+    		msg = "YOU LOSE!";
+    		p = Color.RED;
+    		}
+    	Stage popUp = new Stage();
+		Label label = new Label();
+		
+		label.setText(msg);
+		label.setTextFill(Color.WHITE);
+		label.setBackground(
+				new Background(new BackgroundFill(p, new CornerRadii(6.0), Insets.EMPTY)));
+		label.setFont(Font.font("Helvetica", 50));
+		label.setMaxWidth(Double.MAX_VALUE);
+		label.setAlignment(Pos.CENTER);
+		
+		Scene popScene = new Scene(label, 400, 90);
 
-        for (int r = 0; r < ROWS; r++) {
-            for (int c = 0; c < COLS; c++) {
-                labelGrid[r][c].setText(""); // clear the text
-            }
+		popUp.setScene(popScene);
+		popUp.setTitle("Game Over");
+		popUp.show();
         }
-
-        // creating lose message
-        int row = ROWS/2;
-        int i = 0;
-        for (int col = (COLS/4); col < COLS*((double)3/4); col++) {
-            rectGrid[row][col].setFill(Color.WHITE);
-            if (i >= 0 && i < msg.length) {
-            	labelGrid[row][col].setText(msg[i]);
-            	labelGrid[row][col].toFront();
-            }
-            i++;
-        }
-    }
+    
 
     /**
      * This inner class creates a hexagon which can be places on the board with an x and y position
