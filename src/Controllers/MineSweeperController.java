@@ -163,4 +163,8 @@ public class MineSweeperController {
 	public boolean win() {
 		return win;
 	}
+
+	public MineSweeperTile[][] getBoard() {
+		return this.model.getBoard();
+	}
 }

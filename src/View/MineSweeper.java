@@ -14,8 +14,6 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polygon;
@@ -35,8 +33,8 @@ import Controllers.MineSweeperController;
 public class MineSweeper extends Application implements Observer {
 
     // game constants
-    public static final int ROWS = 15, COLS = 30;
-    public static final int NUM_BOMBS = 60; // i have no clue if this is too many
+    public static final int ROWS = 25, COLS = 45;
+    public static final int NUM_BOMBS = 200; // i have no clue if this is too many
 
     // gui constants
     private static final double SCREEN_WIDTH = Screen.getPrimary().getVisualBounds().getWidth();
@@ -86,7 +84,7 @@ public class MineSweeper extends Application implements Observer {
         gridPane = new AnchorPane();
 
         // creates the initial blank board
-        createBoard();
+        createBoard(controller.getBoard());
 
         BorderPane pane = new BorderPane();
         pane.setCenter(gridPane);
@@ -100,10 +98,10 @@ public class MineSweeper extends Application implements Observer {
     /**
      *  Creates the blank game board of ROW x COL hexagons
      */
-    public void createBoard() {
+    public void createBoard(MineSweeperTile[][] board) {
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLS; col++) {
-                addHex(row, col);
+                addHex(row, col, board);
             }
         }
     }
@@ -114,7 +112,7 @@ public class MineSweeper extends Application implements Observer {
      * @param row is the y coord
      * @param col is the x coord
      */
-    private void addHex(int row, int col) {
+    private void addHex(int row, int col, MineSweeperTile[][] board) {
         double yCoord = (row+1) * HEX_HEIGHT * 0.75;
         double xCoord = (col+1) * HEX_WIDTH + ((row % 2) * HEX_SIZE);
         Hexagon hex = new Hexagon(xCoord, yCoord);
@@ -133,6 +131,13 @@ public class MineSweeper extends Application implements Observer {
     			controller.updateTileStatus(row, col, GUESSED);
             } else if (e.isSecondaryButtonDown()) {
     			controller.updateTileStatus(row, col, FLAGGED);
+            }
+            if (board[row][col].getStatus().getColor() == Color.WHITE) {
+                animateTiles(row, col);
+            }
+
+            if (board[row][col].getStatus().getColor() == Color.BLACK) {
+                animateBombs(row, col);
             }
         });
 
@@ -159,13 +164,13 @@ public class MineSweeper extends Application implements Observer {
      * @param arg   the MineSweeperTile[][] board from the model
      */
     public void update(Observable o, Object arg) {
+        MineSweeperTile[][] board = (MineSweeperTile[][]) arg;
         if (controller.isGameOver())  {// checks with Controller if game is over
-            displayGameOver(); // calls the method to display the game over msg if true
+            displayGameOver(board); // calls the method to display the game over msg if true
             return;
         }
 
         // if the game isn't over, all the tiles are updated according to their enum
-        MineSweeperTile[][] board = (MineSweeperTile[][]) arg;
         for (int row = 0; row < ROWS; row++)
             for (int col = 0; col < COLS; col++) {
 
@@ -175,13 +180,6 @@ public class MineSweeper extends Application implements Observer {
                 if (board[row][col].getMineCount() > 0 && board[row][col].getStatus().equals(GUESSED)) {
                     labelGrid[row][col].setText(""+board[row][col].getMineCount());
                     rectGrid[row][col].setFill(MINE_COUNT_TO_COLOR.get(board[row][col].getMineCount()));
-                }
-                if (board[row][col].getStatus().getColor() == Color.WHITE) {
-                	animateTiles(row, col);
-        		}
-                
-                if (board[row][col].getStatus().getColor() == Color.BLACK) {
-                	animateBombs(row, col);
                 }
             }
 	}
@@ -213,13 +211,14 @@ public class MineSweeper extends Application implements Observer {
      * This method displays the game over message in the middle of the board
      * when the game is over.
      */
-    public void displayGameOver() {
+    public void displayGameOver(MineSweeperTile[][] board) {
     	String msg = "YOU WIN!!";
     	Paint p = Color.GREEN;
     	if (!controller.win()) { // checks with the controller if the player didn't win
     		msg = "YOU LOSE!";
     		p = Color.RED;
-    		}
+        }
+
     	Stage popUp = new Stage();
 		Label label = new Label();
 		
@@ -232,7 +231,7 @@ public class MineSweeper extends Application implements Observer {
 		Button btn = new Button();
 		btn.setText("Play again");
 		
-		
+		// play again scene (might want to make this a new function)
 		BorderPane root = new BorderPane();
 		root.setBackground(
 				new Background(new BackgroundFill(p, new CornerRadii(6.0), Insets.EMPTY)));
@@ -251,9 +250,8 @@ public class MineSweeper extends Application implements Observer {
 			stage.close();
 			this.start(new Stage());
 			popUp.close();
-			
-		});
-        }
+        });
+    }
     
 
     /**
