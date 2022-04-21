@@ -4,6 +4,7 @@ import Models.MineSweeperTile;
 import javafx.animation.RotateTransition;
 import javafx.animation.ScaleTransition;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -110,10 +111,10 @@ public class MineSweeper extends Application implements Observer {
         buttonRow.getChildren().addAll(saveButton, loadButton);
         buttonRow.setPadding(new Insets(5, 15, 5, 40));
         
-//        Text timer = createTimer(controller);
+        Text timer = createTimer();
         
         vBox = new VBox(15);
-        vBox.getChildren().addAll(gridPane, buttonRow);
+        vBox.getChildren().addAll(timer, gridPane, buttonRow);
         vBox.setPadding(new Insets(10,0,0,0));
         
         // creates the initial blank board
@@ -165,14 +166,12 @@ public class MineSweeper extends Application implements Observer {
         	
         		File f = chooser.showOpenDialog(stage);
         		if (f != null) {
-        		try {
-					controller.loadGame(f);
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				} catch (ClassNotFoundException e1) {
-					e1.printStackTrace();
-				}
-        		}
+                    try {
+                        controller.loadGame(f);
+                    } catch (IOException | ClassNotFoundException e1) {
+                        e1.printStackTrace();
+                    }
+                }
         });
     }
 
@@ -248,7 +247,7 @@ public class MineSweeper extends Application implements Observer {
     public void update(Observable o, Object arg) {
         MineSweeperTile[][] board = (MineSweeperTile[][]) arg;
         if (controller.isGameOver())  {// checks with Controller if game is over
-            displayGameOver(board); // calls the method to display the game over msg if true
+            displayGameOver(); // calls the method to display the game over msg if true
             return;
         }
 
@@ -293,7 +292,7 @@ public class MineSweeper extends Application implements Observer {
      * This method displays the game over message in the middle of the board
      * when the game is over.
      */
-    public void displayGameOver(MineSweeperTile[][] board) {
+    public void displayGameOver() {
         executor.shutdown();
     	String msg = "YOU WIN!!";
     	Paint p = Color.GREEN;
@@ -360,18 +359,26 @@ public class MineSweeper extends Application implements Observer {
     /**
      * TODO: Change from while true to a Scheduled Executor
      * Creates a timer that continually updates 
-     * @param controller
-     * @return
+     * @return - a text object which can be added to the screen and updated with the timer
      */
-    private Text createTimer(MineSweeperController controller) {
+    private Text createTimer() {
     	Text timer = new Text();
     	timer.setFont(MAIN_FONT);
 
-        executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleAtFixedRate(() -> {
-            timer.setText("Time: "+ controller.getSecondsElapsed());
-        }, 0, DELTA_TIME_MS, TimeUnit.MILLISECONDS);
+        executor = Executors.newScheduledThreadPool(1, e -> {
+            Thread t = new Thread(e);
+            t.setDaemon(true);
+            return t;
+        });
+
+        Runnable updateTimerRunner = () -> Platform.runLater(() -> updateTimer(timer));
+
+        executor.scheduleAtFixedRate(updateTimerRunner, 0, DELTA_TIME_MS, TimeUnit.MILLISECONDS);
 
     	return timer;
+    }
+
+    private void updateTimer(Text timer) {
+        timer.setText("Time: "+ controller.getSecondsElapsed());
     }
 }

@@ -1,8 +1,6 @@
 package Models;
 
 import java.io.Serializable;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.*; // TODO: dont import *
 import Utils.GUESS_STATUS;
 
@@ -23,6 +21,7 @@ public class MineSweeperBoard extends Observable implements Serializable {
 		//initializes the board as a ROWS x COLS 2D array with null pointers for now
 		board = new MineSweeperTile[ROWS][COLS];
 		observers = new ArrayList<>();
+		ms_elapsed = -1;
 	}
 	
 	/**
@@ -34,7 +33,7 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 */
 	public void createBoard(int row, int col) {
 		// Start the timer
-		ms_elapsed = 1;
+		ms_elapsed = 0;
 		/* row and col are for the first clicked tile to
 		 * make sure a bomb isn't placed there */
 		board[row][col] = new MineSweeperTile(row, col);
@@ -118,7 +117,7 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 * @return the number of seconds elapsed
 	 */
 	public double getSecondsElapsed() {
-		if (ms_elapsed == 0) return 0;
+		if (ms_elapsed == -1) return 0;
 		ms_elapsed += DELTA_TIME_MS;
 		return ms_elapsed/1000.0;
 	}

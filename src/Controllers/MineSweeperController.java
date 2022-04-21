@@ -178,7 +178,7 @@ public class MineSweeperController implements Serializable {
 	
 	/**
 	 * Saves the game by outputting the current state of the board and the instance variables to a file.
-	 * @throws IOException 
+	 * @throws IOException - when we fail to save the game
 	 */
 	public void saveGame(File f) throws IOException {
 		FileOutputStream fos = new FileOutputStream(f);
