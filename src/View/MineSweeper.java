@@ -114,7 +114,7 @@ public class MineSweeper extends Application implements Observer {
         // TODO: compact these into the same event
         hex.setOnMousePressed(e -> {
             if (e.getClickCount() == 2) {
-                controller.updateTilesAround(row, col, GUESSED);
+                controller.updateTilesAround(row, col);
             } else if (e.isPrimaryButtonDown()) {
     			controller.updateTileStatus(row, col, GUESSED);
             } else if (e.isSecondaryButtonDown()) {
@@ -124,7 +124,7 @@ public class MineSweeper extends Application implements Observer {
 
         label.setOnMousePressed(e -> {
             if (e.getClickCount() == 2) {
-                controller.updateTilesAround(row, col, GUESSED);
+                controller.updateTilesAround(row, col);
             } else if (e.isPrimaryButtonDown()) {
                 controller.updateTileStatus(row, col, GUESSED);
             } else if (e.isSecondaryButtonDown()) {

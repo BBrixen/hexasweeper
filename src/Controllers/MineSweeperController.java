@@ -4,6 +4,8 @@ import java.util.Observer;
 import Models.MineSweeperBoard;
 import Models.MineSweeperTile;
 import Utils.GUESS_STATUS;
+import javafx.util.Pair;
+
 import static View.MineSweeper.COLS;
 import static View.MineSweeper.NUM_BOMBS;
 import static View.MineSweeper.ROWS;
@@ -33,16 +35,14 @@ public class MineSweeperController {
 	 * @param status is an enum either GUESSED or FLAGGED, depending on the mouse button clicked.
 	 */
 	public void updateTileStatus(int row, int col, GUESS_STATUS status) {
-		// the 2nd line is a guard clause for updating tiles off the board,
-		// it is needed for the double click (reveal cleared tile)
 		MineSweeperTile[][] board = model.getBoard();
-		if (gameOver ||
-				(board != null && (row >= board.length || row < 0 || col >= board[row].length || col < 0))) return;
+		// this is a complex guard statement to make sure we are in bounds of the board
+		// it is needed from updateTilesAround
+		if (board != null && (row >= board.length || row < 0 || col >= board[row].length || col < 0)) return;
+		if (gameOver || board == null || board[row] == null) return; // basic guard statements
 
+		//determines if the board is still null (indicates that this is the player's first click of the game.
 
-		/* determines if the board is still null (indicates that this is the player's
-		 * first click of the game.
-		 */
 		if (board[row][col] == null) {
 			model.createBoard(row, col); // creates the board and places all bombs
 			updateTileStatus(row, col, status); // updates the board with the player's click
@@ -84,43 +84,33 @@ public class MineSweeperController {
 
 	}
 
-	public void updateTilesAround(int row, int col, GUESS_STATUS status) {
-		// TODO: make this better
-		int[][] adj = {{0, -1},{0, 1},{1, 0},{1, 1},{-1, 0},{-1, 1}};
-		int[][] adjEven = {{0, -1},{0, 1},{1, -1},{1, 0},{-1, -1},{-1, 0}};
-		if (row%2 == 0)
-			adj = adjEven;
-		for (int i = 0; i < adj.length; i++) {
-			updateTileStatus(row + adj[i][0], col + adj[i][1], status);
-		}
-	}
-	
-    /* I did some strange math here. adj is cardinal directions for
-	 * coord pairs for all adjacent tiles in odd rows. 
-	 * adjEven is for even rows. I'm sure there is a cleaner/
-	 * more logical way to do this. I'll try to format it differently.
-	 * This method is used to reveal adjacent tiles. updateAdjacentTiles()
-	 * will continue to call this method automatically until there are no
-	 * longer adjacent tiles with a mineCount of 0.
+	/**
+	 * When the user clicks a tile, it will replicate a click on all the adjacent tiles
+	 * @param row - the row of the tile updating its neighbors
+	 * @param col - the col of the tile updating its neihbors
 	 */
-	private void checkAdjacent(int row, int col) {
-		int[][] adj = {{0, -1},{0, 1},{1, 0},{1, 1},{-1, 0},{-1, 1}};
-    	int[][] adjEven = {{0, -1},{0, 1},{1, -1},{1, 0},{-1, -1},{-1, 0}};
-		if (row%2 == 0) 
-			adj = adjEven;
-		for (int i = 0; i < adj.length; i++) {
-			checkNonBomb(row, adj[i][0], col, adj[i][1]);
-		}	
+	public void updateTilesAround(int row, int col) {
+		for (Pair<Integer, Integer> coord : this.model.getBoard()[row][col].getAdjacentTiles()) {
+			updateTileStatus(coord.getKey(), coord.getValue(), GUESS_STATUS.GUESSED);
+		}
 	}
 
-	/* Checks if adjacent tiles are bombs. If they are not, 
-	 * the tiles are revealed. 
+	/**
+	 * Make sure the tiles around this tile are not bombs
+	 * If they are, mark them as not guessed
+	 * NOTE TO ERIC: I (bennett) do not actually know what this is supposed to do, maybe update the javadoc here
+	 * @param row - the row of the tile to check
+	 * @param col - the col of the tile to check
 	 */
-	private void checkNonBomb(int r, int a, int c, int b) {
-		if (r+a >= 0 && r+a < ROWS && c+b >= 0 && c+b < COLS) {
-			if (!(model.getBoard()[r+a][c+b].isBomb())){
-				updateTileStatus(r+a, c+b, GUESS_STATUS.GUESSED);}
-		}
+	private void checkAdjacent(int row, int col) {
+		for (Pair<Integer, Integer> coord : this.model.getBoard()[row][col].getAdjacentTiles()) {
+			int tempRow = coord.getKey();
+			int tempCol = coord.getValue();
+			if (tempRow>= 0 && tempRow < ROWS && tempCol >= 0 && tempCol < COLS) {
+				if (!(model.getBoard()[tempRow][tempCol].isBomb())){
+					updateTileStatus(tempRow, tempCol, GUESS_STATUS.GUESSED);}
+			}
+		}	
 	}
 
 	/**

@@ -1,6 +1,9 @@
 package Models;
 
 import Utils.GUESS_STATUS;
+import javafx.util.Pair;
+
+import java.util.ArrayList;
 
 public class MineSweeperTile {
 
@@ -32,14 +35,27 @@ public class MineSweeperTile {
 	 * (I used similar math in the controller in the checkAdjacent() method)
 	 */
     public void updateCount(MineSweeperTile[][] board) {
-    	int[][] adj = {{0, -1},{0, 1},{1, 0},{1, 1},{-1, 0},{-1, 1}};
-		if (row%2 == 0)
+    	for (Pair <Integer, Integer> pair : getAdjacentTiles()) {
+            int row = pair.getKey();
+            int col = pair.getValue();
+
+            if (row >= 0 && row < board.length && col  >= 0
+                    && col < board.length && board[row][col].isBomb())
+                board[this.row][this.col].addMineCount();
+        }
+    }
+
+    public ArrayList<Pair<Integer, Integer>> getAdjacentTiles() {
+        // creating variables
+        ArrayList<Pair<Integer, Integer>> adjacents = new ArrayList<>();
+        int[][] adj = {{0, -1},{0, 1},{1, 0},{1, 1},{-1, 0},{-1, 1}};
+        if (row%2 == 0)
             adj = new int[][]{{0, -1}, {0, 1}, {1, -1}, {1, 0}, {-1, -1}, {-1, 0}};
 
-        for (int[] ints : adj)
-            if (row + ints[0] >= 0 && row + ints[0] < board.length && col + ints[1] >= 0
-                    && col + ints[1] < board.length && board[row + ints[0]][col + ints[1]].isBomb())
-                board[row][col].addMineCount();
+        // filling and returning variables
+        for (int[] tup : adj)
+            adjacents.add(new Pair<>(row + tup[0], col + tup[1]));
+        return adjacents;
     }
 
 	public void setStatus(GUESS_STATUS status) {
