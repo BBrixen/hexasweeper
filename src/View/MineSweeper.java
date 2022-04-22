@@ -65,11 +65,11 @@ public class MineSweeper extends Application implements Observer {
             LABEL_OFFSETX = HEX_WIDTH/2.5 - MAIN_FONT_SIZE/6,
             LABEL_OFFSETY = HEX_HEIGHT/6 - MAIN_FONT_SIZE/2.5;
     private static final HashMap<Integer, Color> MINE_COUNT_TO_COLOR = new HashMap<>();
-    private static final int VERY_HARD_DIFF = 600;
-    private static final int HARD_DIFF = 400;
-    private static final int MEDIUM_DIFF = 200;
-    private static final int EASY_DIFF = 100;
-    private static final int VERY_EASY_DIFF = 50;
+    private static final int VERY_HARD_DIFF = ROWS*COLS/2;
+    private static final int HARD_DIFF = ROWS*COLS/3;
+    private static final int MEDIUM_DIFF = ROWS*COLS/5;
+    private static final int EASY_DIFF = ROWS*COLS/10;
+    private static final int VERY_EASY_DIFF = ROWS*COLS/20;
 
 
     // gui variables
