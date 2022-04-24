@@ -5,6 +5,7 @@ import javafx.animation.RotateTransition;
 import javafx.animation.ScaleTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -29,7 +30,6 @@ import javafx.stage.Screen;
 import static Utils.GUESS_STATUS.FLAGGED;
 import static Utils.GUESS_STATUS.GUESSED;
 import static Utils.GUESS_STATUS.UNGUESSED;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -70,6 +70,15 @@ public class MineSweeper extends Application implements Observer {
     private static final int MEDIUM_DIFF = ROWS*COLS/5;
     private static final int EASY_DIFF = ROWS*COLS/10;
     private static final int VERY_EASY_DIFF = ROWS*COLS/20;
+    private static final String BUTTON_STYLE = "-fx-background-color: transparent;";
+    private static final Paint GREEN_BACKGROUND = Color.rgb(120, 190, 120);
+    private static final Paint RED_BACKGROUND =  Color.rgb(190, 120, 120);
+    private static final Color ONE_MINE = Color.rgb(207, 236, 207);
+    private static final Color TWO_MINE = Color.rgb(204, 236, 239);
+    private static final Color THREE_MINE = Color.rgb(221, 212, 232);
+    private static final Color FOUR_MINE = Color.rgb(253, 222, 238);
+    private static final Color FIVE_MINE =  Color.rgb(253, 202, 162);
+    private static final Color SIX_MINE = Color.rgb(255, 105, 97);
 
 
     // gui variables
@@ -89,12 +98,12 @@ public class MineSweeper extends Application implements Observer {
 
     public static void main(String[] args) {
         // filling hashmap, this only needs to be done once
-        MINE_COUNT_TO_COLOR.put(1, Color.rgb(207, 236, 207));
-        MINE_COUNT_TO_COLOR.put(2, Color.rgb(204, 236, 239));
-        MINE_COUNT_TO_COLOR.put(3, Color.rgb(221, 212, 232));
-        MINE_COUNT_TO_COLOR.put(4, Color.rgb(253, 222, 238));
-        MINE_COUNT_TO_COLOR.put(5, Color.rgb(253, 202, 162));
-        MINE_COUNT_TO_COLOR.put(6, Color.rgb(255, 105, 97));
+        MINE_COUNT_TO_COLOR.put(1, ONE_MINE);
+        MINE_COUNT_TO_COLOR.put(2, TWO_MINE);
+        MINE_COUNT_TO_COLOR.put(3, THREE_MINE);
+        MINE_COUNT_TO_COLOR.put(4, FOUR_MINE);
+        MINE_COUNT_TO_COLOR.put(5, FIVE_MINE);
+        MINE_COUNT_TO_COLOR.put(6, SIX_MINE);
         launch(args);
     }
 
@@ -108,19 +117,25 @@ public class MineSweeper extends Application implements Observer {
         labelGrid = new Label[ROWS][COLS];
         gridPane = new AnchorPane();
 
-        saveButton = new Button("Save");        
+        // creating bottom buttons
+        saveButton = new Button("Save");
         loadButton = new Button("Load");
         resetButton = new Button("Reset");
-        
+        saveButton.setStyle(BUTTON_STYLE);
+        loadButton.setStyle(BUTTON_STYLE);
+        resetButton.setStyle(BUTTON_STYLE);
+        saveButton.setTextFill(Color.WHITE);
+        loadButton.setTextFill(Color.WHITE);
+        resetButton.setTextFill(Color.WHITE);
         setButtonActions();
 
         buttonRow = new HBox(15);
         buttonRow.getChildren().addAll(saveButton, loadButton, resetButton);
         buttonRow.setPadding(new Insets(5, 15, 5, 40));
         buttonRow.setAlignment(Pos.CENTER);
-        
+
+        // creating timer
         Text timer = createTimer();
-                
         vBox = new VBox(15);
         vBox.getChildren().addAll(timer, gridPane, buttonRow);
         vBox.setPadding(new Insets(10,0,0,0));
@@ -139,6 +154,7 @@ public class MineSweeper extends Application implements Observer {
                 if (executor != null)
                     executor.shutdown();
         });
+
         chooseDiff();
     }
 
@@ -246,6 +262,15 @@ public class MineSweeper extends Application implements Observer {
             } else if (e.isSecondaryButtonDown()) {
                 controller.updateTileStatus(row, col, FLAGGED);
             }
+
+            if (board[row][col] != null)
+                if (board[row][col].getStatus().getColor() == Color.WHITE) {
+                    animateTiles(row, col);
+                }
+            if (board[row][col] != null)
+                if (board[row][col].getStatus().getColor() == Color.BLACK) {
+                    animateBombs(row, col);
+                }
         });
 
         // adding it to the grids and groups
@@ -311,23 +336,27 @@ public class MineSweeper extends Application implements Observer {
     public void displayGameOver() {
         executor.shutdown();
     	String msg = "YOU WIN!!";
-    	Paint p = Color.GREEN;
+    	Paint p = GREEN_BACKGROUND;
     	if (!controller.win()) { // checks with the controller if the player didn't win
     		msg = "YOU LOSE!";
-    		p = Color.RED;
+    		p = RED_BACKGROUND;
         }
 
     	Stage popUp = new Stage();
-		Label label = new Label();
+        BorderPane root = new BorderPane();
+        popUp.setOnCloseRequest(Event::consume);
+
 		Button btn = new Button("Play again");
-		BorderPane root = new BorderPane();
-		label.setText(msg);
+        btn.setTextFill(Color.WHITE);
+        btn.setStyle(BUTTON_STYLE);
+        btn.setFont(MAIN_FONT);
+
+        Label label = new Label(msg);
 		label.setTextFill(Color.WHITE);
-		label.setFont(Font.font("Helvetica", 50));
+		label.setFont(MAIN_FONT);
 		label.setMaxWidth(Double.MAX_VALUE);
 		label.setAlignment(Pos.BOTTOM_CENTER);
 		label.setPadding(new Insets(20, 0, 0, 0));
-		
 		playAgainPop(root, label, btn, popUp, p);
     }
    
@@ -350,47 +379,55 @@ public class MineSweeper extends Application implements Observer {
 			this.start(new Stage());
 			popUp.close();
         });
-		
 	}
 
 	public void chooseDiff() {
     	Stage diffPop = new Stage();
+        diffPop.setOnCloseRequest(Event::consume);
+
 		Label label = new Label();
-	
 		label.setText("Choose Difficulty");
-		label.setFont(Font.font("Helvetica", 30));
+        label.setTextFill(Color.WHITE);
+		label.setFont(MAIN_FONT);
 		label.setMaxWidth(Double.MAX_VALUE);
 		label.setAlignment(Pos.BOTTOM_CENTER);
 		label.setPadding(new Insets(20, 0, 0, 0));
-		
+
+        // create and style buttons
 		Button veryEasy = new Button("Very Easy");
 		Button easy = new Button("Easy");
 		Button normal = new Button("Normal");
 		Button hard = new Button("Hard");
 		Button veryHard = new Button("Very Hard");
+        veryEasy.setStyle(BUTTON_STYLE);
+        easy.setStyle(BUTTON_STYLE);
+        normal.setStyle(BUTTON_STYLE);
+        hard.setStyle(BUTTON_STYLE);
+        veryHard.setStyle(BUTTON_STYLE);
+
 		HBox buttonBox = new HBox();
 		buttonBox.getChildren().addAll(veryEasy, easy, normal, hard, veryHard);
+        buttonBox.setBackground(new Background(
+                new BackgroundFill(RED_BACKGROUND, new CornerRadii(6.0), Insets.EMPTY)));
 		
 		diffPopUp(buttonBox, label, diffPop);
 		diffListener(veryEasy, easy, normal, hard, veryHard, diffPop);
     }
     
 	private void diffPopUp(HBox buttonBox, Label label, Stage diffPop) {
-		
 		buttonBox.setPadding(new Insets(10, 10, 10, 10));
 		buttonBox.setAlignment(Pos.CENTER);
-		
-		
+
 		BorderPane diff = new BorderPane();
-		diff.setBackground(
-				new Background(new BackgroundFill(Color.WHITE, new CornerRadii(6.0), Insets.EMPTY)));
+        diff.setBackground(new Background(
+                new BackgroundFill(GREEN_BACKGROUND, new CornerRadii(6.0), Insets.EMPTY)));
 		diff.setTop(label);
 		diff.setBottom(buttonBox);
 		diff.setAlignment(label, Pos.CENTER);
 		diff.setAlignment(buttonBox, Pos.CENTER);
 		
 		Scene diffScene = new Scene(diff, 400, 120);
-
+        diffScene.setFill(GREEN_BACKGROUND);
 		diffPop.setScene(diffScene);
 		diffPop.setTitle("New Game");
 		diffPop.show();		
@@ -419,8 +456,29 @@ public class MineSweeper extends Application implements Observer {
         });
 	}
 
+    /**
+     * Creates a timer that continually updates 
+     * @return - a text object which can be added to the screen and updated with the timer
+     */
+    private Text createTimer() {
+    	Text timer = new Text();
+    	timer.setFont(MAIN_FONT);
 
-	/**
+        // creates a scheduled executor to increase the time count by DELTA_MS
+        executor = Executors.newScheduledThreadPool(1, e -> {
+            Thread t = new Thread(e);
+            t.setDaemon(true);
+            return t;
+        });
+
+        // platform.runlater so this runs after javafx has initialized
+        Runnable updateTimerRunner = () -> Platform.runLater(() ->
+                timer.setText("Time: "+ String.format("%.2f", controller.getSecondsElapsed())));
+        executor.scheduleAtFixedRate(updateTimerRunner, 0, DELTA_TIME_MS, TimeUnit.MILLISECONDS);
+    	return timer;
+    }
+
+    /**
      * This inner class creates a hexagon which can be places on the board with an x and y position
      * We calculate this x and y position inside the addHex method
      * This generates a new polygon with the needed hex points
@@ -439,30 +497,5 @@ public class MineSweeper extends Application implements Observer {
 
             setStroke(Color.BLACK);
         }
-    }
-    /**
-     * TODO: Change from while true to a Scheduled Executor
-     * Creates a timer that continually updates 
-     * @return - a text object which can be added to the screen and updated with the timer
-     */
-    private Text createTimer() {
-    	Text timer = new Text();
-    	timer.setFont(MAIN_FONT);
-
-        executor = Executors.newScheduledThreadPool(1, e -> {
-            Thread t = new Thread(e);
-            t.setDaemon(true);
-            return t;
-        });
-
-        Runnable updateTimerRunner = () -> Platform.runLater(() -> updateTimer(timer));
-
-        executor.scheduleAtFixedRate(updateTimerRunner, 0, DELTA_TIME_MS, TimeUnit.MILLISECONDS);
-
-    	return timer;
-    }
-
-    private void updateTimer(Text timer) {
-        timer.setText("Time: "+ String.format("%.2f", controller.getSecondsElapsed()));
     }
 }
