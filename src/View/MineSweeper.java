@@ -86,9 +86,11 @@ public class MineSweeper extends Application implements Observer {
     private Label[][] labelGrid;
     private AnchorPane gridPane;
     private Stage stage;
-    
-    private VBox vBox;
+
+    private BorderPane mainPane;
+    private VBox mainVBox;
     private HBox buttonRow;
+    private VBox scoreBoard;
     private Button saveButton;
     private Button loadButton;
     private Button resetButton;
@@ -136,17 +138,17 @@ public class MineSweeper extends Application implements Observer {
 
         // creating timer
         Text timer = createTimer();
-        vBox = new VBox(15);
-        vBox.getChildren().addAll(timer, gridPane, buttonRow);
-        vBox.setPadding(new Insets(10,0,0,0));
-        vBox.setAlignment(Pos.CENTER);
+        mainVBox = new VBox(15);
+        mainVBox.getChildren().addAll(timer, gridPane, buttonRow);
+        mainVBox.setPadding(new Insets(10,0,0,0));
+        mainVBox.setAlignment(Pos.CENTER);
         
         // creates the initial blank board
         createBoard(controller.getBoard());
 
-        BorderPane pane = new BorderPane();
-        pane.setCenter(vBox);
-        Scene scene = new Scene(pane, SCENE_WIDTH, SCENE_HEIGHT);
+        mainPane = new BorderPane();
+        mainPane.setCenter(mainVBox);
+        Scene scene = new Scene(mainPane, SCENE_WIDTH, SCENE_HEIGHT);
         stage.setScene(scene);
         stage.setTitle("Mine Sweeper");
         stage.show();
@@ -216,6 +218,21 @@ public class MineSweeper extends Application implements Observer {
                 addHex(row, col, board);
             }
         }
+    }
+
+    public void createScoreBoard(MineSweeperController controller) {
+        double[] topTimes = controller.getTopTimes();
+        Label[] topTimeLabels = new Label[topTimes.length];
+
+        for (int i = 0; i < topTimes.length; i++) {
+            // TODO: style label
+            Label label = new Label(""+topTimes[i]);
+            label.setTextFill(GREEN_BACKGROUND);
+            topTimeLabels[i] = label;
+        }
+
+        scoreBoard = new VBox(topTimeLabels);
+        mainPane.setRight(scoreBoard);
     }
 
     /**

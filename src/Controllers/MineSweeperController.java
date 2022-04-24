@@ -227,5 +227,9 @@ public class MineSweeperController implements Serializable {
 	public double getSecondsElapsed() {
 		return model.getSecondsElapsed();
 	}
+
+	public double[] getTopTimes() {
+		return new double[5]; // TODO have this read from a file which we save to after the game is over
+	}
 	
 }
