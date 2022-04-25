@@ -13,17 +13,48 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	private MineSweeperTile[][] board;
 	private final List<Observer> observers; // do we need a list?
 	private int ms_elapsed;
+	private final int numBombs;
 	private String difficulty;
+
+	private int rows = 16, cols = 24;
+	private static final int VERY_HARD_DIVIDER = 3;
+	private static final int HARD_DIVIDER = 4;
+	private static final int NORMAL_DIVIVER = 5;
+	private static final int EASY_DIVIDER = 8;
+	private static final int VERY_EASY_DIVIDER = 20;
 	
 	/**
 	 * Constructor for MineSweeperBoard model object.
 	 */
 	public MineSweeperBoard(String difficulty) {
 		//initializes the board as a ROWS x COLS 2D array with null pointers for now
-		board = new MineSweeperTile[ROWS][COLS];
+		board = new MineSweeperTile[rows][cols];
 		observers = new ArrayList<>();
 		ms_elapsed = -1;
 		this.difficulty = difficulty;
+
+		int divider = NORMAL_DIVIVER;
+		switch (difficulty) {
+			case "Very Easy":
+				divider = VERY_EASY_DIVIDER;
+				cols = 16;
+				break;
+			case "Easy":
+				divider = EASY_DIVIDER;
+				cols = 20;
+				break;
+			case "Hard":
+				divider = HARD_DIVIDER;
+				rows = 20;
+				break;
+			case "Very Hard":
+				divider = VERY_HARD_DIVIDER;
+				rows = 24;
+				cols = 30;
+				break;
+		};
+
+		numBombs = rows * cols / divider;
 	}
 	
 	/**
@@ -42,8 +73,8 @@ public class MineSweeperBoard extends Observable implements Serializable {
 		createBombs(row, col); // places all the bombs in the board after the first press
 
 		// now places unguessed tiles without bombs
-        for (int r= 0; r < ROWS; r++) 
-            for (int c = 0; c < COLS; c++)
+        for (int r= 0; r < rows; r++)
+            for (int c = 0; c < cols; c++)
             	if (board[r][c] == null)
             		board[r][c] = new MineSweeperTile(r, c);
 
@@ -100,9 +131,9 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 */
 	public void createBombs(int startRow, int startCol) {
 		int i = 0;
-		while (i < NUM_BOMBS) {
-			int row = (int)(Math.random() * ROWS );
-			int col = (int)(Math.random() * COLS);
+		while (i < numBombs) {
+			int row = (int)(Math.random() * rows );
+			int col = (int)(Math.random() * cols);
 
 			int diffRow = Math.abs(startRow - row);
 			int diffCol = Math.abs(startCol - col); // make sure we start with a 0
@@ -126,7 +157,6 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	
 	/**
 	 * Calculates the number of seconds that have elapsed in the game
-	 * @return the number of seconds elapsed
 	 */
 	public void setSecondsElapsed(int elapsed) {
 		ms_elapsed = (int) (elapsed*1000.0);
@@ -138,5 +168,17 @@ public class MineSweeperBoard extends Observable implements Serializable {
 
 	public void setDifficulty(String difficulty) {
 		this.difficulty = difficulty;
+	}
+
+	public int getRows() {
+		return rows;
+	}
+
+	public int getCols() {
+		return cols;
+	}
+
+	public int getNumBombs() {
+		return numBombs;
 	}
 }

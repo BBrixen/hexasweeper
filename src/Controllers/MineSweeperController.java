@@ -13,9 +13,6 @@ import Models.MineSweeperTile;
 import Models.ScoreBoard;
 import Utils.GUESS_STATUS;
 import javafx.util.Pair;
-import static View.MineSweeper.COLS;
-import static View.MineSweeper.NUM_BOMBS;
-import static View.MineSweeper.ROWS;
 
 public class MineSweeperController implements Serializable {
 
@@ -25,13 +22,13 @@ public class MineSweeperController implements Serializable {
 	private int numberOfGuesses; // keeps track of the total number of guesses
 	private boolean win;
 	private MineSweeperTile[][] board;
-	
+
 	/**
 	 * Contructor for the controller.
 	 * numBombs is used as a parameter for constructing the model.
 	 */
-	public MineSweeperController() {
-		this.model = new MineSweeperBoard("Normal");
+	public MineSweeperController(String difficulty) {
+		this.model = new MineSweeperBoard(difficulty);
 		this.scoreBoard = new ScoreBoard();
 		win = true; // keeps track of the total number of guesses
 	}
@@ -97,7 +94,7 @@ public class MineSweeperController implements Serializable {
 		 * Checks if the game is over by checking the number of player clicks
 		 * that have not been bombs or flagging clicks.
 		 */
-		if (numberOfGuesses == (board.length*board[0].length) - NUM_BOMBS) {
+		if (numberOfGuesses == (board.length*board[0].length) - model.getNumBombs()) {
 			showAllBombs();
 		}
 
@@ -127,7 +124,7 @@ public class MineSweeperController implements Serializable {
 		for (Pair<Integer, Integer> coord : this.model.getBoard()[row][col].getAdjacentTiles()) {
 			int tempRow = coord.getKey();
 			int tempCol = coord.getValue();
-			if (tempRow>= 0 && tempRow < ROWS && tempCol >= 0 && tempCol < COLS) {
+			if (tempRow>= 0 && tempRow < model.getRows() && tempCol >= 0 && tempCol < model.getCols()) {
 				if (!(model.getBoard()[tempRow][tempCol].isBomb())){
 					updateTileStatus(tempRow, tempCol, GUESS_STATUS.GUESSED);}
 			}
@@ -251,5 +248,12 @@ public class MineSweeperController implements Serializable {
 
 	public void setDifficulty(String difficulty) {
 		this.model.setDifficulty(difficulty);
+	}
+
+	public int getRows() {
+		return model.getRows();
+	}
+	public int getCols() {
+		return model.getCols();
 	}
 }

@@ -44,14 +44,6 @@ import Controllers.MineSweeperController;
 @SuppressWarnings("deprecation")
 public class MineSweeper extends Application implements Observer {
 
-    // game constants
-    public static final int ROWS = 25, COLS = 45;
-    private static final int VERY_HARD_DIFF = ROWS*COLS/2;
-    private static final int HARD_DIFF = ROWS*COLS/3;
-    private static final int MEDIUM_DIFF = ROWS*COLS/5;
-    private static final int EASY_DIFF = ROWS*COLS/10;
-    private static final int VERY_EASY_DIFF = ROWS*COLS/20;
-    public static int NUM_BOMBS = MEDIUM_DIFF;
     public static final int DELTA_TIME_MS = 10;
 
     // game variables
@@ -62,16 +54,18 @@ public class MineSweeper extends Application implements Observer {
     private static final double SCREEN_WIDTH = Screen.getPrimary().getVisualBounds().getWidth();
     private static final double SCREEN_HEIGHT = Screen.getPrimary().getVisualBounds().getHeight();
     
-    private static final double HEX_RADIUS = Math.min(SCREEN_HEIGHT/(ROWS*2), 30), HEX_SIZE = Math.sqrt(HEX_RADIUS * HEX_RADIUS * 0.75);
-    private static final int
-            SCENE_WIDTH = (int) (1.75*(COLS + 2) * HEX_RADIUS),
-            SCENE_HEIGHT = (int) (1.5*(ROWS + 5) * HEX_RADIUS);
-    private static final double HEX_HEIGHT = 2* HEX_RADIUS, HEX_WIDTH = 2*HEX_SIZE;
-    private static final double MAIN_FONT_SIZE = HEX_HEIGHT/2.5;
-    private static final Font MAIN_FONT = new Font("Helvetica", MAIN_FONT_SIZE);
-    private static final double
-            LABEL_OFFSETX = HEX_WIDTH/2.5 - MAIN_FONT_SIZE/6,
-            LABEL_OFFSETY = HEX_HEIGHT/6 - MAIN_FONT_SIZE/2.5;
+    private static double HEX_RADIUS = Math.min(SCREEN_HEIGHT/(16*2), 30);
+    private static double HEX_SIZE = Math.sqrt(HEX_RADIUS * HEX_RADIUS * 0.75);
+    private static int
+            SCENE_WIDTH = (int) (1.75*(24 + 2) * HEX_RADIUS);
+    private static int SCENE_HEIGHT = (int) (1.5*(16 + 5) * HEX_RADIUS);
+    private static double HEX_HEIGHT = 2* HEX_RADIUS;
+    private static double HEX_WIDTH = 2*HEX_SIZE;
+    private static double MAIN_FONT_SIZE = HEX_HEIGHT/2.5;
+    private static Font MAIN_FONT = new Font("Helvetica", MAIN_FONT_SIZE);
+    private static double
+            LABEL_OFFSETX = HEX_WIDTH/2.5 - MAIN_FONT_SIZE/6;
+    private static double LABEL_OFFSETY = HEX_HEIGHT/6 - MAIN_FONT_SIZE/2.5;
     private static final HashMap<Integer, Color> MINE_COUNT_TO_COLOR = new HashMap<>();
     private static final String BUTTON_STYLE = "-fx-background-color: transparent;";
     private static final Paint GREEN_BACKGROUND = Color.rgb(120, 190, 120);
@@ -112,11 +106,20 @@ public class MineSweeper extends Application implements Observer {
     public void start(Stage stage) {
     	this.stage = stage;
     	// initialize game
-        controller = new MineSweeperController();
-        controller.addObserver(this); // add as observer for model (MineSweeperBoard)
+        createController("Normal");
+        stage.setTitle("Mine Sweeper");
+        stage.show();
+        stage.setOnCloseRequest(e -> {
+                if (executor != null)
+                    executor.shutdown();
+        });
 
-        rectGrid = new Hexagon[ROWS][COLS];
-        labelGrid = new Label[ROWS][COLS];
+        chooseDiff();
+    }
+
+    private Scene createScene() {
+        rectGrid = new Hexagon[controller.getRows()][controller.getCols()];
+        labelGrid = new Label[controller.getRows()][controller.getCols()];
         gridPane = new AnchorPane();
         buttonRow = new HBox(15);
         mainPane = new BorderPane();
@@ -143,22 +146,36 @@ public class MineSweeper extends Application implements Observer {
         mainVBox.getChildren().addAll(timer, gridPane, buttonRow);
         mainVBox.setPadding(new Insets(10,0,0,0));
         mainVBox.setAlignment(Pos.CENTER);
-        
+
         // creates the initial blank board
         createBoard(controller.getBoard());
         createScoreBoard(controller);
 
         mainPane.setCenter(mainVBox);
-        Scene scene = new Scene(mainPane, SCENE_WIDTH, SCENE_HEIGHT);
-        stage.setScene(scene);
-        stage.setTitle("Mine Sweeper");
-        stage.show();
-        stage.setOnCloseRequest(e -> {
-                if (executor != null)
-                    executor.shutdown();
-        });
+        return new Scene(mainPane, SCENE_WIDTH, SCENE_HEIGHT);
+    }
 
-        chooseDiff();
+    private void generateConstants(int rows, int cols) {
+        HEX_RADIUS = Math.min(SCREEN_HEIGHT/(rows*2), 30);
+        HEX_SIZE = Math.sqrt(HEX_RADIUS * HEX_RADIUS * 0.75);
+        SCENE_WIDTH = (int) (1.75*(cols + 2) * HEX_RADIUS);
+        SCENE_HEIGHT = (int) (1.5*(rows + 5) * HEX_RADIUS);
+        LABEL_OFFSETX = HEX_WIDTH/2.5 - MAIN_FONT_SIZE/6;
+        LABEL_OFFSETY = HEX_HEIGHT/6 - MAIN_FONT_SIZE/2.5;
+        HEX_HEIGHT = 2* HEX_RADIUS;
+        HEX_WIDTH = 2*HEX_SIZE;
+        MAIN_FONT_SIZE = HEX_HEIGHT/2;
+        MAIN_FONT = new Font("Helvetica", MAIN_FONT_SIZE);
+    }
+
+    private void createController(String difficulty) {
+        controller = new MineSweeperController(difficulty);
+        System.out.println("new rows: " + controller.getRows());
+        generateConstants(controller.getRows(), controller.getCols());
+        controller.addObserver(this); // add as observer for model (MineSweeperBoard)
+        rectGrid = new Hexagon[controller.getRows()][controller.getCols()];
+        labelGrid = new Label[controller.getRows()][controller.getCols()];
+        stage.setScene(createScene());
     }
 
     /**
@@ -214,8 +231,8 @@ public class MineSweeper extends Application implements Observer {
      *  Creates the blank game board of ROW x COL hexagons
      */
     public void createBoard(MineSweeperTile[][] board) {
-        for (int row = 0; row < ROWS; row++) {
-            for (int col = 0; col < COLS; col++) {
+        for (int row = 0; row < board.length; row++) {
+            for (int col = 0; col < board[row].length; col++) {
                 addHex(row, col, board);
             }
         }
@@ -319,8 +336,8 @@ public class MineSweeper extends Application implements Observer {
         }
 
         // if the game isn't over, all the tiles are updated according to their enum
-        for (int row = 0; row < ROWS; row++)
-            for (int col = 0; col < COLS; col++) {
+        for (int row = 0; row < board.length; row++)
+            for (int col = 0; col < board[row].length; col++) {
 
                 rectGrid[row][col].setFill(board[row][col].getStatus().getColor());
 
@@ -460,28 +477,23 @@ public class MineSweeper extends Application implements Observer {
 	
     private void diffListener(Button veryEasy, Button easy, Button normal, Button hard, Button veryHard, Stage diffPop) {
 		veryEasy.setOnMousePressed(me -> {
-			NUM_BOMBS = VERY_EASY_DIFF;
-            controller.setDifficulty("Very Easy");
+            createController("Very Easy");
 			diffPop.close();
         });
 		easy.setOnMousePressed(me -> {
-			NUM_BOMBS = EASY_DIFF;
-            controller.setDifficulty("Easy");
+            createController("Easy");
 			diffPop.close();
         });
 		normal.setOnMousePressed(me -> {
-			NUM_BOMBS = MEDIUM_DIFF;
-            controller.setDifficulty("Normal");
+            createController("Normal");
 			diffPop.close();
         });
 		hard.setOnMousePressed(me -> {
-			NUM_BOMBS = HARD_DIFF;
-            controller.setDifficulty("Hard");
+            createController("Hard");
 			diffPop.close();
         });
 		veryHard.setOnMousePressed(me -> {
-			NUM_BOMBS = VERY_HARD_DIFF;
-            controller.setDifficulty("Very Hard");
+            createController("Very Hard");
 			diffPop.close();
         });
 	}
