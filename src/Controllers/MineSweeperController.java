@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.Observer;
 import Models.MineSweeperBoard;
 import Models.MineSweeperTile;
+import Models.ScoreBoard;
 import Utils.GUESS_STATUS;
 import javafx.util.Pair;
 import static View.MineSweeper.COLS;
@@ -18,7 +19,8 @@ import static View.MineSweeper.ROWS;
 
 public class MineSweeperController implements Serializable {
 
-	private final MineSweeperBoard model;
+	private MineSweeperBoard model;
+	private final ScoreBoard scoreBoard;
 	private boolean gameOver; // tracks if game is over
 	private int numberOfGuesses; // keeps track of the total number of guesses
 	private boolean win;
@@ -29,7 +31,16 @@ public class MineSweeperController implements Serializable {
 	 * numBombs is used as a parameter for constructing the model.
 	 */
 	public MineSweeperController() {
-		this.model = new MineSweeperBoard();
+		this.model = new MineSweeperBoard("Normal");
+		this.scoreBoard = new ScoreBoard();
+		win = true; // keeps track of the total number of guesses
+	}
+
+	/**
+	 * This restarts a new game if the user presses play again
+	 */
+	public void newGame() {
+		this.model = new MineSweeperBoard("Normal");
 		win = true; // keeps track of the total number of guesses
 	}
 	
@@ -163,6 +174,7 @@ public class MineSweeperController implements Serializable {
 	 */
 	public void gameIsOver() {
 		gameOver = true;
+		if (win) scoreBoard.addNewTime(model.getSecondsElapsed(), model.getDifficulty());
 		model.notifyObservers();
 	}
 
@@ -227,5 +239,17 @@ public class MineSweeperController implements Serializable {
 	public double getSecondsElapsed() {
 		return model.getSecondsElapsed();
 	}
-	
+
+	public String[] getTopTimes() {
+		Pair<Double, String>[] times = scoreBoard.getTopTimes();
+		String[] topTimes = new String[times.length];
+		for (int i = 0; i < topTimes.length; i++) {
+			topTimes[i] = times[i].getValue() + ": " + times[i].getKey();
+		}
+		return topTimes;
+	}
+
+	public void setDifficulty(String difficulty) {
+		this.model.setDifficulty(difficulty);
+	}
 }

@@ -38,17 +38,25 @@ import java.util.Observer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import Controllers.MineSweeperController;
+
 
 @SuppressWarnings("deprecation")
 public class MineSweeper extends Application implements Observer {
 
     // game constants
     public static final int ROWS = 25, COLS = 45;
-    public static int NUM_BOMBS = 200; // i have no clue if this is too many
-    private static ScheduledExecutorService executor = null;
+    private static final int VERY_HARD_DIFF = ROWS*COLS/2;
+    private static final int HARD_DIFF = ROWS*COLS/3;
+    private static final int MEDIUM_DIFF = ROWS*COLS/5;
+    private static final int EASY_DIFF = ROWS*COLS/10;
+    private static final int VERY_EASY_DIFF = ROWS*COLS/20;
+    public static int NUM_BOMBS = MEDIUM_DIFF;
     public static final int DELTA_TIME_MS = 10;
+
+    // game variables
+    private static ScheduledExecutorService executor = null;
+    private MineSweeperController controller;
 
     // gui constants
     private static final double SCREEN_WIDTH = Screen.getPrimary().getVisualBounds().getWidth();
@@ -65,11 +73,6 @@ public class MineSweeper extends Application implements Observer {
             LABEL_OFFSETX = HEX_WIDTH/2.5 - MAIN_FONT_SIZE/6,
             LABEL_OFFSETY = HEX_HEIGHT/6 - MAIN_FONT_SIZE/2.5;
     private static final HashMap<Integer, Color> MINE_COUNT_TO_COLOR = new HashMap<>();
-    private static final int VERY_HARD_DIFF = ROWS*COLS/2;
-    private static final int HARD_DIFF = ROWS*COLS/3;
-    private static final int MEDIUM_DIFF = ROWS*COLS/5;
-    private static final int EASY_DIFF = ROWS*COLS/10;
-    private static final int VERY_EASY_DIFF = ROWS*COLS/20;
     private static final String BUTTON_STYLE = "-fx-background-color: transparent;";
     private static final Paint GREEN_BACKGROUND = Color.rgb(120, 190, 120);
     private static final Paint RED_BACKGROUND =  Color.rgb(190, 120, 120);
@@ -86,15 +89,13 @@ public class MineSweeper extends Application implements Observer {
     private Label[][] labelGrid;
     private AnchorPane gridPane;
     private Stage stage;
-    
-    private VBox vBox;
+    private BorderPane mainPane;
+    private VBox mainVBox;
     private HBox buttonRow;
+    private VBox scoreBoard;
     private Button saveButton;
     private Button loadButton;
     private Button resetButton;
-    
-    // controller variable
-    private MineSweeperController controller;
 
     public static void main(String[] args) {
         // filling hashmap, this only needs to be done once
@@ -113,9 +114,13 @@ public class MineSweeper extends Application implements Observer {
     	// initialize game
         controller = new MineSweeperController();
         controller.addObserver(this); // add as observer for model (MineSweeperBoard)
+
         rectGrid = new Hexagon[ROWS][COLS];
         labelGrid = new Label[ROWS][COLS];
         gridPane = new AnchorPane();
+        buttonRow = new HBox(15);
+        mainPane = new BorderPane();
+        mainVBox = new VBox(15);
 
         // creating bottom buttons
         saveButton = new Button("Save");
@@ -124,29 +129,27 @@ public class MineSweeper extends Application implements Observer {
         saveButton.setStyle(BUTTON_STYLE);
         loadButton.setStyle(BUTTON_STYLE);
         resetButton.setStyle(BUTTON_STYLE);
-        saveButton.setTextFill(Color.WHITE);
-        loadButton.setTextFill(Color.WHITE);
-        resetButton.setTextFill(Color.WHITE);
+        saveButton.setFont(MAIN_FONT);
+        loadButton.setFont(MAIN_FONT);
+        resetButton.setFont(MAIN_FONT);
         setButtonActions();
 
-        buttonRow = new HBox(15);
         buttonRow.getChildren().addAll(saveButton, loadButton, resetButton);
         buttonRow.setPadding(new Insets(5, 15, 5, 40));
         buttonRow.setAlignment(Pos.CENTER);
 
         // creating timer
         Text timer = createTimer();
-        vBox = new VBox(15);
-        vBox.getChildren().addAll(timer, gridPane, buttonRow);
-        vBox.setPadding(new Insets(10,0,0,0));
-        vBox.setAlignment(Pos.CENTER);
+        mainVBox.getChildren().addAll(timer, gridPane, buttonRow);
+        mainVBox.setPadding(new Insets(10,0,0,0));
+        mainVBox.setAlignment(Pos.CENTER);
         
         // creates the initial blank board
         createBoard(controller.getBoard());
+        createScoreBoard(controller);
 
-        BorderPane pane = new BorderPane();
-        pane.setCenter(vBox);
-        Scene scene = new Scene(pane, SCENE_WIDTH, SCENE_HEIGHT);
+        mainPane.setCenter(mainVBox);
+        Scene scene = new Scene(mainPane, SCENE_WIDTH, SCENE_HEIGHT);
         stage.setScene(scene);
         stage.setTitle("Mine Sweeper");
         stage.show();
@@ -216,6 +219,29 @@ public class MineSweeper extends Application implements Observer {
                 addHex(row, col, board);
             }
         }
+    }
+
+    public void createScoreBoard(MineSweeperController controller) {
+        String[] topTimes = controller.getTopTimes();
+        Label topLabel = new Label("Top Scores   ");
+        topLabel.setFont(MAIN_FONT);
+        Label[] topTimeLabels = new Label[topTimes.length+1];
+        topTimeLabels[0] = topLabel;
+
+        for (int i = 0; i < topTimes.length; i++) {
+            // TODO: style label
+            Label label = new Label(topTimes[i]);
+            label.setTextFill(GREEN_BACKGROUND);
+            label.setFont(MAIN_FONT);
+            label.setTextFill(GREEN_BACKGROUND);
+            label.setPadding(new Insets(10));
+            topTimeLabels[i+1] = label;
+        }
+
+        scoreBoard = new VBox(MAIN_FONT_SIZE/2);
+        scoreBoard.getChildren().addAll(topTimeLabels);
+        scoreBoard.setAlignment(Pos.BASELINE_RIGHT);
+        mainPane.setRight(scoreBoard);
     }
 
     /**
@@ -383,7 +409,6 @@ public class MineSweeper extends Application implements Observer {
 
 	public void chooseDiff() {
     	Stage diffPop = new Stage();
-        diffPop.setOnCloseRequest(Event::consume);
 
 		Label label = new Label();
 		label.setText("Choose Difficulty");
@@ -436,22 +461,27 @@ public class MineSweeper extends Application implements Observer {
     private void diffListener(Button veryEasy, Button easy, Button normal, Button hard, Button veryHard, Stage diffPop) {
 		veryEasy.setOnMousePressed(me -> {
 			NUM_BOMBS = VERY_EASY_DIFF;
+            controller.setDifficulty("Very Easy");
 			diffPop.close();
         });
 		easy.setOnMousePressed(me -> {
 			NUM_BOMBS = EASY_DIFF;
+            controller.setDifficulty("Easy");
 			diffPop.close();
         });
 		normal.setOnMousePressed(me -> {
 			NUM_BOMBS = MEDIUM_DIFF;
+            controller.setDifficulty("Normal");
 			diffPop.close();
         });
 		hard.setOnMousePressed(me -> {
 			NUM_BOMBS = HARD_DIFF;
+            controller.setDifficulty("Hard");
 			diffPop.close();
         });
 		veryHard.setOnMousePressed(me -> {
 			NUM_BOMBS = VERY_HARD_DIFF;
+            controller.setDifficulty("Very Hard");
 			diffPop.close();
         });
 	}
@@ -459,6 +489,7 @@ public class MineSweeper extends Application implements Observer {
     /**
      * Creates a timer that continually updates 
      * @return - a text object which can be added to the screen and updated with the timer
+     * TODO: move this timer to the model
      */
     private Text createTimer() {
     	Text timer = new Text();
