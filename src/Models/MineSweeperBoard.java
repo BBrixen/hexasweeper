@@ -13,15 +13,17 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	private MineSweeperTile[][] board;
 	private final List<Observer> observers; // do we need a list?
 	private int ms_elapsed;
+	private String difficulty;
 	
 	/**
 	 * Constructor for MineSweeperBoard model object.
 	 */
-	public MineSweeperBoard() {
+	public MineSweeperBoard(String difficulty) {
 		//initializes the board as a ROWS x COLS 2D array with null pointers for now
 		board = new MineSweeperTile[ROWS][COLS];
 		observers = new ArrayList<>();
 		ms_elapsed = -1;
+		this.difficulty = difficulty;
 	}
 	
 	/**
@@ -128,5 +130,13 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 */
 	public void setSecondsElapsed(int elapsed) {
 		ms_elapsed = (int) (elapsed*1000.0);
+	}
+
+	public String getDifficulty() {
+		return difficulty;
+	}
+
+	public void setDifficulty(String difficulty) {
+		this.difficulty = difficulty;
 	}
 }

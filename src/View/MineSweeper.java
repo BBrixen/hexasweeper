@@ -222,15 +222,15 @@ public class MineSweeper extends Application implements Observer {
     }
 
     public void createScoreBoard(MineSweeperController controller) {
-        double[] topTimes = controller.getTopTimes();
-        Label topLabel = new Label("Top Scores:");
+        String[] topTimes = controller.getTopTimes();
+        Label topLabel = new Label("Top Scores   ");
         topLabel.setFont(MAIN_FONT);
         Label[] topTimeLabels = new Label[topTimes.length+1];
         topTimeLabels[0] = topLabel;
 
         for (int i = 0; i < topTimes.length; i++) {
             // TODO: style label
-            Label label = new Label(""+topTimes[i]);
+            Label label = new Label(topTimes[i]);
             label.setTextFill(GREEN_BACKGROUND);
             label.setFont(MAIN_FONT);
             label.setTextFill(GREEN_BACKGROUND);
@@ -461,22 +461,27 @@ public class MineSweeper extends Application implements Observer {
     private void diffListener(Button veryEasy, Button easy, Button normal, Button hard, Button veryHard, Stage diffPop) {
 		veryEasy.setOnMousePressed(me -> {
 			NUM_BOMBS = VERY_EASY_DIFF;
+            controller.setDifficulty("Very Easy");
 			diffPop.close();
         });
 		easy.setOnMousePressed(me -> {
 			NUM_BOMBS = EASY_DIFF;
+            controller.setDifficulty("Easy");
 			diffPop.close();
         });
 		normal.setOnMousePressed(me -> {
 			NUM_BOMBS = MEDIUM_DIFF;
+            controller.setDifficulty("Normal");
 			diffPop.close();
         });
 		hard.setOnMousePressed(me -> {
 			NUM_BOMBS = HARD_DIFF;
+            controller.setDifficulty("Hard");
 			diffPop.close();
         });
 		veryHard.setOnMousePressed(me -> {
 			NUM_BOMBS = VERY_HARD_DIFF;
+            controller.setDifficulty("Very Hard");
 			diffPop.close();
         });
 	}
