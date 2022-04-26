@@ -6,6 +6,7 @@ import javafx.animation.ScaleTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -45,9 +46,6 @@ import Controllers.MineSweeperController;
 public class MineSweeper extends Application implements Observer {
 
     public static final int DELTA_TIME_MS = 10;
-    // This value should be used by the model to increment time, and will be set to 0
-    // When we want the game to be paused.
-    public static int TIME_INCR = DELTA_TIME_MS;
 
     // game variables
     private static ScheduledExecutorService executor = null;
@@ -529,7 +527,9 @@ public class MineSweeper extends Application implements Observer {
      * Disables the elements in the scene and pauses the timer
      */
     private void disablePause() {
-    	TIME_INCR = 0;
+    	controller.disableTimer();
+    	setBoardOpacity(0.0);
+    	setBoardDisabled(true);
     	
     }
     
@@ -538,7 +538,42 @@ public class MineSweeper extends Application implements Observer {
      * unpauses the timer
      */
     private void enableUnpause() {
-    	TIME_INCR = DELTA_TIME_MS;
+    	controller.enableTimer();
+    	setBoardOpacity(1.0);
+    	setBoardDisabled(false);
+    }
+    
+    /**
+     * Sets every hexagon's opacity to the value given in the arguments
+     * @param opacity the opacity to set each hexagon to, 0.0 being translucent, and 1.0 being fully
+     * opaque
+     */
+    private void setBoardOpacity(double opacity) {
+    	for (int i = 0; i < rectGrid.length; i++) {
+    		for (int j = 0; j < rectGrid[i].length; j++) {
+    			rectGrid[i][j].setOpacity(opacity);
+    		}
+    	}
+    	// Could probably do this in the previous for loop, but just being safe
+    	for (int i = 0; i < labelGrid.length; i++) {
+    		for (int j = 0; j < labelGrid[i].length; j++) {
+    			labelGrid[i][j].setOpacity(opacity);
+    		}
+    	}
+    }
+    
+    private void setBoardDisabled(boolean disabled) {
+    	for (int i = 0; i< rectGrid.length; i++) {
+    		for (int j = 0; j < rectGrid[i].length; j++) {
+    			rectGrid[i][j].setDisable(disabled);
+    		}
+    	}
+    	
+    	for (int i = 0; i < labelGrid.length; i++) {
+    		for (int j = 0; j < labelGrid[i].length; j++) {
+    			labelGrid[i][j].setDisable(disabled);
+    		}
+    	}
     }
 
     /**

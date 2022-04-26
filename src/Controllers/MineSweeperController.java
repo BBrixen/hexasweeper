@@ -256,4 +256,12 @@ public class MineSweeperController implements Serializable {
 	public int getCols() {
 		return model.getCols();
 	}
+	
+	public void disableTimer() {
+		model.disableTimer();
+	}
+	
+	public void enableTimer() {
+		model.enableTimer();
+	}
 }
