@@ -28,11 +28,6 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 */
 	public MineSweeperBoard(String difficulty) {
 		//initializes the board as a ROWS x COLS 2D array with null pointers for now
-		board = new MineSweeperTile[rows][cols];
-		observers = new ArrayList<>();
-		ms_elapsed = -1;
-		this.difficulty = difficulty;
-
 		int divider = NORMAL_DIVIVER;
 		switch (difficulty) {
 			case "Very Easy":
@@ -55,6 +50,10 @@ public class MineSweeperBoard extends Observable implements Serializable {
 		};
 
 		numBombs = rows * cols / divider;
+		board = new MineSweeperTile[rows][cols];
+		observers = new ArrayList<>();
+		ms_elapsed = -1;
+		this.difficulty = difficulty;
 	}
 	
 	/**

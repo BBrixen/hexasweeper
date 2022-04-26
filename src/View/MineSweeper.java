@@ -107,13 +107,13 @@ public class MineSweeper extends Application implements Observer {
     	this.stage = stage;
     	// initialize game
         createController("Normal");
+
         stage.setTitle("Mine Sweeper");
         stage.show();
         stage.setOnCloseRequest(e -> {
                 if (executor != null)
                     executor.shutdown();
         });
-
         chooseDiff();
     }
 
@@ -152,7 +152,7 @@ public class MineSweeper extends Application implements Observer {
         createScoreBoard(controller);
 
         mainPane.setCenter(mainVBox);
-        return new Scene(mainPane, SCENE_WIDTH, SCENE_HEIGHT);
+        return new Scene(mainPane, SCREEN_WIDTH, SCREEN_HEIGHT);
     }
 
     private void generateConstants(int rows, int cols) {
@@ -170,7 +170,6 @@ public class MineSweeper extends Application implements Observer {
 
     private void createController(String difficulty) {
         controller = new MineSweeperController(difficulty);
-        System.out.println("new rows: " + controller.getRows());
         generateConstants(controller.getRows(), controller.getCols());
         controller.addObserver(this); // add as observer for model (MineSweeperBoard)
         rectGrid = new Hexagon[controller.getRows()][controller.getCols()];
@@ -387,7 +386,6 @@ public class MineSweeper extends Application implements Observer {
 
     	Stage popUp = new Stage();
         BorderPane root = new BorderPane();
-        popUp.setOnCloseRequest(Event::consume);
 
 		Button btn = new Button("Play again");
         btn.setTextFill(Color.WHITE);
