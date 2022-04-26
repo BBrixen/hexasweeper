@@ -150,7 +150,7 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 */
 	public double getSecondsElapsed() {
 		if (ms_elapsed == -1) return 0;
-		ms_elapsed += DELTA_TIME_MS;
+		ms_elapsed += TIME_INCR;
 		return ms_elapsed/1000.0;
 	}
 	

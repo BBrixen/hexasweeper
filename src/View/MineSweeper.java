@@ -45,6 +45,9 @@ import Controllers.MineSweeperController;
 public class MineSweeper extends Application implements Observer {
 
     public static final int DELTA_TIME_MS = 10;
+    // This value should be used by the model to increment time, and will be set to 0
+    // When we want the game to be paused.
+    public static int TIME_INCR = DELTA_TIME_MS;
 
     // game variables
     private static ScheduledExecutorService executor = null;
@@ -183,8 +186,9 @@ public class MineSweeper extends Application implements Observer {
     public void setButtonActions() {
         saveButton.setOnAction(e -> {
         	if (!controller.isGameOver()) {
-	        	// Should stop the clock when the user clicks save, so as not to rush them
-	        	
+	        	// Call pause method in order to prevent player cheating with file dialog box
+        		disablePause();
+        		
         		FileChooser fileChooser = new FileChooser();
         		 
                 //Set extension filter for text files
@@ -202,13 +206,14 @@ public class MineSweeper extends Application implements Observer {
 					}
 	        	}
                 }
+        	enableUnpause();
         });
     	
         loadButton.setOnAction(e -> {
         	// Unlike save, you should be able to load a game even after having ended another one
         	
         	FileChooser chooser = new FileChooser();
-        	
+        	disablePause();
         		File f = chooser.showOpenDialog(stage);
         		if (f != null) {
                     try {
@@ -217,6 +222,7 @@ public class MineSweeper extends Application implements Observer {
                         e1.printStackTrace();
                     }
                 }
+        		enableUnpause();
         });
         
         resetButton.setOnAction(e -> {
@@ -518,6 +524,22 @@ public class MineSweeper extends Application implements Observer {
         executor.scheduleAtFixedRate(updateTimerRunner, 0, DELTA_TIME_MS, TimeUnit.MILLISECONDS);
     	return timer;
     }
+    
+    /**
+     * Disables the elements in the scene and pauses the timer
+     */
+    private void disablePause() {
+    	TIME_INCR = 0;
+    	
+    }
+    
+    /**
+     * Re-enables the elements in the scene and
+     * unpauses the timer
+     */
+    private void enableUnpause() {
+    	TIME_INCR = DELTA_TIME_MS;
+    }
 
     /**
      * This inner class creates a hexagon which can be places on the board with an x and y position
@@ -539,4 +561,5 @@ public class MineSweeper extends Application implements Observer {
             setStroke(Color.BLACK);
         }
     }
+    
 }
