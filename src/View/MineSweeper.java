@@ -219,11 +219,7 @@ public class MineSweeper extends Application implements Observer {
                 }
         });
         
-        resetButton.setOnAction(e -> {
-        	stage.close();
-			this.start(new Stage());
-        });
-        
+        resetButton.setOnAction(e -> chooseDiff());
     }
 
     /**
@@ -416,9 +412,8 @@ public class MineSweeper extends Application implements Observer {
 		popUp.show();
 		
 		btn.setOnMousePressed(me -> {
-			stage.close();
-			this.start(new Stage());
-			popUp.close();
+            popUp.close();
+			chooseDiff();
         });
 	}
 
