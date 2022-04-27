@@ -68,7 +68,10 @@ public class MineSweeper extends Application implements Observer {
             LABEL_OFFSETX = HEX_WIDTH/2.5 - MAIN_FONT_SIZE/6;
     private static double LABEL_OFFSETY = HEX_HEIGHT/6 - MAIN_FONT_SIZE/2.5;
     private static final HashMap<Integer, Color> MINE_COUNT_TO_COLOR = new HashMap<>();
-    private static final String BUTTON_STYLE = "-fx-background-color: transparent;";
+    private static final String BUTTON_STYLE = "-fx-background-color: white;"
+    		+ "  -fx-border-color: black;"
+    		+ "  -fx-border-radius: 10;"
+    		+ "  -fx-background-radius: 10;";
     private static final Paint GREEN_BACKGROUND = Color.rgb(120, 190, 120);
     private static final Paint RED_BACKGROUND =  Color.rgb(190, 120, 120);
     private static final Color ONE_MINE = Color.rgb(207, 236, 207);
@@ -140,6 +143,7 @@ public class MineSweeper extends Application implements Observer {
 
         buttonRow.getChildren().addAll(saveButton, loadButton, resetButton);
         buttonRow.setAlignment(Pos.CENTER);
+
 
         // creating timer
         
@@ -384,7 +388,7 @@ public class MineSweeper extends Application implements Observer {
      */
     public void displayGameOver() {
         executor.shutdown();
-    	String msg = "YOU WIN!!";
+    	String msg = "YOU WIN!";
     	Paint p = GREEN_BACKGROUND;
     	if (!controller.win()) { // checks with the controller if the player didn't win
     		msg = "YOU LOSE!";
@@ -395,9 +399,10 @@ public class MineSweeper extends Application implements Observer {
         BorderPane root = new BorderPane();
 
 		Button btn = new Button("Play again");
-        btn.setTextFill(Color.WHITE);
+        btn.setTextFill(Color.BLACK);
         btn.setStyle(BUTTON_STYLE);
         btn.setFont(MAIN_FONT);
+        btn.setAlignment(Pos.CENTER);
 
         Label label = new Label(msg);
 		label.setTextFill(Color.WHITE);
@@ -415,8 +420,10 @@ public class MineSweeper extends Application implements Observer {
 		root.setBottom(btn);
 		root.setAlignment(label, Pos.CENTER);
 		root.setAlignment(btn, Pos.CENTER);
+		root.setMargin(btn, new Insets(20));
 		
-		Scene popScene = new Scene(root, 400, 120);
+		
+		Scene popScene = new Scene(root, 400, 160);
 
 		popUp.setScene(popScene);
 		popUp.setTitle("Game Over");
@@ -454,7 +461,7 @@ public class MineSweeper extends Application implements Observer {
 		HBox buttonBox = new HBox();
 		buttonBox.getChildren().addAll(veryEasy, easy, normal, hard, veryHard);
         buttonBox.setBackground(new Background(
-                new BackgroundFill(RED_BACKGROUND, new CornerRadii(6.0), Insets.EMPTY)));
+                new BackgroundFill(GREEN_BACKGROUND, new CornerRadii(6.0), Insets.EMPTY)));
 		
 		diffPopUp(buttonBox, label, diffPop);
 		diffListener(veryEasy, easy, normal, hard, veryHard, diffPop);
@@ -463,6 +470,7 @@ public class MineSweeper extends Application implements Observer {
 	private void diffPopUp(HBox buttonBox, Label label, Stage diffPop) {
 		buttonBox.setPadding(new Insets(10, 10, 10, 10));
 		buttonBox.setAlignment(Pos.CENTER);
+		buttonBox.setSpacing(10);
 
 		BorderPane diff = new BorderPane();
         diff.setBackground(new Background(
