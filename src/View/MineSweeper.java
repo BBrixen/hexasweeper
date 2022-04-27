@@ -6,11 +6,14 @@ import javafx.animation.ScaleTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -67,7 +70,10 @@ public class MineSweeper extends Application implements Observer {
             LABEL_OFFSETX = HEX_WIDTH/2.5 - MAIN_FONT_SIZE/6;
     private static double LABEL_OFFSETY = HEX_HEIGHT/6 - MAIN_FONT_SIZE/2.5;
     private static final HashMap<Integer, Color> MINE_COUNT_TO_COLOR = new HashMap<>();
-    private static final String BUTTON_STYLE = "-fx-background-color: transparent;";
+    private static final String BUTTON_STYLE = "-fx-background-color: white;"
+    		+ "  -fx-border-color: black;"
+    		+ "  -fx-border-radius: 10;"
+    		+ "  -fx-background-radius: 10;";
     private static final Paint GREEN_BACKGROUND = Color.rgb(120, 190, 120);
     private static final Paint RED_BACKGROUND =  Color.rgb(190, 120, 120);
     private static final Color ONE_MINE = Color.rgb(207, 236, 207);
@@ -83,7 +89,7 @@ public class MineSweeper extends Application implements Observer {
     private Label[][] labelGrid;
     private AnchorPane gridPane;
     private Stage stage;
-    private BorderPane mainPane;
+    private HBox mainPane;
     private VBox mainVBox;
     private HBox buttonRow;
     private VBox scoreBoard;
@@ -122,7 +128,7 @@ public class MineSweeper extends Application implements Observer {
         labelGrid = new Label[controller.getRows()][controller.getCols()];
         gridPane = new AnchorPane();
         buttonRow = new HBox(15);
-        mainPane = new BorderPane();
+        mainPane = new HBox();
         mainVBox = new VBox(15);
 
         // creating bottom buttons
@@ -136,10 +142,12 @@ public class MineSweeper extends Application implements Observer {
         loadButton.setFont(MAIN_FONT);
         resetButton.setFont(MAIN_FONT);
         setButtonActions();
+        Button pause = createPauseButton();
+        pause.setStyle(BUTTON_STYLE);
 
-        buttonRow.getChildren().addAll(saveButton, loadButton, resetButton);
-        buttonRow.setPadding(new Insets(5, 15, 5, 40));
+        buttonRow.getChildren().addAll(pause, saveButton, loadButton, resetButton);
         buttonRow.setAlignment(Pos.CENTER);
+
 
         // creating timer
         
@@ -149,14 +157,13 @@ public class MineSweeper extends Application implements Observer {
         }
         Text timer = createTimer();
         mainVBox.getChildren().addAll(timer, gridPane, buttonRow);
-        mainVBox.setPadding(new Insets(10,0,0,0));
         mainVBox.setAlignment(Pos.CENTER);
 
         // creates the initial blank board
         createBoard(controller.getBoard());
         createScoreBoard(controller);
 
-        mainPane.setCenter(mainVBox);
+        mainPane.getChildren().addAll(mainVBox);
         return new Scene(mainPane, SCREEN_WIDTH, SCREEN_HEIGHT);
     }
 
@@ -188,8 +195,9 @@ public class MineSweeper extends Application implements Observer {
     public void setButtonActions() {
         saveButton.setOnAction(e -> {
         	if (!controller.isGameOver()) {
-	        	// Should stop the clock when the user clicks save, so as not to rush them
-	        	
+	        	// Call pause method in order to prevent player cheating with file dialog box
+        		pauseGame();
+        		
         		FileChooser fileChooser = new FileChooser();
         		 
                 //Set extension filter for text files
@@ -207,13 +215,14 @@ public class MineSweeper extends Application implements Observer {
 					}
 	        	}
                 }
+        	unpauseGame();
         });
     	
         loadButton.setOnAction(e -> {
         	// Unlike save, you should be able to load a game even after having ended another one
         	
         	FileChooser chooser = new FileChooser();
-        	
+        	pauseGame();
         		File f = chooser.showOpenDialog(stage);
         		if (f != null) {
                     try {
@@ -222,6 +231,7 @@ public class MineSweeper extends Application implements Observer {
                         e1.printStackTrace();
                     }
                 }
+        		unpauseGame();
         });
         
         resetButton.setOnAction(e -> chooseDiff());
@@ -257,8 +267,9 @@ public class MineSweeper extends Application implements Observer {
 
         scoreBoard = new VBox(MAIN_FONT_SIZE/2);
         scoreBoard.getChildren().addAll(topTimeLabels);
-        scoreBoard.setAlignment(Pos.BASELINE_RIGHT);
-        mainPane.setRight(scoreBoard);
+        scoreBoard.setAlignment(Pos.CENTER);
+        mainPane.getChildren().addAll(scoreBoard);
+        mainPane.setAlignment(Pos.CENTER);
     }
 
     /**
@@ -381,7 +392,7 @@ public class MineSweeper extends Application implements Observer {
      */
     public void displayGameOver() {
         executor.shutdown();
-    	String msg = "YOU WIN!!";
+    	String msg = "YOU WIN!";
     	Paint p = GREEN_BACKGROUND;
     	if (!controller.win()) { // checks with the controller if the player didn't win
     		msg = "YOU LOSE!";
@@ -392,9 +403,10 @@ public class MineSweeper extends Application implements Observer {
         BorderPane root = new BorderPane();
 
 		Button btn = new Button("Play again");
-        btn.setTextFill(Color.WHITE);
+        btn.setTextFill(Color.BLACK);
         btn.setStyle(BUTTON_STYLE);
         btn.setFont(MAIN_FONT);
+        btn.setAlignment(Pos.CENTER);
 
         Label label = new Label(msg);
 		label.setTextFill(Color.WHITE);
@@ -412,8 +424,10 @@ public class MineSweeper extends Application implements Observer {
 		root.setBottom(btn);
 		root.setAlignment(label, Pos.CENTER);
 		root.setAlignment(btn, Pos.CENTER);
+		root.setMargin(btn, new Insets(20));
 		
-		Scene popScene = new Scene(root, 400, 120);
+		
+		Scene popScene = new Scene(root, 400, 160);
 
 		popUp.setScene(popScene);
 		popUp.setTitle("Game Over");
@@ -451,7 +465,7 @@ public class MineSweeper extends Application implements Observer {
 		HBox buttonBox = new HBox();
 		buttonBox.getChildren().addAll(veryEasy, easy, normal, hard, veryHard);
         buttonBox.setBackground(new Background(
-                new BackgroundFill(RED_BACKGROUND, new CornerRadii(6.0), Insets.EMPTY)));
+                new BackgroundFill(GREEN_BACKGROUND, new CornerRadii(6.0), Insets.EMPTY)));
 		
 		diffPopUp(buttonBox, label, diffPop);
 		diffListener(veryEasy, easy, normal, hard, veryHard, diffPop);
@@ -460,6 +474,7 @@ public class MineSweeper extends Application implements Observer {
 	private void diffPopUp(HBox buttonBox, Label label, Stage diffPop) {
 		buttonBox.setPadding(new Insets(10, 10, 10, 10));
 		buttonBox.setAlignment(Pos.CENTER);
+		buttonBox.setSpacing(10);
 
 		BorderPane diff = new BorderPane();
         diff.setBackground(new Background(
@@ -521,6 +536,90 @@ public class MineSweeper extends Application implements Observer {
         executor.scheduleAtFixedRate(updateTimerRunner, 0, DELTA_TIME_MS, TimeUnit.MILLISECONDS);
     	return timer;
     }
+    
+    /**
+     * Disables the elements in the scene and pauses the timer
+     */
+    private void pauseGame() {
+    	controller.disableTimer();
+    	setBoardOpacity(0.0);
+    	setBoardDisabled(true);
+    	
+    }
+    
+    /**
+     * Re-enables the elements in the scene and
+     * unpauses the timer
+     */
+    private void unpauseGame() {
+    	controller.enableTimer();
+    	setBoardOpacity(1.0);
+    	setBoardDisabled(false);
+    }
+    
+    /**
+     * Sets every hexagon's opacity to the value given in the arguments
+     * @param opacity the opacity to set each hexagon to, 0.0 being translucent, and 1.0 being fully
+     * opaque
+     */
+    private void setBoardOpacity(double opacity) {
+    	for (int i = 0; i < rectGrid.length; i++) {
+    		for (int j = 0; j < rectGrid[i].length; j++) {
+    			rectGrid[i][j].setOpacity(opacity);
+    		}
+    	}
+    	// Could probably do this in the previous for loop, but just being safe
+    	for (int i = 0; i < labelGrid.length; i++) {
+    		for (int j = 0; j < labelGrid[i].length; j++) {
+    			labelGrid[i][j].setOpacity(opacity);
+    		}
+    	}
+    }
+    
+    private void setBoardDisabled(boolean disabled) {
+    	for (int i = 0; i< rectGrid.length; i++) {
+    		for (int j = 0; j < rectGrid[i].length; j++) {
+    			rectGrid[i][j].setDisable(disabled);
+    		}
+    	}
+    	
+    	for (int i = 0; i < labelGrid.length; i++) {
+    		for (int j = 0; j < labelGrid[i].length; j++) {
+    			labelGrid[i][j].setDisable(disabled);
+    		}
+    	}
+    }
+    
+    /**
+     * Creates the actual pause button to be displayed in the scene
+     * @return
+     */
+    private Button createPauseButton() {
+    	Button button = new Button();
+    	Image pauseImage = new Image("file:Images/pause.png", 50, 50, true, false);
+    	ImageView view = new ImageView(pauseImage);
+    	view.setFitHeight(50);
+    	view.setPreserveRatio(true);
+    	button.setGraphic(view);
+    	button.setPrefSize(50, 50);
+    	button.setOnMouseClicked(e -> {
+    		// If game is paused and button is clicked, switch image back to pause button
+    		if (controller.isGamePaused()) {
+    			button.setGraphic(view);
+    			unpauseGame();
+    		}
+    		
+    		
+    		else {
+    			Image playImage = new Image("file:Images/play.png", 50, 50, true, false);
+    			ImageView playView = new ImageView(playImage);
+    			button.setGraphic(playView);
+    			pauseGame();
+    		}
+    		
+    	});
+    	return button;
+    }
 
     /**
      * This inner class creates a hexagon which can be places on the board with an x and y position
@@ -542,4 +641,5 @@ public class MineSweeper extends Application implements Observer {
             setStroke(Color.BLACK);
         }
     }
+    
 }
