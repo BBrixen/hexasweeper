@@ -24,8 +24,12 @@ public class MineSweeperController implements Serializable {
 	private MineSweeperTile[][] board;
 
 	/**
-	 * Contructor for the controller.
-	 * numBombs is used as a parameter for constructing the model.
+	 * Constructor for the controller.
+	 * 
+	 * When initialized, the controller immediately creates a new board with
+	 * the size and mine density appropriate for the selected difficulty.
+	 * 
+	 * @param difficulty A string representing the difficulty of the game, which affects board size and mine density.
 	 */
 	public MineSweeperController(String difficulty) {
 		this.model = new MineSweeperBoard(difficulty);
@@ -34,10 +38,10 @@ public class MineSweeperController implements Serializable {
 	}
 
 	/**
-	 * This restarts a new game if the user presses play again
+	 * Starts a new game of Minesweeper in the current window without resetting the scoreboard.
 	 */
 	public void newGame() {
-		this.model = new MineSweeperBoard("Normal");
+		this.model = new MineSweeperBoard("Normal"); // presumably to be changed with difficulty select?
 		win = true; // keeps track of the total number of guesses
 	}
 	
@@ -101,9 +105,10 @@ public class MineSweeperController implements Serializable {
 	}
 
 	/**
-	 * When the user clicks a tile, it will replicate a click on all the adjacent tiles
-	 * @param row - the row of the tile updating its neighbors
-	 * @param col - the col of the tile updating its neihbors
+	 * When the user clicks a tile, this method updates all of the tiles around it.
+	 * 
+	 * @param row The row of the tile to update around.
+	 * @param col The column of the tile to update around.
 	 */
 	public void updateTilesAround(int row, int col) {
 		if (this.model.getBoard()[row][col] != null)
@@ -116,9 +121,10 @@ public class MineSweeperController implements Serializable {
 	/**
 	 * This method reveals all tiles adjacent to a zero tile.
 	 * This method will continue to be called by updateTileStatus() until all chained
-	 * zero tiles are revealed and all tiles that are adjacent to that chain.
-	 * @param row - the row of the tile to check
-	 * @param col - the col of the tile to check
+	 * zero tiles are revealed, as well as all tiles that are adjacent to that chain.
+	 * 
+	 * @param row The row of the tile to check.
+	 * @param col The column of the tile to check.
 	 */
 	private void checkAdjacent(int row, int col) {
 		for (Pair<Integer, Integer> coord : this.model.getBoard()[row][col].getAdjacentTiles()) {
@@ -151,23 +157,23 @@ public class MineSweeperController implements Serializable {
 	}
 
 	/**
-	 * Adds an observer to the model's observer list
-	 * @param o is the observer to be added. Most likely a view object
+	 * Adds an observer to the model's observer list.
+	 * 
+	 * @param o The observer to be added. Most likely a view object.
 	 */
 	public void addObserver(Observer o) {
 		model.addObserver(o);
 	}
 	
 	/**
-	 * Checks if the game is over.
-	 * @return boolean indicating if the game is over
+	 * @return A boolean indicating if the game is over.
 	 */
 	public boolean isGameOver() {
 		return gameOver;
 	}
 	
 	/**
-	 * Sets gameOver to true and call's the model's notify method.
+	 * Sets gameOver to true and calls the model's notify method.
 	 */
 	public void gameIsOver() {
 		gameOver = true;
@@ -176,20 +182,26 @@ public class MineSweeperController implements Serializable {
 	}
 
 	/**
-	 * Returns a boolean indicating if the player won the game
-	 * @return boolean if the player won
+	 * @return A boolean indicating if the player won the game.
 	 */
 	public boolean win() {
 		return win;
 	}
 
+	/**
+	 * @return The MineSweeperTile[][] array from this controller's current model.
+	 */
 	public MineSweeperTile[][] getBoard() {
 		return this.model.getBoard();
 	}
 	
+	/*
+	 * TODO: Figure out under what circumstances this could fail.
+	 */
 	/**
 	 * Saves the game by outputting the current state of the board and the instance variables to a file.
-	 * @throws IOException - when we fail to save the game
+	 * 
+	 * @throws IOException If the game fails to save.
 	 */
 	public void saveGame(File f) throws IOException {
 		FileOutputStream fos = new FileOutputStream(f);
@@ -208,8 +220,14 @@ public class MineSweeperController implements Serializable {
 		oos.close();
 	}
 	
+	/*
+	 * TODO: Figure out under what circumstances this could fail.
+	 */
 	/**
 	 * Loads the game by reading off parameters from the Controller object stored in the chosen file.
+	 * 
+	 * @throws IOException If the game fails to load.
+	 * @throws ClassNotFoundException 
 	 */
 	public void loadGame(File f) throws IOException, ClassNotFoundException {
 		FileInputStream fis = new FileInputStream(f);
@@ -229,9 +247,9 @@ public class MineSweeperController implements Serializable {
 	}
 
 	/**
-	 * Gets the number of seconds elapsed in the game
-	 * from the model
-	 * @return The number of seconds that the game has been going for
+	 * When called, this method updates the model's time by some number of milliseconds and returns the new time.
+	 * 
+	 * @return The number of seconds that the current game has been going for, as a double.
 	 */
 	public double getSecondsElapsed() {
 		return model.getSecondsElapsed();
@@ -246,13 +264,25 @@ public class MineSweeperController implements Serializable {
 		return topTimes;
 	}
 
+	/**
+	 * Updates the model's difficulty setting.
+	 * 
+	 * @param A string storing the new difficulty to use.
+	 */
 	public void setDifficulty(String difficulty) {
 		this.model.setDifficulty(difficulty);
 	}
 
+	/**
+	 * @return The number of rows in the model's grid.
+	 */
 	public int getRows() {
 		return model.getRows();
 	}
+	
+	/**
+	 * @return The number of columns in the model's grid.
+	 */
 	public int getCols() {
 		return model.getCols();
 	}

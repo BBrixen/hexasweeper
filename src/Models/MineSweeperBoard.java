@@ -6,17 +6,33 @@ import Utils.GUESS_STATUS;
 
 import static View.MineSweeper.*;
 
+/**
+ * This class holds the model for a game of Minesweeper, focusing on the gameplay area itself.
+ * 
+ * The grid of tiles is stored as a 2D array of MineSweeperTiles here,
+ * while the class keeps track of gameplay information that needs to be stored,
+ * such as elapsed time and variables that are relevant during setup.
+ * The class also updates its observers with any changes to the board state.
+ *
+ */
 @SuppressWarnings("deprecation")
 public class MineSweeperBoard extends Observable implements Serializable {
 
-	// the minesweeper board as a 2D array
+	/**
+	 * A 2D array of MindsweeperTiles to store information on the instantaneous board state.
+	 */
 	private MineSweeperTile[][] board;
+	
 	private final List<Observer> observers; // do we need a list?
 	private int ms_elapsed;
 	private final int numBombs;
 	private String difficulty;
 
 	private int rows = 16, cols = 24;
+	
+	/**
+	 * The "divider" variables affect the density of mines; for divider N, one in N tiles should be a mine.
+	 */
 	private static final int VERY_HARD_DIVIDER = 3;
 	private static final int HARD_DIVIDER = 4;
 	private static final int NORMAL_DIVIVER = 5;
@@ -24,7 +40,9 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	private static final int VERY_EASY_DIVIDER = 20;
 	
 	/**
-	 * Constructor for MineSweeperBoard model object.
+	 * Constructor for the MineSweeperBoard model object.
+	 * 
+	 * @param difficulty A string representing the difficulty of the game, which affects board size and mine density.
 	 */
 	public MineSweeperBoard(String difficulty) {
 		//initializes the board as a ROWS x COLS 2D array with null pointers for now
@@ -110,14 +128,16 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	}
 	
 	/**
-	 * Adds any observers to notify of changes
+	 * Adds an observer to notify of changes.
+	 * 
+	 * @param o The observer to add, presumably a view object.
 	 */
 	public void addObserver(Observer o) {
 		observers.add(o);
 	}
 	
 	/**
-	 * This method notifies observers when the board has changed
+	 * This method notifies observers when the board has changed.
 	 */
 	public void notifyObservers() {
 		for (Observer o : observers) {
@@ -126,7 +146,13 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	}
 	
 	/**
-	 * This method places bombs in random locations if the tile is null.
+	 * This method places bombs in random locations once the user clicks on the board for the first time.
+	 * 
+	 * It will never place them within 2 hexes of the user's first click, to ensure the game is playable
+	 * and that the first click gives useful information.
+	 * 
+	 * @param startRow The row that the user originally clicked.
+	 * @param startCol The column that the user originally clicked.
 	 */
 	public void createBombs(int startRow, int startCol) {
 		int i = 0;
@@ -145,8 +171,10 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	}
 
 	/**
-	 * Calculates the number of seconds that have elapsed in the game
-	 * @return the number of seconds elapsed
+	 * Adds a certain number of milliseconds to the elapsed time.
+	 * Then calculates the number of seconds that have elapsed in the game, and returns it as a double.
+	 * 
+	 * @return The number of elapsed seconds, as a double.
 	 */
 	public double getSecondsElapsed() {
 		if (ms_elapsed == -1) return 0;
@@ -155,28 +183,53 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	}
 	
 	/**
-	 * Calculates the number of seconds that have elapsed in the game
+	 * Updates the number of milliseconds elapsed to match an input in seconds.
+	 * 
+	 * @param elapsed An integer number of seconds to update the timer to.
 	 */
 	public void setSecondsElapsed(int elapsed) {
 		ms_elapsed = (int) (elapsed*1000.0);
 	}
 
+	/**
+	 * @return This game's difficulty setting, expressed as a string (like "Easy" or "Very Hard").
+	 */
 	public String getDifficulty() {
 		return difficulty;
 	}
 
+	/**
+	 * Sets the game's difficulty. This setting can't affect a game already in progress,
+	 * as the grid and mines have already been fully set by then.
+	 * 
+	 * @param difficulty A new difficulty to set this game to, expressed as a string (like "Easy" or "Very Hard").
+	 */
 	public void setDifficulty(String difficulty) {
 		this.difficulty = difficulty;
 	}
 
+	/**
+	 * @return The number of rows in the Minesweeper board.
+	 */
 	public int getRows() {
 		return rows;
 	}
 
+	/**
+	 * @return The number of columns in the Minesweeper board.
+	 */
 	public int getCols() {
 		return cols;
 	}
 
+	/**
+	 * Returns the numBombs variable, which stores the number of bombs on the board.
+	 * 
+	 * Note that this is the intended number of bombs to place, before game setup,
+	 * and not the number that actually *were* placed (if, somehow, it might be different).
+	 * 
+	 * @return The number of bombs on the Minesweeper board.
+	 */
 	public int getNumBombs() {
 		return numBombs;
 	}

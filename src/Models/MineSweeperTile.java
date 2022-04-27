@@ -6,15 +6,38 @@ import javafx.util.Pair;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * This class stores all of the information about a single tile on the Minesweeper board.
+ * 
+ * A tile needs to know whether it has been guessed, unguessed, flagged, or has a bomb revealed,
+ * which is stored in its GUESS_STATUS variable. It also needs to know how many adjacent bombs there are,
+ * so it can reveal the number if it is clicked on. Finally, it stores its own coordinates
+ * and whether it has a bomb on itself.
+ *
+ */
 public class MineSweeperTile implements Serializable{
 
     private GUESS_STATUS status;
-    private int mineCount; // the number of mines around this
+    
+    /**
+     * The number of tiles adjacent to this one that contain mines.
+     */
+    private int mineCount;
+    
     private final int row, col;
-    // indicates if the tile contains a bomb,
-    // and whether or not the number of bombs around it should be shown or hidden
+    
+    /** Indicates if the tile contains a bomb,
+     *  and thus whether or not the number of bombs around it should be shown.
+     */
     private boolean bomb;
 
+    /**
+     * Creates a new tile at a given coordinate and with a certain status.
+     * 
+     * @param row The row to place this tile at.
+     * @param col The column to place this tile at.
+     * @param status The guess status to give this tile when placing it.
+     */
     public MineSweeperTile(int row, int col, GUESS_STATUS status) {
     	this.row = row;
     	this.col = col;
@@ -22,6 +45,12 @@ public class MineSweeperTile implements Serializable{
         mineCount = 0;
     }
     
+    /**
+     * Constructor without a guess status, which defaults to creating an unguessed tile.
+     * 
+     * @param row The row to place this tile at.
+     * @param col The column to place this tile at.
+     */
     public MineSweeperTile(int row, int col) {
     	this(row, col, GUESS_STATUS.UNGUESSED);
 	}
@@ -35,6 +64,12 @@ public class MineSweeperTile implements Serializable{
 	 * 
 	 * (I used similar math in the controller in the checkAdjacent() method)
 	 */
+    /**
+     * Counts up tiles which are adjacent to this one, and adds one to the mineCount variable
+     * each time one of them contains a mine.
+     * 
+     * @param board The entire MineSweeperTile[][] array with the current board state,
+     */
     public void updateCount(MineSweeperTile[][] board) {
     	for (Pair <Integer, Integer> pair : getAdjacentTiles()) {
             int row = pair.getKey();
@@ -46,14 +81,16 @@ public class MineSweeperTile implements Serializable{
         }
     }
 
-    /**
-     * This gets the coordinates of all the tile adjacent to this current tile
-     * These coordinates CAN be outside the bounds of the board,
-     * so it is best to always check whether or not they are in bounds or not
-     *
+    /*
      * TODO: maybe make this check the bounds of the board first, that way we dont have to check each other time.
      *  idk this might be needed tho
-     * @return - a list of (x, y) coordinates which are the sourrounding tiles
+     */
+    /**
+     * Returns the coordinates of all tiles adjacent to this one.
+     * These coordinates CAN be outside the bounds of the board,
+     * so it is best to always check whether or not they are in bounds.
+     *
+     * @return A list of (x, y) coordinate pairs that the surrounding tiles have, expressed as an ArrayList of Integer Pairs.
      */
     public ArrayList<Pair<Integer, Integer>> getAdjacentTiles() {
         // creating variables
@@ -68,27 +105,47 @@ public class MineSweeperTile implements Serializable{
         return adjacents;
     }
 
+    /**
+     * @param status The new guess status of this tile (guessed, unguessed, flagged, mine revealed).
+     */
 	public void setStatus(GUESS_STATUS status) {
     	this.status = status;
     }
     
+	/**
+	 * @return The guess status of this tile (guessed, unguessed, flagged, mine revealed).
+	 */
     public GUESS_STATUS getStatus() {
     	return status;
     }
     
+    /**
+     * @return A boolean indicating whether there is a mine here.
+     */
     public boolean isBomb() {
     	return bomb;
     }
     
+    /**
+     * Mark that this tile contains a mine.
+     * 
+     * This method also sets the mineCount to 0, since the number of adjacent mines should never be displayed on a mine tile.
+     */
     public void setBomb() {
     	bomb = true;
         mineCount = 0; // 0 because we dont count the number of bombs around other bombs
     }
 
+    /**
+     * @return The number of adjacent mines.
+     */
     public int getMineCount() {
     	return mineCount;
     }
     
+    /**
+     * Adds one to the labeled number of adjacent mines.
+     */
     public void addMineCount() {
     	mineCount = mineCount + 1;
     }
