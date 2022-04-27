@@ -84,7 +84,7 @@ public class MineSweeper extends Application implements Observer {
     private Label[][] labelGrid;
     private AnchorPane gridPane;
     private Stage stage;
-    private BorderPane mainPane;
+    private HBox mainPane;
     private VBox mainVBox;
     private HBox buttonRow;
     private VBox scoreBoard;
@@ -123,7 +123,7 @@ public class MineSweeper extends Application implements Observer {
         labelGrid = new Label[controller.getRows()][controller.getCols()];
         gridPane = new AnchorPane();
         buttonRow = new HBox(15);
-        mainPane = new BorderPane();
+        mainPane = new HBox();
         mainVBox = new VBox(15);
 
         // creating bottom buttons
@@ -139,7 +139,6 @@ public class MineSweeper extends Application implements Observer {
         setButtonActions();
 
         buttonRow.getChildren().addAll(saveButton, loadButton, resetButton);
-        buttonRow.setPadding(new Insets(5, 15, 5, 40));
         buttonRow.setAlignment(Pos.CENTER);
 
         // creating timer
@@ -150,14 +149,13 @@ public class MineSweeper extends Application implements Observer {
         }
         Text timer = createTimer();
         mainVBox.getChildren().addAll(timer, gridPane, buttonRow);
-        mainVBox.setPadding(new Insets(10,0,0,0));
         mainVBox.setAlignment(Pos.CENTER);
 
         // creates the initial blank board
         createBoard(controller.getBoard());
         createScoreBoard(controller);
 
-        mainPane.setCenter(mainVBox);
+        mainPane.getChildren().addAll(mainVBox);
         return new Scene(mainPane, SCREEN_WIDTH, SCREEN_HEIGHT);
     }
 
@@ -261,8 +259,9 @@ public class MineSweeper extends Application implements Observer {
 
         scoreBoard = new VBox(MAIN_FONT_SIZE/2);
         scoreBoard.getChildren().addAll(topTimeLabels);
-        scoreBoard.setAlignment(Pos.BASELINE_RIGHT);
-        mainPane.setRight(scoreBoard);
+        scoreBoard.setAlignment(Pos.CENTER);
+        mainPane.getChildren().addAll(scoreBoard);
+        mainPane.setAlignment(Pos.CENTER);
     }
 
     /**
