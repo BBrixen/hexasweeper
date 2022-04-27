@@ -346,6 +346,9 @@ public class MineSweeper extends Application implements Observer {
                     labelGrid[row][col].setText(""+board[row][col].getMineCount());
                     rectGrid[row][col].setFill(MINE_COUNT_TO_COLOR.get(board[row][col].getMineCount()));
                 }
+                else {
+                	labelGrid[row][col].setText("");
+                }
             }
 	}
 
