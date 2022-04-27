@@ -27,6 +27,7 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	private int ms_elapsed;
 	private final int numBombs;
 	private String difficulty;
+	private int timeInc;
 
 	private int rows = 16, cols = 24;
 	
@@ -72,6 +73,7 @@ public class MineSweeperBoard extends Observable implements Serializable {
 		observers = new ArrayList<>();
 		ms_elapsed = -1;
 		this.difficulty = difficulty;
+		timeInc = DELTA_TIME_MS;
 	}
 	
 	/**
@@ -178,8 +180,16 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 */
 	public double getSecondsElapsed() {
 		if (ms_elapsed == -1) return 0;
-		ms_elapsed += DELTA_TIME_MS;
+		ms_elapsed += timeInc;
 		return ms_elapsed/1000.0;
+	}
+	
+	public void disableTimer() {
+		timeInc = 0;
+	}
+	
+	public void enableTimer() {
+		timeInc = DELTA_TIME_MS;
 	}
 	
 	/**
@@ -233,4 +243,5 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	public int getNumBombs() {
 		return numBombs;
 	}
+	
 }

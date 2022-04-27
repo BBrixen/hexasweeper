@@ -6,6 +6,7 @@ import javafx.animation.ScaleTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -188,8 +189,9 @@ public class MineSweeper extends Application implements Observer {
     public void setButtonActions() {
         saveButton.setOnAction(e -> {
         	if (!controller.isGameOver()) {
-	        	// Should stop the clock when the user clicks save, so as not to rush them
-	        	
+	        	// Call pause method in order to prevent player cheating with file dialog box
+        		disablePause();
+        		
         		FileChooser fileChooser = new FileChooser();
         		 
                 //Set extension filter for text files
@@ -207,13 +209,14 @@ public class MineSweeper extends Application implements Observer {
 					}
 	        	}
                 }
+        	enableUnpause();
         });
     	
         loadButton.setOnAction(e -> {
         	// Unlike save, you should be able to load a game even after having ended another one
         	
         	FileChooser chooser = new FileChooser();
-        	
+        	disablePause();
         		File f = chooser.showOpenDialog(stage);
         		if (f != null) {
                     try {
@@ -222,6 +225,7 @@ public class MineSweeper extends Application implements Observer {
                         e1.printStackTrace();
                     }
                 }
+        		enableUnpause();
         });
         
         resetButton.setOnAction(e -> chooseDiff());
@@ -521,6 +525,59 @@ public class MineSweeper extends Application implements Observer {
         executor.scheduleAtFixedRate(updateTimerRunner, 0, DELTA_TIME_MS, TimeUnit.MILLISECONDS);
     	return timer;
     }
+    
+    /**
+     * Disables the elements in the scene and pauses the timer
+     */
+    private void disablePause() {
+    	controller.disableTimer();
+    	setBoardOpacity(0.0);
+    	setBoardDisabled(true);
+    	
+    }
+    
+    /**
+     * Re-enables the elements in the scene and
+     * unpauses the timer
+     */
+    private void enableUnpause() {
+    	controller.enableTimer();
+    	setBoardOpacity(1.0);
+    	setBoardDisabled(false);
+    }
+    
+    /**
+     * Sets every hexagon's opacity to the value given in the arguments
+     * @param opacity the opacity to set each hexagon to, 0.0 being translucent, and 1.0 being fully
+     * opaque
+     */
+    private void setBoardOpacity(double opacity) {
+    	for (int i = 0; i < rectGrid.length; i++) {
+    		for (int j = 0; j < rectGrid[i].length; j++) {
+    			rectGrid[i][j].setOpacity(opacity);
+    		}
+    	}
+    	// Could probably do this in the previous for loop, but just being safe
+    	for (int i = 0; i < labelGrid.length; i++) {
+    		for (int j = 0; j < labelGrid[i].length; j++) {
+    			labelGrid[i][j].setOpacity(opacity);
+    		}
+    	}
+    }
+    
+    private void setBoardDisabled(boolean disabled) {
+    	for (int i = 0; i< rectGrid.length; i++) {
+    		for (int j = 0; j < rectGrid[i].length; j++) {
+    			rectGrid[i][j].setDisable(disabled);
+    		}
+    	}
+    	
+    	for (int i = 0; i < labelGrid.length; i++) {
+    		for (int j = 0; j < labelGrid[i].length; j++) {
+    			labelGrid[i][j].setDisable(disabled);
+    		}
+    	}
+    }
 
     /**
      * This inner class creates a hexagon which can be places on the board with an x and y position
@@ -542,4 +599,5 @@ public class MineSweeper extends Application implements Observer {
             setStroke(Color.BLACK);
         }
     }
+    
 }
