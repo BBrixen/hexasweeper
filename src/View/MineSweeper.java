@@ -12,6 +12,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -140,8 +142,10 @@ public class MineSweeper extends Application implements Observer {
         loadButton.setFont(MAIN_FONT);
         resetButton.setFont(MAIN_FONT);
         setButtonActions();
+        Button pause = createPauseButton();
+        pause.setStyle(BUTTON_STYLE);
 
-        buttonRow.getChildren().addAll(saveButton, loadButton, resetButton);
+        buttonRow.getChildren().addAll(pause, saveButton, loadButton, resetButton);
         buttonRow.setAlignment(Pos.CENTER);
 
 
@@ -192,7 +196,7 @@ public class MineSweeper extends Application implements Observer {
         saveButton.setOnAction(e -> {
         	if (!controller.isGameOver()) {
 	        	// Call pause method in order to prevent player cheating with file dialog box
-        		disablePause();
+        		pauseGame();
         		
         		FileChooser fileChooser = new FileChooser();
         		 
@@ -211,14 +215,14 @@ public class MineSweeper extends Application implements Observer {
 					}
 	        	}
                 }
-        	enableUnpause();
+        	unpauseGame();
         });
     	
         loadButton.setOnAction(e -> {
         	// Unlike save, you should be able to load a game even after having ended another one
         	
         	FileChooser chooser = new FileChooser();
-        	disablePause();
+        	pauseGame();
         		File f = chooser.showOpenDialog(stage);
         		if (f != null) {
                     try {
@@ -227,7 +231,7 @@ public class MineSweeper extends Application implements Observer {
                         e1.printStackTrace();
                     }
                 }
-        		enableUnpause();
+        		unpauseGame();
         });
         
         resetButton.setOnAction(e -> chooseDiff());
@@ -536,7 +540,7 @@ public class MineSweeper extends Application implements Observer {
     /**
      * Disables the elements in the scene and pauses the timer
      */
-    private void disablePause() {
+    private void pauseGame() {
     	controller.disableTimer();
     	setBoardOpacity(0.0);
     	setBoardDisabled(true);
@@ -547,7 +551,7 @@ public class MineSweeper extends Application implements Observer {
      * Re-enables the elements in the scene and
      * unpauses the timer
      */
-    private void enableUnpause() {
+    private void unpauseGame() {
     	controller.enableTimer();
     	setBoardOpacity(1.0);
     	setBoardDisabled(false);
@@ -584,6 +588,37 @@ public class MineSweeper extends Application implements Observer {
     			labelGrid[i][j].setDisable(disabled);
     		}
     	}
+    }
+    
+    /**
+     * Creates the actual pause button to be displayed in the scene
+     * @return
+     */
+    private Button createPauseButton() {
+    	Button button = new Button();
+    	Image pauseImage = new Image("file:Images/pause.png", 50, 50, true, false);
+    	ImageView view = new ImageView(pauseImage);
+    	view.setFitHeight(50);
+    	view.setPreserveRatio(true);
+    	button.setGraphic(view);
+    	button.setPrefSize(50, 50);
+    	button.setOnMouseClicked(e -> {
+    		// If game is paused and button is clicked, switch image back to pause button
+    		if (controller.isGamePaused()) {
+    			button.setGraphic(view);
+    			unpauseGame();
+    		}
+    		
+    		
+    		else {
+    			Image playImage = new Image("file:Images/play.png", 50, 50, true, false);
+    			ImageView playView = new ImageView(playImage);
+    			button.setGraphic(playView);
+    			pauseGame();
+    		}
+    		
+    	});
+    	return button;
     }
 
     /**

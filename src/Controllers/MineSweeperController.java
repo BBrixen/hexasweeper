@@ -294,4 +294,8 @@ public class MineSweeperController implements Serializable {
 	public void enableTimer() {
 		model.enableTimer();
 	}
+	
+	public boolean isGamePaused() {
+		return model.isGamePaused();
+	}
 }

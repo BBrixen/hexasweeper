@@ -244,4 +244,11 @@ public class MineSweeperBoard extends Observable implements Serializable {
 		return numBombs;
 	}
 	
+	public boolean isGamePaused() {
+		if(timeInc == 0) {
+			return true;
+		}
+		return false;
+	}
+	
 }
