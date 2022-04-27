@@ -5,8 +5,6 @@ import javafx.animation.RotateTransition;
 import javafx.animation.ScaleTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -427,7 +425,7 @@ public class MineSweeper extends Application implements Observer {
 		root.setMargin(btn, new Insets(20));
 		
 		
-		Scene popScene = new Scene(root, 400, 160);
+		Scene popScene = new Scene(root, SCENE_WIDTH/2, SCENE_HEIGHT/6);
 
 		popUp.setScene(popScene);
 		popUp.setTitle("Game Over");
@@ -484,7 +482,7 @@ public class MineSweeper extends Application implements Observer {
 		diff.setAlignment(label, Pos.CENTER);
 		diff.setAlignment(buttonBox, Pos.CENTER);
 		
-		Scene diffScene = new Scene(diff, 400, 120);
+		Scene diffScene = new Scene(diff, SCENE_WIDTH/2, SCENE_HEIGHT/6);
         diffScene.setFill(GREEN_BACKGROUND);
 		diffPop.setScene(diffScene);
 		diffPop.setTitle("New Game");
