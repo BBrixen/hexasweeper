@@ -49,24 +49,25 @@ public class MineSweeperBoard extends Observable implements Serializable {
 		//initializes the board as a ROWS x COLS 2D array with null pointers for now
 		int divider = NORMAL_DIVIVER;
 		switch (difficulty) {
-			case "Very Easy":
+			case "Very Easy" -> {
 				divider = VERY_EASY_DIVIDER;
 				cols = 16;
-				break;
-			case "Easy":
+			}
+			case "Easy" -> {
 				divider = EASY_DIVIDER;
 				cols = 20;
-				break;
-			case "Hard":
+			}
+			case "Hard" -> {
 				divider = HARD_DIVIDER;
 				rows = 20;
-				break;
-			case "Very Hard":
+			}
+			case "Very Hard" -> {
 				divider = VERY_HARD_DIVIDER;
 				rows = 24;
 				cols = 30;
-				break;
-		};
+			}
+		}
+
 
 		numBombs = rows * cols / divider;
 		board = new MineSweeperTile[rows][cols];
@@ -115,30 +116,6 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	}
 	
 	/**
-	 * Method to return the entire board
-	 * @return the board object as a MineSweeperTile 2D array
-	 */
-	public MineSweeperTile[][] getBoard() {
-		return board;
-	}
-	
-	/**
-	 * Sets the board to an existing board, from a loaded file.
-	 */
-	public void setBoard(MineSweeperTile[][] newBoard) {
-		board = newBoard;
-	}
-	
-	/**
-	 * Adds an observer to notify of changes.
-	 * 
-	 * @param o The observer to add, presumably a view object.
-	 */
-	public void addObserver(Observer o) {
-		observers.add(o);
-	}
-	
-	/**
 	 * This method notifies observers when the board has changed.
 	 */
 	public void notifyObservers() {
@@ -172,24 +149,54 @@ public class MineSweeperBoard extends Observable implements Serializable {
 		}
 	}
 
+	// GETTERS AND SETTERS
+
 	/**
-	 * Adds a certain number of milliseconds to the elapsed time.
-	 * Then calculates the number of seconds that have elapsed in the game, and returns it as a double.
-	 * 
-	 * @return The number of elapsed seconds, as a double.
+	 * Method to return the entire board
+	 * @return the board object as a MineSweeperTile 2D array
 	 */
-	public double getSecondsElapsed() {
-		if (ms_elapsed == -1) return 0;
-		ms_elapsed += timeInc;
-		return ms_elapsed/1000.0;
+	public MineSweeperTile[][] getBoard() {
+		return board;
 	}
-	
+
+	/**
+	 * Sets the board to an existing board, from a loaded file.
+	 */
+	public void setBoard(MineSweeperTile[][] newBoard) {
+		board = newBoard;
+	}
+
+	/**
+	 * Adds an observer to notify of changes.
+	 *
+	 * @param o The observer to add, presumably a view object.
+	 */
+	public void addObserver(Observer o) {
+		observers.add(o);
+	}
+
+	/**
+	 * Disables the game timer by setting the time increment to 0ms
+	 * We call this when we pause the game
+	 */
 	public void disableTimer() {
 		timeInc = 0;
 	}
-	
+
+	/**
+	 * Enables the game timer by setting the time increment to DELTA_TIME_MS
+	 * We call this when we resume the game
+	 */
 	public void enableTimer() {
 		timeInc = DELTA_TIME_MS;
+	}
+
+	/**
+	 * This determines if the game is paused by checking if the timer is active
+	 * @return - true if the game is paused (the timer is inactive), false otherwise
+	 */
+	public boolean isGamePaused() {
+		return timeInc == 0;
 	}
 	
 	/**
@@ -199,6 +206,18 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 */
 	public void setSecondsElapsed(int elapsed) {
 		ms_elapsed = (int) (elapsed*1000.0);
+	}
+
+	/**
+	 * Adds a certain number of milliseconds to the elapsed time.
+	 * Then calculates the number of seconds that have elapsed in the game, and returns it as a double.
+	 *
+	 * @return The number of elapsed seconds, as a double.
+	 */
+	public double getSecondsElapsed() {
+		if (ms_elapsed == -1) return 0;
+		ms_elapsed += timeInc;
+		return ms_elapsed/1000.0;
 	}
 
 	/**
@@ -243,12 +262,4 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	public int getNumBombs() {
 		return numBombs;
 	}
-	
-	public boolean isGamePaused() {
-		if(timeInc == 0) {
-			return true;
-		}
-		return false;
-	}
-	
 }
