@@ -55,15 +55,6 @@ public class MineSweeperTile implements Serializable{
     	this(row, col, GUESS_STATUS.UNGUESSED);
 	}
 
-    
-    /* I did some strange math here. adj is cardinal directions for
-	 * coord pairs for all adjacent tiles in odd rows. 
-	 * adjEven is for even rows. I'm sure there is a cleaner/
-	 * more logical way to do this. I'll try to format it differently.
-	 * This method is used to update each tile's mineCount.
-	 * 
-	 * (I used similar math in the controller in the checkAdjacent() method)
-	 */
     /**
      * Counts up tiles which are adjacent to this one, and adds one to the mineCount variable
      * each time one of them contains a mine.
@@ -80,6 +71,15 @@ public class MineSweeperTile implements Serializable{
                 board[this.row][this.col].addMineCount();
         }
     }
+
+    /**
+     * Adds one to the labeled number of adjacent mines.
+     */
+    public void addMineCount() {
+        mineCount = mineCount + 1;
+    }
+
+    // GETTERS AND SETTERS
 
     /*
      * TODO: maybe make this check the bounds of the board first, that way we dont have to check each other time.
@@ -141,12 +141,5 @@ public class MineSweeperTile implements Serializable{
      */
     public int getMineCount() {
     	return mineCount;
-    }
-    
-    /**
-     * Adds one to the labeled number of adjacent mines.
-     */
-    public void addMineCount() {
-    	mineCount = mineCount + 1;
     }
 }
