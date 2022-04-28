@@ -38,14 +38,6 @@ public class MineSweeperController implements Serializable {
 	}
 
 	/**
-	 * Starts a new game of Minesweeper in the current window without resetting the scoreboard.
-	 */
-	public void newGame() {
-		this.model = new MineSweeperBoard("Normal"); // presumably to be changed with difficulty select?
-		win = true; // keeps track of the total number of guesses
-	}
-	
-	/**
 	 * This method determines the current status of the clicked tile, and based
 	 * on the status parameter, assigns a new status to the tile.
 	 * 
@@ -165,36 +157,6 @@ public class MineSweeperController implements Serializable {
 		model.addObserver(o);
 	}
 	
-	/**
-	 * @return A boolean indicating if the game is over.
-	 */
-	public boolean isGameOver() {
-		return gameOver;
-	}
-	
-	/**
-	 * Sets gameOver to true and calls the model's notify method.
-	 */
-	public void gameIsOver() {
-		gameOver = true;
-		if (win) scoreBoard.addNewTime(model.getSecondsElapsed(), model.getDifficulty());
-		model.notifyObservers();
-	}
-
-	/**
-	 * @return A boolean indicating if the player won the game.
-	 */
-	public boolean win() {
-		return win;
-	}
-
-	/**
-	 * @return The MineSweeperTile[][] array from this controller's current model.
-	 */
-	public MineSweeperTile[][] getBoard() {
-		return this.model.getBoard();
-	}
-	
 	/*
 	 * TODO: Figure out under what circumstances this could fail.
 	 */
@@ -226,8 +188,8 @@ public class MineSweeperController implements Serializable {
 	/**
 	 * Loads the game by reading off parameters from the Controller object stored in the chosen file.
 	 * 
-	 * @throws IOException If the game fails to load.
-	 * @throws ClassNotFoundException 
+	 * @throws IOException If opening the file fails
+	 * @throws ClassNotFoundException If the object we try to load is not a valid MineSweeperTile[][]
 	 */
 	public void loadGame(File f) throws IOException, ClassNotFoundException {
 		FileInputStream fis = new FileInputStream(f);
@@ -246,6 +208,38 @@ public class MineSweeperController implements Serializable {
 		model.notifyObservers();
 	}
 
+	//GETTERS AND SETTERS
+
+	/**
+	 * @return A boolean indicating if the game is over.
+	 */
+	public boolean isGameOver() {
+		return gameOver;
+	}
+
+	/**
+	 * Sets gameOver to true and calls the model's notify method.
+	 */
+	public void gameIsOver() {
+		gameOver = true;
+		if (win) scoreBoard.addNewTime(model.getSecondsElapsed(), model.getDifficulty());
+		model.notifyObservers();
+	}
+
+	/**
+	 * @return A boolean indicating if the player won the game.
+	 */
+	public boolean win() {
+		return win;
+	}
+
+	/**
+	 * @return The MineSweeperTile[][] array from this controller's current model.
+	 */
+	public MineSweeperTile[][] getBoard() {
+		return this.model.getBoard();
+	}
+
 	/**
 	 * When called, this method updates the model's time by some number of milliseconds and returns the new time.
 	 * 
@@ -255,6 +249,11 @@ public class MineSweeperController implements Serializable {
 		return model.getSecondsElapsed();
 	}
 
+	/**
+	 * Retrieves the top times from the scoreboard,
+	 * TODO make this dependeds on the difficulty of game being played
+	 * @return - a string representing the top times
+	 */
 	public String[] getTopTimes() {
 		Pair<Double, String>[] times = scoreBoard.getTopTimes();
 		String[] topTimes = new String[times.length];
@@ -262,15 +261,6 @@ public class MineSweeperController implements Serializable {
 			topTimes[i] = times[i].getValue() + ": " + times[i].getKey();
 		}
 		return topTimes;
-	}
-
-	/**
-	 * Updates the model's difficulty setting.
-	 * 
-	 * @param A string storing the new difficulty to use.
-	 */
-	public void setDifficulty(String difficulty) {
-		this.model.setDifficulty(difficulty);
 	}
 
 	/**

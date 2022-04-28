@@ -12,7 +12,7 @@ public class ScoreBoard {
 
     private static final int NUM_TOP_TIMES = 5;
     private static final String fileName = "scores.txt";
-    private final Pair[] topTimes;
+    private final Pair<Double, String>[] topTimes;
 
     public ScoreBoard() {
         topTimes = new Pair[NUM_TOP_TIMES];
@@ -31,7 +31,7 @@ public class ScoreBoard {
         } catch (FileNotFoundException ignored) {}
 
         for (int i = 0; i < topTimes.length; i++) {
-            Pair time = topTimes[i];
+            Pair<Double, String> time = topTimes[i];
             if (time == null) {
                 topTimes[i] = new Pair<>(0.0, "No Entry");
             }
@@ -69,8 +69,11 @@ public class ScoreBoard {
         return topTimes;
     }
 
+    /**
+     * This saves the times stored in the scoreboard into a text file
+     * We call this when the user generates a new top time that we want to save
+     */
     private void saveTime() {
-        System.out.println("saving");
         try {
             FileWriter writer = new FileWriter(fileName);
             for (Pair<Double, String> time : topTimes) {

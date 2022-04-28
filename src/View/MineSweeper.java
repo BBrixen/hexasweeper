@@ -45,10 +45,9 @@ import Controllers.MineSweeperController;
 @SuppressWarnings("deprecation")
 public class MineSweeper extends Application implements Observer {
 
-    public static final int DELTA_TIME_MS = 10;
-
     // game variables
     private static ScheduledExecutorService executor = null;
+    public static final int DELTA_TIME_MS = 10;
     private MineSweeperController controller;
 
     // gui constants
@@ -94,6 +93,8 @@ public class MineSweeper extends Application implements Observer {
     private Button saveButton;
     private Button loadButton;
     private Button resetButton;
+
+    //////////// CREATING THE SCENE AND GAME ////////////
 
     public static void main(String[] args) {
         // filling hashmap, this only needs to be done once
@@ -188,6 +189,180 @@ public class MineSweeper extends Application implements Observer {
     }
 
     /**
+     *  Creates the blank game board of ROW x COL hexagons
+     */
+    public void createBoard(MineSweeperTile[][] board) {
+        for (int row = 0; row < board.length; row++) {
+            for (int col = 0; col < board[row].length; col++) {
+                addHex(row, col, board);
+            }
+        }
+    }
+
+    public void createScoreBoard(MineSweeperController controller) {
+        String[] topTimes = controller.getTopTimes();
+        Label topLabel = new Label("Top Scores   ");
+        topLabel.setFont(MAIN_FONT);
+        Label[] topTimeLabels = new Label[topTimes.length+1];
+        topTimeLabels[0] = topLabel;
+
+        for (int i = 0; i < topTimes.length; i++) {
+            // TODO: style label
+            Label label = new Label(topTimes[i]);
+            label.setTextFill(GREEN_BACKGROUND);
+            label.setFont(MAIN_FONT);
+            label.setTextFill(GREEN_BACKGROUND);
+            label.setPadding(new Insets(10));
+            topTimeLabels[i+1] = label;
+        }
+
+        scoreBoard = new VBox(MAIN_FONT_SIZE/2);
+        scoreBoard.getChildren().addAll(topTimeLabels);
+        scoreBoard.setAlignment(Pos.CENTER);
+        mainPane.getChildren().addAll(scoreBoard);
+        mainPane.setAlignment(Pos.CENTER);
+    }
+
+    //////////// CREATING COMPONENTS FOR THE DISPLAY ////////////
+
+    /**
+     * This inner class creates a hexagon which can be places on the board with an x and y position
+     * We calculate this x and y position inside the addHex method
+     * This generates a new polygon with the needed hex points
+     */
+    private static class Hexagon extends Polygon {
+        Hexagon(double x, double y) {
+            // creates the polygon using the corner coordinates
+            getPoints().addAll(
+                    x, y,
+                    x, y + HEX_RADIUS,
+                    x + HEX_SIZE, y + HEX_RADIUS * 1.5,
+                    x + HEX_WIDTH, y + HEX_RADIUS,
+                    x + HEX_WIDTH, y,
+                    x + HEX_SIZE, y - HEX_RADIUS * 0.5
+            );
+
+            setStroke(Color.BLACK);
+        }
+    }
+
+    /**
+     * Creates a new rectangle object at the specified row and col
+     *
+     * @param row is the y coord
+     * @param col is the x coord
+     */
+    private void addHex(int row, int col, MineSweeperTile[][] board) {
+        double yCoord = (row+1) * HEX_HEIGHT * 0.75;
+        double xCoord = (col+1) * HEX_WIDTH + ((row % 2) * HEX_SIZE);
+        Hexagon hex = new Hexagon(xCoord, yCoord);
+        hex.setFill(UNGUESSED.getColor());
+
+        Label label = new Label("");
+        label.setFont(MAIN_FONT);
+        label.setTranslateX(xCoord + LABEL_OFFSETX);
+        label.setTranslateY(yCoord + LABEL_OFFSETY);
+
+        // TODO: compact these into the same event
+        hex.setOnMousePressed(e -> {
+            if (e.getClickCount() == 2) {
+                controller.updateTilesAround(row, col);
+            } else if (e.isPrimaryButtonDown()) {
+                controller.updateTileStatus(row, col, GUESSED);
+            } else if (e.isSecondaryButtonDown()) {
+                controller.updateTileStatus(row, col, FLAGGED);
+            }
+            if (board[row][col] != null)
+                if (board[row][col].getStatus().getColor() == Color.WHITE) {
+                    animateTiles(row, col);
+                }
+            if (board[row][col] != null)
+                if (board[row][col].getStatus().getColor() == Color.BLACK) {
+                    animateBombs(row, col);
+                }
+        });
+
+        label.setOnMousePressed(e -> {
+            if (e.getClickCount() == 2) {
+                controller.updateTilesAround(row, col);
+            } else if (e.isPrimaryButtonDown()) {
+                controller.updateTileStatus(row, col, GUESSED);
+            } else if (e.isSecondaryButtonDown()) {
+                controller.updateTileStatus(row, col, FLAGGED);
+            }
+
+            if (board[row][col] != null)
+                if (board[row][col].getStatus().getColor() == Color.WHITE) {
+                    animateTiles(row, col);
+                }
+            if (board[row][col] != null)
+                if (board[row][col].getStatus().getColor() == Color.BLACK) {
+                    animateBombs(row, col);
+                }
+        });
+
+        // adding it to the grids and groups
+        rectGrid[row][col] = hex;
+        labelGrid[row][col] = label;
+        gridPane.getChildren().add(hex);
+        gridPane.getChildren().add(label);
+    }
+
+    /**
+     * Creates a timer that continually updates
+     * @return - a text object which can be added to the screen and updated with the timer
+     * TODO: move this timer to the model
+     */
+    private Text createTimer() {
+        Text timer = new Text();
+        timer.setFont(MAIN_FONT);
+
+        // creates a scheduled executor to increase the time count by DELTA_MS
+        executor = Executors.newScheduledThreadPool(1, e -> {
+            Thread t = new Thread(e);
+            t.setDaemon(true);
+            return t;
+        });
+
+        // platform.runlater so this runs after javafx has initialized
+        Runnable updateTimerRunner = () -> Platform.runLater(() ->
+                timer.setText("Time: "+ String.format("%.2f", controller.getSecondsElapsed())));
+        executor.scheduleAtFixedRate(updateTimerRunner, 0, DELTA_TIME_MS, TimeUnit.MILLISECONDS);
+        return timer;
+    }
+
+    /**
+     * Creates the actual pause button to be displayed in the scene
+     * @return - the pause button to be added to the scene
+     */
+    private Button createPauseButton() {
+        Button button = new Button();
+        Image pauseImage = new Image("file:Images/pause.png", 50, 50, true, false);
+        ImageView view = new ImageView(pauseImage);
+        view.setFitHeight(50);
+        view.setPreserveRatio(true);
+        button.setGraphic(view);
+        button.setPrefSize(50, 50);
+        button.setOnMouseClicked(e -> {
+            // If game is paused and button is clicked, switch image back to pause button
+            if (controller.isGamePaused()) {
+                button.setGraphic(view);
+                unpauseGame();
+            }
+
+
+            else {
+                Image playImage = new Image("file:Images/play.png", 50, 50, true, false);
+                ImageView playView = new ImageView(playImage);
+                button.setGraphic(playView);
+                pauseGame();
+            }
+
+        });
+        return button;
+    }
+
+    /**
      * Sets the functionality of the buttons on the screen.
      */
     public void setButtonActions() {
@@ -235,131 +410,137 @@ public class MineSweeper extends Application implements Observer {
         resetButton.setOnAction(e -> chooseDiff());
     }
 
-    /**
-     *  Creates the blank game board of ROW x COL hexagons
-     */
-    public void createBoard(MineSweeperTile[][] board) {
-        for (int row = 0; row < board.length; row++) {
-            for (int col = 0; col < board[row].length; col++) {
-                addHex(row, col, board);
-            }
-        }
-    }
-
-    public void createScoreBoard(MineSweeperController controller) {
-        String[] topTimes = controller.getTopTimes();
-        Label topLabel = new Label("Top Scores   ");
-        topLabel.setFont(MAIN_FONT);
-        Label[] topTimeLabels = new Label[topTimes.length+1];
-        topTimeLabels[0] = topLabel;
-
-        for (int i = 0; i < topTimes.length; i++) {
-            // TODO: style label
-            Label label = new Label(topTimes[i]);
-            label.setTextFill(GREEN_BACKGROUND);
-            label.setFont(MAIN_FONT);
-            label.setTextFill(GREEN_BACKGROUND);
-            label.setPadding(new Insets(10));
-            topTimeLabels[i+1] = label;
-        }
-
-        scoreBoard = new VBox(MAIN_FONT_SIZE/2);
-        scoreBoard.getChildren().addAll(topTimeLabels);
-        scoreBoard.setAlignment(Pos.CENTER);
-        mainPane.getChildren().addAll(scoreBoard);
-        mainPane.setAlignment(Pos.CENTER);
-    }
+    //////////// POP UP DISPLAYS ////////////
 
     /**
-     * Creates a new rectangle object at the specified row and col
-     * 
-     * @param row is the y coord
-     * @param col is the x coord
+     * This method displays the game over message in the middle of the board
+     * when the game is over.
      */
-    private void addHex(int row, int col, MineSweeperTile[][] board) {
-        double yCoord = (row+1) * HEX_HEIGHT * 0.75;
-        double xCoord = (col+1) * HEX_WIDTH + ((row % 2) * HEX_SIZE);
-        Hexagon hex = new Hexagon(xCoord, yCoord);
-        hex.setFill(UNGUESSED.getColor());
+    public void displayGameOver() {
+        executor.shutdown();
+        String msg = "YOU WIN!";
+        Paint p = GREEN_BACKGROUND;
+        if (!controller.win()) { // checks with the controller if the player didn't win
+            msg = "YOU LOSE!";
+            p = RED_BACKGROUND;
+        }
 
-        Label label = new Label("");
+        Stage popUp = new Stage();
+        BorderPane root = new BorderPane();
+
+        Button btn = new Button("Play again");
+        btn.setTextFill(Color.BLACK);
+        btn.setStyle(BUTTON_STYLE);
+        btn.setFont(MAIN_FONT);
+        btn.setAlignment(Pos.CENTER);
+
+        Label label = new Label(msg);
+        label.setTextFill(Color.WHITE);
         label.setFont(MAIN_FONT);
-        label.setTranslateX(xCoord + LABEL_OFFSETX);
-        label.setTranslateY(yCoord + LABEL_OFFSETY);
-
-        // TODO: compact these into the same event
-        hex.setOnMousePressed(e -> {
-            if (e.getClickCount() == 2) {
-                controller.updateTilesAround(row, col);
-            } else if (e.isPrimaryButtonDown()) {
-    			controller.updateTileStatus(row, col, GUESSED);
-            } else if (e.isSecondaryButtonDown()) {
-    			controller.updateTileStatus(row, col, FLAGGED);
-            }
-            if (board[row][col] != null)
-	            if (board[row][col].getStatus().getColor() == Color.WHITE) {
-	                animateTiles(row, col);
-	            }
-            if (board[row][col] != null)
-	            if (board[row][col].getStatus().getColor() == Color.BLACK) {
-	                animateBombs(row, col);
-	            }
-        });
-
-        label.setOnMousePressed(e -> {
-            if (e.getClickCount() == 2) {
-                controller.updateTilesAround(row, col);
-            } else if (e.isPrimaryButtonDown()) {
-                controller.updateTileStatus(row, col, GUESSED);
-            } else if (e.isSecondaryButtonDown()) {
-                controller.updateTileStatus(row, col, FLAGGED);
-            }
-
-            if (board[row][col] != null)
-                if (board[row][col].getStatus().getColor() == Color.WHITE) {
-                    animateTiles(row, col);
-                }
-            if (board[row][col] != null)
-                if (board[row][col].getStatus().getColor() == Color.BLACK) {
-                    animateBombs(row, col);
-                }
-        });
-
-        // adding it to the grids and groups
-        rectGrid[row][col] = hex;
-        labelGrid[row][col] = label;
-        gridPane.getChildren().add(hex);
-        gridPane.getChildren().add(label);
+        label.setMaxWidth(Double.MAX_VALUE);
+        label.setAlignment(Pos.BOTTOM_CENTER);
+        label.setPadding(new Insets(20, 0, 0, 0));
+        playAgainPop(root, label, btn, popUp, p);
     }
 
-    /**
-     *
-     * @param o     the model
-     * @param arg   the MineSweeperTile[][] board from the model
-     */
-    public void update(Observable o, Object arg) {
-        MineSweeperTile[][] board = (MineSweeperTile[][]) arg;
-        if (controller.isGameOver())  {// checks with Controller if game is over
-            displayGameOver(); // calls the method to display the game over msg if true
-            return;
-        }
+    private void playAgainPop(BorderPane root, Label label, Button btn, Stage popUp, Paint p) {
+        root.setBackground(
+                new Background(new BackgroundFill(p, new CornerRadii(6.0), Insets.EMPTY)));
+        root.setTop(label);
+        root.setBottom(btn);
+        BorderPane.setAlignment(label, Pos.CENTER);
+        BorderPane.setAlignment(btn, Pos.CENTER);
+        BorderPane.setMargin(btn, new Insets(20));
 
-        // if the game isn't over, all the tiles are updated according to their enum
-        for (int row = 0; row < board.length; row++)
-            for (int col = 0; col < board[row].length; col++) {
 
-                rectGrid[row][col].setFill(board[row][col].getStatus().getColor());
+        Scene popScene = new Scene(root, (float) SCENE_WIDTH/2, (float) SCENE_HEIGHT/6);
 
-                // Reveals minecount of any guessed tiles
-                if (board[row][col].getMineCount() > 0 && board[row][col].getStatus().equals(GUESSED)) {
-                    labelGrid[row][col].setText(""+board[row][col].getMineCount());
-                    rectGrid[row][col].setFill(MINE_COUNT_TO_COLOR.get(board[row][col].getMineCount()));
-                }
-                else {
-                	labelGrid[row][col].setText("");
-                }
-            }
-	}
+        popUp.setScene(popScene);
+        popUp.setTitle("Game Over");
+        popUp.show();
+
+        btn.setOnMousePressed(me -> {
+            popUp.close();
+            chooseDiff();
+        });
+    }
+
+    public void chooseDiff() {
+        Stage diffPop = new Stage();
+
+        Label label = new Label();
+        label.setText("Choose Difficulty");
+        label.setTextFill(Color.WHITE);
+        label.setFont(MAIN_FONT);
+        label.setMaxWidth(Double.MAX_VALUE);
+        label.setAlignment(Pos.BOTTOM_CENTER);
+        label.setPadding(new Insets(20, 0, 0, 0));
+
+        // create and style buttons
+        Button veryEasy = new Button("Very Easy");
+        Button easy = new Button("Easy");
+        Button normal = new Button("Normal");
+        Button hard = new Button("Hard");
+        Button veryHard = new Button("Very Hard");
+        veryEasy.setStyle(BUTTON_STYLE);
+        easy.setStyle(BUTTON_STYLE);
+        normal.setStyle(BUTTON_STYLE);
+        hard.setStyle(BUTTON_STYLE);
+        veryHard.setStyle(BUTTON_STYLE);
+
+        HBox buttonBox = new HBox();
+        buttonBox.getChildren().addAll(veryEasy, easy, normal, hard, veryHard);
+        buttonBox.setBackground(new Background(
+                new BackgroundFill(GREEN_BACKGROUND, new CornerRadii(6.0), Insets.EMPTY)));
+
+        diffPopUp(buttonBox, label, diffPop);
+        diffListener(veryEasy, easy, normal, hard, veryHard, diffPop);
+    }
+
+    private void diffPopUp(HBox buttonBox, Label label, Stage diffPop) {
+        buttonBox.setPadding(new Insets(10, 10, 10, 10));
+        buttonBox.setAlignment(Pos.CENTER);
+        buttonBox.setSpacing(10);
+
+        BorderPane diff = new BorderPane();
+        diff.setBackground(new Background(
+                new BackgroundFill(GREEN_BACKGROUND, new CornerRadii(6.0), Insets.EMPTY)));
+        diff.setTop(label);
+        diff.setBottom(buttonBox);
+        BorderPane.setAlignment(label, Pos.CENTER);
+        BorderPane.setAlignment(buttonBox, Pos.CENTER);
+
+        Scene diffScene = new Scene(diff, (float) SCENE_WIDTH/2, (float) SCENE_HEIGHT/6);
+        diffScene.setFill(GREEN_BACKGROUND);
+        diffPop.setScene(diffScene);
+        diffPop.setTitle("New Game");
+        diffPop.show();
+    }
+
+    private void diffListener(Button veryEasy, Button easy, Button normal, Button hard, Button veryHard, Stage diffPop) {
+        veryEasy.setOnMousePressed(me -> {
+            createController("Very Easy");
+            diffPop.close();
+        });
+        easy.setOnMousePressed(me -> {
+            createController("Easy");
+            diffPop.close();
+        });
+        normal.setOnMousePressed(me -> {
+            createController("Normal");
+            diffPop.close();
+        });
+        hard.setOnMousePressed(me -> {
+            createController("Hard");
+            diffPop.close();
+        });
+        veryHard.setOnMousePressed(me -> {
+            createController("Very Hard");
+            diffPop.close();
+        });
+    }
+
+    //////////// ANIMATIONS ////////////
 
 	private void animateBombs(int row, int col) {
 		rectGrid[row][col].toFront();
@@ -384,156 +565,7 @@ public class MineSweeper extends Application implements Observer {
     	big.play();	
 	}
 
-	/**
-     * This method displays the game over message in the middle of the board
-     * when the game is over.
-     */
-    public void displayGameOver() {
-        executor.shutdown();
-    	String msg = "YOU WIN!";
-    	Paint p = GREEN_BACKGROUND;
-    	if (!controller.win()) { // checks with the controller if the player didn't win
-    		msg = "YOU LOSE!";
-    		p = RED_BACKGROUND;
-        }
-
-    	Stage popUp = new Stage();
-        BorderPane root = new BorderPane();
-
-		Button btn = new Button("Play again");
-        btn.setTextFill(Color.BLACK);
-        btn.setStyle(BUTTON_STYLE);
-        btn.setFont(MAIN_FONT);
-        btn.setAlignment(Pos.CENTER);
-
-        Label label = new Label(msg);
-		label.setTextFill(Color.WHITE);
-		label.setFont(MAIN_FONT);
-		label.setMaxWidth(Double.MAX_VALUE);
-		label.setAlignment(Pos.BOTTOM_CENTER);
-		label.setPadding(new Insets(20, 0, 0, 0));
-		playAgainPop(root, label, btn, popUp, p);
-    }
-   
-    private void playAgainPop(BorderPane root, Label label, Button btn, Stage popUp, Paint p) {
-		root.setBackground(
-				new Background(new BackgroundFill(p, new CornerRadii(6.0), Insets.EMPTY)));
-		root.setTop(label);
-		root.setBottom(btn);
-		root.setAlignment(label, Pos.CENTER);
-		root.setAlignment(btn, Pos.CENTER);
-		root.setMargin(btn, new Insets(20));
-		
-		
-		Scene popScene = new Scene(root, SCENE_WIDTH/2, SCENE_HEIGHT/6);
-
-		popUp.setScene(popScene);
-		popUp.setTitle("Game Over");
-		popUp.show();
-		
-		btn.setOnMousePressed(me -> {
-            popUp.close();
-			chooseDiff();
-        });
-	}
-
-	public void chooseDiff() {
-    	Stage diffPop = new Stage();
-
-		Label label = new Label();
-		label.setText("Choose Difficulty");
-        label.setTextFill(Color.WHITE);
-		label.setFont(MAIN_FONT);
-		label.setMaxWidth(Double.MAX_VALUE);
-		label.setAlignment(Pos.BOTTOM_CENTER);
-		label.setPadding(new Insets(20, 0, 0, 0));
-
-        // create and style buttons
-		Button veryEasy = new Button("Very Easy");
-		Button easy = new Button("Easy");
-		Button normal = new Button("Normal");
-		Button hard = new Button("Hard");
-		Button veryHard = new Button("Very Hard");
-        veryEasy.setStyle(BUTTON_STYLE);
-        easy.setStyle(BUTTON_STYLE);
-        normal.setStyle(BUTTON_STYLE);
-        hard.setStyle(BUTTON_STYLE);
-        veryHard.setStyle(BUTTON_STYLE);
-
-		HBox buttonBox = new HBox();
-		buttonBox.getChildren().addAll(veryEasy, easy, normal, hard, veryHard);
-        buttonBox.setBackground(new Background(
-                new BackgroundFill(GREEN_BACKGROUND, new CornerRadii(6.0), Insets.EMPTY)));
-		
-		diffPopUp(buttonBox, label, diffPop);
-		diffListener(veryEasy, easy, normal, hard, veryHard, diffPop);
-    }
-    
-	private void diffPopUp(HBox buttonBox, Label label, Stage diffPop) {
-		buttonBox.setPadding(new Insets(10, 10, 10, 10));
-		buttonBox.setAlignment(Pos.CENTER);
-		buttonBox.setSpacing(10);
-
-		BorderPane diff = new BorderPane();
-        diff.setBackground(new Background(
-                new BackgroundFill(GREEN_BACKGROUND, new CornerRadii(6.0), Insets.EMPTY)));
-		diff.setTop(label);
-		diff.setBottom(buttonBox);
-		diff.setAlignment(label, Pos.CENTER);
-		diff.setAlignment(buttonBox, Pos.CENTER);
-		
-		Scene diffScene = new Scene(diff, SCENE_WIDTH/2, SCENE_HEIGHT/6);
-        diffScene.setFill(GREEN_BACKGROUND);
-		diffPop.setScene(diffScene);
-		diffPop.setTitle("New Game");
-		diffPop.show();		
-	}
-	
-    private void diffListener(Button veryEasy, Button easy, Button normal, Button hard, Button veryHard, Stage diffPop) {
-		veryEasy.setOnMousePressed(me -> {
-            createController("Very Easy");
-			diffPop.close();
-        });
-		easy.setOnMousePressed(me -> {
-            createController("Easy");
-			diffPop.close();
-        });
-		normal.setOnMousePressed(me -> {
-            createController("Normal");
-			diffPop.close();
-        });
-		hard.setOnMousePressed(me -> {
-            createController("Hard");
-			diffPop.close();
-        });
-		veryHard.setOnMousePressed(me -> {
-            createController("Very Hard");
-			diffPop.close();
-        });
-	}
-
-    /**
-     * Creates a timer that continually updates 
-     * @return - a text object which can be added to the screen and updated with the timer
-     * TODO: move this timer to the model
-     */
-    private Text createTimer() {
-    	Text timer = new Text();
-    	timer.setFont(MAIN_FONT);
-
-        // creates a scheduled executor to increase the time count by DELTA_MS
-        executor = Executors.newScheduledThreadPool(1, e -> {
-            Thread t = new Thread(e);
-            t.setDaemon(true);
-            return t;
-        });
-
-        // platform.runlater so this runs after javafx has initialized
-        Runnable updateTimerRunner = () -> Platform.runLater(() ->
-                timer.setText("Time: "+ String.format("%.2f", controller.getSecondsElapsed())));
-        executor.scheduleAtFixedRate(updateTimerRunner, 0, DELTA_TIME_MS, TimeUnit.MILLISECONDS);
-    	return timer;
-    }
+    //////////// UPDATE THE DISPLAY ////////////
     
     /**
      * Disables the elements in the scene and pauses the timer
@@ -561,83 +593,49 @@ public class MineSweeper extends Application implements Observer {
      * opaque
      */
     private void setBoardOpacity(double opacity) {
-    	for (int i = 0; i < rectGrid.length; i++) {
-    		for (int j = 0; j < rectGrid[i].length; j++) {
-    			rectGrid[i][j].setOpacity(opacity);
-    		}
-    	}
-    	// Could probably do this in the previous for loop, but just being safe
-    	for (int i = 0; i < labelGrid.length; i++) {
-    		for (int j = 0; j < labelGrid[i].length; j++) {
-    			labelGrid[i][j].setOpacity(opacity);
-    		}
-    	}
-    }
-    
-    private void setBoardDisabled(boolean disabled) {
-    	for (int i = 0; i< rectGrid.length; i++) {
-    		for (int j = 0; j < rectGrid[i].length; j++) {
-    			rectGrid[i][j].setDisable(disabled);
-    		}
-    	}
-    	
-    	for (int i = 0; i < labelGrid.length; i++) {
-    		for (int j = 0; j < labelGrid[i].length; j++) {
-    			labelGrid[i][j].setDisable(disabled);
-    		}
-    	}
-    }
-    
-    /**
-     * Creates the actual pause button to be displayed in the scene
-     * @return
-     */
-    private Button createPauseButton() {
-    	Button button = new Button();
-    	Image pauseImage = new Image("file:Images/pause.png", 50, 50, true, false);
-    	ImageView view = new ImageView(pauseImage);
-    	view.setFitHeight(50);
-    	view.setPreserveRatio(true);
-    	button.setGraphic(view);
-    	button.setPrefSize(50, 50);
-    	button.setOnMouseClicked(e -> {
-    		// If game is paused and button is clicked, switch image back to pause button
-    		if (controller.isGamePaused()) {
-    			button.setGraphic(view);
-    			unpauseGame();
-    		}
-    		
-    		
-    		else {
-    			Image playImage = new Image("file:Images/play.png", 50, 50, true, false);
-    			ImageView playView = new ImageView(playImage);
-    			button.setGraphic(playView);
-    			pauseGame();
-    		}
-    		
-    	});
-    	return button;
-    }
-
-    /**
-     * This inner class creates a hexagon which can be places on the board with an x and y position
-     * We calculate this x and y position inside the addHex method
-     * This generates a new polygon with the needed hex points
-     */
-    private static class Hexagon extends Polygon {
-        Hexagon(double x, double y) {
-            // creates the polygon using the corner coordinates
-            getPoints().addAll(
-                    x, y,
-                    x, y + HEX_RADIUS,
-                    x + HEX_SIZE, y + HEX_RADIUS * 1.5,
-                    x + HEX_WIDTH, y + HEX_RADIUS,
-                    x + HEX_WIDTH, y,
-                    x + HEX_SIZE, y - HEX_RADIUS * 0.5
-            );
-
-            setStroke(Color.BLACK);
+        for (int i = 0; i< rectGrid.length && i < labelGrid.length; i++) {
+            for (int j = 0; j < rectGrid[i].length && j < labelGrid[i].length; j++) {
+                rectGrid[i][j].setOpacity(opacity);
+                labelGrid[i][j].setOpacity(opacity);
+            }
         }
     }
     
+    private void setBoardDisabled(boolean disabled) {
+    	for (int i = 0; i< rectGrid.length && i < labelGrid.length; i++) {
+    		for (int j = 0; j < rectGrid[i].length && j < labelGrid[i].length; j++) {
+    			rectGrid[i][j].setDisable(disabled);
+                labelGrid[i][j].setDisable(disabled);
+    		}
+    	}
+    }
+
+    /**
+     *
+     * @param o     the model
+     * @param arg   the MineSweeperTile[][] board from the model
+     */
+    public void update(Observable o, Object arg) {
+        MineSweeperTile[][] board = (MineSweeperTile[][]) arg;
+        if (controller.isGameOver())  {// checks with Controller if game is over
+            displayGameOver(); // calls the method to display the game over msg if true
+            return;
+        }
+
+        // if the game isn't over, all the tiles are updated according to their enum
+        for (int row = 0; row < board.length; row++)
+            for (int col = 0; col < board[row].length; col++) {
+
+                rectGrid[row][col].setFill(board[row][col].getStatus().getColor());
+
+                // Reveals minecount of any guessed tiles
+                if (board[row][col].getMineCount() > 0 && board[row][col].getStatus().equals(GUESSED)) {
+                    labelGrid[row][col].setText(""+board[row][col].getMineCount());
+                    rectGrid[row][col].setFill(MINE_COUNT_TO_COLOR.get(board[row][col].getMineCount()));
+                }
+                else {
+                    labelGrid[row][col].setText("");
+                }
+            }
+    }
 }
