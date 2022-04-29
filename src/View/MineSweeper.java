@@ -46,6 +46,7 @@ import Controllers.MineSweeperController;
 public class MineSweeper extends Application implements Observer {
 
     // game variables
+    // TODO move executor and delta_time_ms t0 the model
     private static ScheduledExecutorService executor = null;
     public static final int DELTA_TIME_MS = 10;
     private MineSweeperController controller;
@@ -53,7 +54,6 @@ public class MineSweeper extends Application implements Observer {
     // gui constants
     private static final double SCREEN_WIDTH = Screen.getPrimary().getVisualBounds().getWidth();
     private static final double SCREEN_HEIGHT = Screen.getPrimary().getVisualBounds().getHeight();
-    
     private static double HEX_RADIUS = Math.min(SCREEN_HEIGHT/(16*2), 30);
     private static double HEX_SIZE = Math.sqrt(HEX_RADIUS * HEX_RADIUS * 0.75);
     private static int
@@ -66,13 +66,13 @@ public class MineSweeper extends Application implements Observer {
     private static double
             LABEL_OFFSETX = HEX_WIDTH/2.5 - MAIN_FONT_SIZE/6;
     private static double LABEL_OFFSETY = HEX_HEIGHT/6 - MAIN_FONT_SIZE/2.5;
-    private static final HashMap<Integer, Color> MINE_COUNT_TO_COLOR = new HashMap<>();
     private static final String BUTTON_STYLE = "-fx-background-color: white;"
     		+ "  -fx-border-color: black;"
     		+ "  -fx-border-radius: 10;"
     		+ "  -fx-background-radius: 10;";
     private static final Paint GREEN_BACKGROUND = Color.rgb(120, 190, 120);
     private static final Paint RED_BACKGROUND =  Color.rgb(190, 120, 120);
+    private static final HashMap<Integer, Color> MINE_COUNT_TO_COLOR = new HashMap<>();
     private static final Color ONE_MINE = Color.rgb(207, 236, 207);
     private static final Color TWO_MINE = Color.rgb(204, 236, 239);
     private static final Color THREE_MINE = Color.rgb(221, 212, 232);
@@ -82,17 +82,10 @@ public class MineSweeper extends Application implements Observer {
 
 
     // gui variables
+    // TODO move rectGrid and labelGrid into local variables
     private Hexagon[][] rectGrid;
     private Label[][] labelGrid;
-    private AnchorPane gridPane;
     private Stage stage;
-    private HBox mainPane;
-    private VBox mainVBox;
-    private HBox buttonRow;
-    private VBox scoreBoard;
-    private Button saveButton;
-    private Button loadButton;
-    private Button resetButton;
 
     //////////// CREATING THE SCENE AND GAME ////////////
 
@@ -125,22 +118,22 @@ public class MineSweeper extends Application implements Observer {
     private Scene createScene() {
         rectGrid = new Hexagon[controller.getRows()][controller.getCols()];
         labelGrid = new Label[controller.getRows()][controller.getCols()];
-        gridPane = new AnchorPane();
-        buttonRow = new HBox(15);
-        mainPane = new HBox();
-        mainVBox = new VBox(15);
+        AnchorPane gridPane = new AnchorPane();
+        HBox buttonRow = new HBox(15);
+        HBox mainPane = new HBox();
+        VBox mainVBox = new VBox(15);
 
         // creating bottom buttons
-        saveButton = new Button("Save");
-        loadButton = new Button("Load");
-        resetButton = new Button("Reset");
+        Button saveButton = new Button("Save");
+        Button loadButton = new Button("Load");
+        Button resetButton = new Button("Reset");
         saveButton.setStyle(BUTTON_STYLE);
         loadButton.setStyle(BUTTON_STYLE);
         resetButton.setStyle(BUTTON_STYLE);
         saveButton.setFont(MAIN_FONT);
         loadButton.setFont(MAIN_FONT);
         resetButton.setFont(MAIN_FONT);
-        setButtonActions();
+        setButtonActions(saveButton, loadButton, resetButton);
         Button pause = createPauseButton();
         pause.setStyle(BUTTON_STYLE);
 
@@ -159,8 +152,8 @@ public class MineSweeper extends Application implements Observer {
         mainVBox.setAlignment(Pos.CENTER);
 
         // creates the initial blank board
-        createBoard(controller.getBoard());
-        createScoreBoard(controller);
+        createBoard(controller.getBoard(), gridPane);
+        createScoreBoard(controller, mainPane);
 
         mainPane.getChildren().addAll(mainVBox);
         return new Scene(mainPane, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -191,15 +184,15 @@ public class MineSweeper extends Application implements Observer {
     /**
      *  Creates the blank game board of ROW x COL hexagons
      */
-    public void createBoard(MineSweeperTile[][] board) {
+    public void createBoard(MineSweeperTile[][] board, AnchorPane gridPane) {
         for (int row = 0; row < board.length; row++) {
             for (int col = 0; col < board[row].length; col++) {
-                addHex(row, col, board);
+                addHex(row, col, board, gridPane);
             }
         }
     }
 
-    public void createScoreBoard(MineSweeperController controller) {
+    public void createScoreBoard(MineSweeperController controller, HBox mainPane) {
         String[] topTimes = controller.getTopTimes();
         Label topLabel = new Label("Top Scores   ");
         topLabel.setFont(MAIN_FONT);
@@ -216,7 +209,7 @@ public class MineSweeper extends Application implements Observer {
             topTimeLabels[i+1] = label;
         }
 
-        scoreBoard = new VBox(MAIN_FONT_SIZE/2);
+        VBox scoreBoard = new VBox(MAIN_FONT_SIZE / 2);
         scoreBoard.getChildren().addAll(topTimeLabels);
         scoreBoard.setAlignment(Pos.CENTER);
         mainPane.getChildren().addAll(scoreBoard);
@@ -252,7 +245,7 @@ public class MineSweeper extends Application implements Observer {
      * @param row is the y coord
      * @param col is the x coord
      */
-    private void addHex(int row, int col, MineSweeperTile[][] board) {
+    private void addHex(int row, int col, MineSweeperTile[][] board, AnchorPane gridPane) {
         double yCoord = (row+1) * HEX_HEIGHT * 0.75;
         double xCoord = (col+1) * HEX_WIDTH + ((row % 2) * HEX_SIZE);
         Hexagon hex = new Hexagon(xCoord, yCoord);
@@ -365,7 +358,7 @@ public class MineSweeper extends Application implements Observer {
     /**
      * Sets the functionality of the buttons on the screen.
      */
-    public void setButtonActions() {
+    public void setButtonActions(Button saveButton, Button loadButton, Button resetButton) {
         saveButton.setOnAction(e -> {
         	if (!controller.isGameOver()) {
 	        	// Call pause method in order to prevent player cheating with file dialog box
