@@ -256,17 +256,18 @@ public class MineSweeper extends Application implements Observer {
                 controller.updateTilesAround(row, col);
             } else if (e.isPrimaryButtonDown()) {
                 controller.updateTileStatus(row, col, GUESSED);
+                if (board[row][col] != null && e.getClickCount() == 1) {
+                    if (board[row][col].getStatus().getColor() == Color.WHITE) {
+                        animateTiles(row, col);
+                    }
+                    else if (board[row][col].getStatus().getColor() == Color.BLACK) {
+                        animateBombs(row, col);
+                    }
+                    }
             } else if (e.isSecondaryButtonDown()) {
                 controller.updateTileStatus(row, col, FLAGGED);
             }
-            if (board[row][col] != null)
-                if (board[row][col].getStatus().getColor() == Color.WHITE) {
-                    animateTiles(row, col);
-                }
-            if (board[row][col] != null)
-                if (board[row][col].getStatus().getColor() == Color.BLACK) {
-                    animateBombs(row, col);
-                }
+
         });
 
         label.setOnMousePressed(e -> {
@@ -274,18 +275,18 @@ public class MineSweeper extends Application implements Observer {
                 controller.updateTilesAround(row, col);
             } else if (e.isPrimaryButtonDown()) {
                 controller.updateTileStatus(row, col, GUESSED);
+                if (board[row][col] != null && e.getClickCount() == 1) {
+                    if (board[row][col].getStatus().getColor() == Color.WHITE) {
+                        animateTiles(row, col);
+                    }
+                    else if (board[row][col].getStatus().getColor() == Color.BLACK) {
+                        animateBombs(row, col);
+                    }
+                    }
             } else if (e.isSecondaryButtonDown()) {
                 controller.updateTileStatus(row, col, FLAGGED);
             }
 
-            if (board[row][col] != null)
-                if (board[row][col].getStatus().getColor() == Color.WHITE) {
-                    animateTiles(row, col);
-                }
-            if (board[row][col] != null)
-                if (board[row][col].getStatus().getColor() == Color.BLACK) {
-                    animateBombs(row, col);
-                }
         });
 
         // adding it to the grids and groups
@@ -397,6 +398,7 @@ public class MineSweeper extends Application implements Observer {
      * when the game is over.
      */
     public void displayGameOver() {
+    	controller.disableTimer();
         String msg = "YOU WIN!";
         Paint p = GREEN_BACKGROUND;
         if (!controller.win()) { // checks with the controller if the player didn't win
@@ -529,8 +531,9 @@ public class MineSweeper extends Application implements Observer {
         rt.setCycleCount(1);
         big.setByX(.2f);
     	big.setByY(.2f);
-    	big.setCycleCount(1);
+    	big.setCycleCount(2);
     	rectGrid[row][col].toFront();
+    	big.setAutoReverse(true);
     	big.play();
     	rt.play();
 	}
@@ -553,7 +556,6 @@ public class MineSweeper extends Application implements Observer {
     	controller.disableTimer();
     	setBoardOpacity(0.0);
     	setBoardDisabled(true);
-    	
     }
     
     /**
