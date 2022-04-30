@@ -82,9 +82,13 @@ public class MineSweeper extends Application implements Observer {
 
 
     // gui variables
-    // TODO move rectGrid and labelGrid into local variables
+    // these grid variables must be global since they are used
+    // inside the update function and there is no way to pass them as parameters
     private Hexagon[][] rectGrid;
     private Label[][] labelGrid;
+    // the stage must be global since it is used and modified in many locations.
+    // it is far too much pain to make it a local variable
+    // also this variable makes sense to be global since it is the main display stage
     private Stage stage;
 
     //////////// CREATING THE SCENE AND GAME ////////////
