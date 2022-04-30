@@ -2,9 +2,12 @@ package Models;
 
 import java.io.Serializable;
 import java.util.*; // TODO: dont import *
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import Utils.GUESS_STATUS;
 
-import static View.MineSweeper.*;
 
 /**
  * This class holds the model for a game of Minesweeper, focusing on the gameplay area itself.
@@ -18,18 +21,18 @@ import static View.MineSweeper.*;
 @SuppressWarnings("deprecation")
 public class MineSweeperBoard extends Observable implements Serializable {
 
+	private static ScheduledExecutorService executor = null;
+	private static final int DELTA_TIME_MS = 10;
+
+
 	/**
 	 * A 2D array of MindsweeperTiles to store information on the instantaneous board state.
 	 */
 	private MineSweeperTile[][] board;
-	
 	private final List<Observer> observers; // do we need a list?
-	private int ms_elapsed;
 	private final int numBombs;
-	private String difficulty;
-	private int timeInc;
-
-	private int rows = 16, cols = 24;
+	private final String difficulty;
+	private int timeInc, ms_elapsed, rows = 16, cols = 24;
 	
 	/**
 	 * The "divider" variables affect the density of mines; for divider N, one in N tiles should be a mine.
@@ -149,6 +152,31 @@ public class MineSweeperBoard extends Observable implements Serializable {
 		}
 	}
 
+	/**
+	 * This creates a new executor to increase the timer on the board
+	 * We create a scheduled executor to decrease computing time of using a while true loop
+	 * @param updateTimer - the runnable to call every update cycle.
+	 *                       For text, this would be printing, for view, this would be updating the label
+	 */
+	public void createBoardTimer(Runnable updateTimer) {
+		// creates a scheduled executor to increase the time count by DELTA_MS
+		executor = Executors.newScheduledThreadPool(1, e -> {
+			Thread t = new Thread(e);
+			t.setDaemon(true);
+			return t;
+		});
+
+		executor.scheduleAtFixedRate(updateTimer, 0, DELTA_TIME_MS, TimeUnit.MILLISECONDS);
+	}
+
+	/**
+	 * This terminates the executor so it is not running after the game is over
+	 */
+	public void shutdown() {
+		if (executor != null)
+			executor.shutdown();
+	}
+
 	// GETTERS AND SETTERS
 
 	/**
@@ -225,16 +253,6 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 */
 	public String getDifficulty() {
 		return difficulty;
-	}
-
-	/**
-	 * Sets the game's difficulty. This setting can't affect a game already in progress,
-	 * as the grid and mines have already been fully set by then.
-	 * 
-	 * @param difficulty A new difficulty to set this game to, expressed as a string (like "Easy" or "Very Hard").
-	 */
-	public void setDifficulty(String difficulty) {
-		this.difficulty = difficulty;
 	}
 
 	/**

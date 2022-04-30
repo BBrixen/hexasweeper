@@ -208,6 +208,23 @@ public class MineSweeperController implements Serializable {
 		model.notifyObservers();
 	}
 
+	/**
+	 * This passes the timer creation onto the model
+	 * @param updater - the runnable to be called upon updates to the timer
+	 */
+	public void createTimer(Runnable updater) {
+		model.createBoardTimer(updater);
+	}
+
+	/**
+	 * This kills the timer executor so that it is no longer running.
+	 * This allows us to either create a new executor for a new game,
+	 * or we can exit the program
+	 */
+	public void shutdownTimer() {
+		model.shutdown();
+	}
+
 	//GETTERS AND SETTERS
 
 	/**

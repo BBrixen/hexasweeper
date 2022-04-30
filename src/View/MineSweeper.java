@@ -36,9 +36,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import Controllers.MineSweeperController;
 
 
@@ -47,8 +44,6 @@ public class MineSweeper extends Application implements Observer {
 
     // game variables
     // TODO move executor and delta_time_ms t0 the model
-    private static ScheduledExecutorService executor = null;
-    public static final int DELTA_TIME_MS = 10;
     private MineSweeperController controller;
 
     // gui constants
@@ -112,10 +107,7 @@ public class MineSweeper extends Application implements Observer {
 
         stage.setTitle("Mine Sweeper");
         stage.show();
-        stage.setOnCloseRequest(e -> {
-                if (executor != null)
-                    executor.shutdown();
-        });
+        stage.setOnCloseRequest(e -> controller.shutdownTimer());
         chooseDiff();
     }
 
@@ -148,9 +140,7 @@ public class MineSweeper extends Application implements Observer {
         // creating timer
         
         // Delete the current executor for the timer; we'll make a new one in the next line
-        if (executor != null) {
-        	executor.shutdown();
-        }
+        controller.shutdownTimer();
         Text timer = createTimer();
         mainVBox.getChildren().addAll(timer, gridPane, buttonRow);
         mainVBox.setAlignment(Pos.CENTER);
@@ -314,17 +304,10 @@ public class MineSweeper extends Application implements Observer {
         Text timer = new Text();
         timer.setFont(MAIN_FONT);
 
-        // creates a scheduled executor to increase the time count by DELTA_MS
-        executor = Executors.newScheduledThreadPool(1, e -> {
-            Thread t = new Thread(e);
-            t.setDaemon(true);
-            return t;
-        });
-
         // platform.runlater so this runs after javafx has initialized
         Runnable updateTimerRunner = () -> Platform.runLater(() ->
                 timer.setText("Time: "+ String.format("%.2f", controller.getSecondsElapsed())));
-        executor.scheduleAtFixedRate(updateTimerRunner, 0, DELTA_TIME_MS, TimeUnit.MILLISECONDS);
+        controller.createTimer(updateTimerRunner);
         return timer;
     }
 
@@ -414,7 +397,6 @@ public class MineSweeper extends Application implements Observer {
      * when the game is over.
      */
     public void displayGameOver() {
-        executor.shutdown();
         String msg = "YOU WIN!";
         Paint p = GREEN_BACKGROUND;
         if (!controller.win()) { // checks with the controller if the player didn't win
