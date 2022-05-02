@@ -1,6 +1,5 @@
 package View;
 
-import Models.MineSweeperTile;
 import javafx.animation.RotateTransition;
 import javafx.animation.ScaleTransition;
 import javafx.application.Application;
@@ -28,15 +27,16 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
-import static Utils.GUESS_STATUS.FLAGGED;
-import static Utils.GUESS_STATUS.GUESSED;
-import static Utils.GUESS_STATUS.UNGUESSED;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
+import Models.MineSweeperTile;
 import Controllers.MineSweeperController;
+import static Utils.GUESS_STATUS.FLAGGED;
+import static Utils.GUESS_STATUS.GUESSED;
+import static Utils.GUESS_STATUS.UNGUESSED;
 
 
 @SuppressWarnings("deprecation")

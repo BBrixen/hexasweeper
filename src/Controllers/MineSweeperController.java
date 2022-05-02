@@ -239,7 +239,7 @@ public class MineSweeperController implements Serializable {
 	 */
 	public void gameIsOver() {
 		gameOver = true;
-		if (win) scoreBoard.addNewTime(model.getSecondsElapsed(), model.getDifficulty());
+		if (win) scoreBoard.addNewTime(model.getSecondsElapsed(), model.getDifficulty(), true);
 		model.notifyObservers();
 	}
 
@@ -272,10 +272,13 @@ public class MineSweeperController implements Serializable {
 	 * @return - a string representing the top times
 	 */
 	public String[] getTopTimes() {
-		Pair<Double, String>[] times = scoreBoard.getTopTimes();
+		Double[] times = scoreBoard.getTopTimes(model.getDifficulty());
 		String[] topTimes = new String[times.length];
+
 		for (int i = 0; i < topTimes.length; i++) {
-			topTimes[i] = times[i].getValue() + ": " + times[i].getKey();
+			topTimes[i] = model.getDifficulty() + ": " + times[i];
+			if (times[i] == null || times[i] == 0.0)
+				topTimes[i] = model.getDifficulty() + ": -.-";
 		}
 		return topTimes;
 	}

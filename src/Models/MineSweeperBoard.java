@@ -6,7 +6,6 @@ import java.util.Observer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import Utils.GUESS_STATUS;
 
 
@@ -21,10 +20,6 @@ import Utils.GUESS_STATUS;
  */
 @SuppressWarnings("deprecation")
 public class MineSweeperBoard extends Observable implements Serializable {
-
-	private static ScheduledExecutorService executor = null;
-	private static final int DELTA_TIME_MS = 10;
-
 
 	/**
 	 * A 2D array of MindsweeperTiles to store information on the instantaneous board state.
@@ -43,6 +38,8 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	private static final int NORMAL_DIVIVER = 5;
 	private static final int EASY_DIVIDER = 8;
 	private static final int VERY_EASY_DIVIDER = 20;
+	private static ScheduledExecutorService executor = null;
+	private static final int DELTA_TIME_MS = 10;
 	
 	/**
 	 * Constructor for the MineSweeperBoard model object.
