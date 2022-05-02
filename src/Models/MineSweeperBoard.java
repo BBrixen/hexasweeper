@@ -1,7 +1,8 @@
 package Models;
 
 import java.io.Serializable;
-import java.util.*; // TODO: dont import *
+import java.util.Observable;
+import java.util.Observer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
