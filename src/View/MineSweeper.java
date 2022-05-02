@@ -169,7 +169,7 @@ public class MineSweeper extends Application implements Observer {
     private void createController(String difficulty) {
         controller = new MineSweeperController(difficulty);
         generateConstants(controller.getRows(), controller.getCols());
-        controller.addObserver(this); // add as observer for model (MineSweeperBoard)
+        controller.setObserver(this); // add as observer for model (MineSweeperBoard)
         rectGrid = new Hexagon[controller.getRows()][controller.getCols()];
         labelGrid = new Label[controller.getRows()][controller.getCols()];
         stage.setScene(createScene());

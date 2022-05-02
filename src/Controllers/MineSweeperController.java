@@ -16,7 +16,7 @@ import javafx.util.Pair;
 
 public class MineSweeperController implements Serializable {
 
-	private MineSweeperBoard model;
+	private final MineSweeperBoard model;
 	private final ScoreBoard scoreBoard;
 	private boolean gameOver; // tracks if game is over
 	private int numberOfGuesses; // keeps track of the total number of guesses
@@ -153,8 +153,8 @@ public class MineSweeperController implements Serializable {
 	 * 
 	 * @param o The observer to be added. Most likely a view object.
 	 */
-	public void addObserver(Observer o) {
-		model.addObserver(o);
+	public void setObserver(Observer o) {
+		model.setObserver(o);
 	}
 	
 	/*

@@ -29,7 +29,7 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 * A 2D array of MindsweeperTiles to store information on the instantaneous board state.
 	 */
 	private MineSweeperTile[][] board;
-	private final List<Observer> observers; // do we need a list?
+	private Observer observer; // do we need a list?
 	private final int numBombs;
 	private final String difficulty;
 	private int timeInc, ms_elapsed, rows = 16, cols = 24;
@@ -74,7 +74,6 @@ public class MineSweeperBoard extends Observable implements Serializable {
 
 		numBombs = rows * cols / divider;
 		board = new MineSweeperTile[rows][cols];
-		observers = new ArrayList<>();
 		ms_elapsed = -1;
 		this.difficulty = difficulty;
 		timeInc = DELTA_TIME_MS;
@@ -122,9 +121,7 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 * This method notifies observers when the board has changed.
 	 */
 	public void notifyObservers() {
-		for (Observer o : observers) {
-			o.update(this, this.board);
-		}
+		observer.update(this, this.board);
 	}
 	
 	/**
@@ -199,8 +196,8 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 *
 	 * @param o The observer to add, presumably a view object.
 	 */
-	public void addObserver(Observer o) {
-		observers.add(o);
+	public void setObserver(Observer o) {
+		observer = o;
 	}
 
 	/**
