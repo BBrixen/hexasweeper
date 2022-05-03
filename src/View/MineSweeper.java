@@ -58,9 +58,6 @@ public class MineSweeper extends Application implements Observer {
     private static double HEX_WIDTH = 2*HEX_SIZE;
     private static double MAIN_FONT_SIZE = HEX_HEIGHT/2.5;
     private static Font MAIN_FONT = new Font("Helvetica", MAIN_FONT_SIZE);
-    private static double
-            LABEL_OFFSETX = HEX_WIDTH/2.5 - MAIN_FONT_SIZE/6;
-    private static double LABEL_OFFSETY = HEX_HEIGHT/6 - MAIN_FONT_SIZE/2.5;
     private static final String BUTTON_STYLE = "-fx-background-color: white;"
     		+ "  -fx-border-color: black;"
     		+ "  -fx-border-radius: 10;"
@@ -158,8 +155,6 @@ public class MineSweeper extends Application implements Observer {
         HEX_SIZE = Math.sqrt(HEX_RADIUS * HEX_RADIUS * 0.75);
         SCENE_WIDTH = (int) (1.75*(cols + 2) * HEX_RADIUS);
         SCENE_HEIGHT = (int) (1.5*(rows + 5) * HEX_RADIUS);
-        LABEL_OFFSETX = HEX_WIDTH/2.5 - MAIN_FONT_SIZE/6;
-        LABEL_OFFSETY = HEX_HEIGHT/6 - MAIN_FONT_SIZE/2.5;
         HEX_HEIGHT = 2* HEX_RADIUS;
         HEX_WIDTH = 2*HEX_SIZE;
         MAIN_FONT_SIZE = HEX_HEIGHT/2;
@@ -247,9 +242,10 @@ public class MineSweeper extends Application implements Observer {
 
         Label label = new Label("");
         label.setFont(MAIN_FONT);
-        label.setTranslateX(xCoord + LABEL_OFFSETX);
-        label.setTranslateY(yCoord + LABEL_OFFSETY);
-
+        label.setTranslateX(xCoord);
+        label.setTranslateY(yCoord);
+        label.setPadding(new Insets(HEX_HEIGHT/-8,0,0,HEX_WIDTH/3));
+        
         // TODO: compact these into the same event
         hex.setOnMousePressed(e -> {
             if (e.getClickCount() == 2) {
