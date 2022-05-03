@@ -90,7 +90,7 @@ public class MineSweeperController implements Serializable {
 		 * Checks if the game is over by checking the number of player clicks
 		 * that have not been bombs or flagging clicks.
 		 */
-		if (numberOfGuesses == (board.length*board[0].length) - model.getNumBombs()) {
+		if (numberOfGuesses == (board.length*board[0].length) - model.getNumBombs() && !gameOver) {
 			showAllBombs();
 		}
 
