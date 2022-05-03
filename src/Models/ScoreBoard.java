@@ -30,7 +30,7 @@ public class ScoreBoard {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
                 String[] words = line.split(" ");
-
+                
                 // add to the hashmap
                 double time = Double.parseDouble(words[0]);
                 String difficulty =  line.substring(words[0].length()+1);
@@ -83,7 +83,9 @@ public class ScoreBoard {
             FileWriter writer = new FileWriter(fileName);
             for (String difficulty : topTimes.keySet()) {
                 for (Double time : topTimes.get(difficulty)) {
-                    writer.write(time + " " + difficulty + "\n");
+                	if (time != null && time != 0.0) {
+                        writer.write(time + " " + difficulty + "\n");
+                	}
                 }
             }
             writer.close();

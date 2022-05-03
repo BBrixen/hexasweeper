@@ -35,9 +35,10 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 */
 	private static final int VERY_HARD_DIVIDER = 3;
 	private static final int HARD_DIVIDER = 4;
-	private static final int NORMAL_DIVIVER = 5;
+	private static final int NORMAL_DIVIDER = 5;
 	private static final int EASY_DIVIDER = 8;
 	private static final int VERY_EASY_DIVIDER = 20;
+	
 	private static ScheduledExecutorService executor = null;
 	private static final int DELTA_TIME_MS = 10;
 	
@@ -48,19 +49,27 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 */
 	public MineSweeperBoard(String difficulty) {
 		//initializes the board as a ROWS x COLS 2D array with null pointers for now
-		int divider = NORMAL_DIVIVER;
+		int divider = NORMAL_DIVIDER;
 		switch (difficulty) {
 			case "Very Easy" -> {
 				divider = VERY_EASY_DIVIDER;
+				rows = 16;
 				cols = 16;
 			}
 			case "Easy" -> {
 				divider = EASY_DIVIDER;
+				rows = 16;
 				cols = 20;
+			}
+			case "Normal" -> {
+				divider = NORMAL_DIVIDER;
+				rows = 16;
+				cols = 24;
 			}
 			case "Hard" -> {
 				divider = HARD_DIVIDER;
 				rows = 20;
+				cols = 24;
 			}
 			case "Very Hard" -> {
 				divider = VERY_HARD_DIVIDER;
