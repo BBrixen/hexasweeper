@@ -332,6 +332,10 @@ public class MineSweeperController implements Serializable {
 		return model.getNumFlags() + " / " + model.getNumBombs();
 	}
 	
+	/**
+	 * Returns how many bombs are on the current board
+	 * @return The number of bombs on the current board
+	 */
 	public int getBombCount() {
 		return model.getNumBombs();
 	}
