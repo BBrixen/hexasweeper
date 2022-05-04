@@ -137,6 +137,9 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 * This method notifies observers when the board has changed.
 	 */
 	public void notifyObservers() {
+		if (observer == null) {
+			return;
+		}
 		observer.update(this, this.board);
 	}
 	

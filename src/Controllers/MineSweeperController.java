@@ -331,4 +331,8 @@ public class MineSweeperController implements Serializable {
 	public String getMineCount() {
 		return model.getNumFlags() + " / " + model.getNumBombs();
 	}
+	
+	public int getBombCount() {
+		return model.getNumBombs();
+	}
 }
