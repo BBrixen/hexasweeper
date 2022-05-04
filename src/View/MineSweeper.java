@@ -11,7 +11,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -297,7 +296,7 @@ public class MineSweeper extends Application implements Observer {
      * @return - a text object which can be added to the screen and updated with the timer
      */
     private HBox createTimerAndMineCount() {
-        HBox gameInfo = new HBox();
+        HBox gameInfo = new HBox(MAIN_FONT_SIZE);
         gameInfo.setAlignment(Pos.CENTER);
         gameInfo.setPadding(new Insets(10));
 
