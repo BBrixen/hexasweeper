@@ -41,8 +41,6 @@ public class ScoreBoard {
 
     public void addNewTime(double time, String difficulty, boolean saving) {
         boolean changed = false;
-        System.out.println("time to change is: " + time);
-
         Double[] times = topTimes.get(difficulty);
 
         for (int i = 0; i < NUM_TOP_TIMES; i++) {

@@ -37,6 +37,11 @@ public class MineSweeperController implements Serializable {
 		win = true; // keeps track of the total number of guesses
 	}
 
+	public MineSweeperController(File savedController) throws IOException, ClassNotFoundException {
+		this("Normal");
+		this.loadGame(savedController);
+	}
+
 	/**
 	 * This method determines the current status of the clicked tile, and based
 	 * on the status parameter, assigns a new status to the tile.
@@ -201,16 +206,14 @@ public class MineSweeperController implements Serializable {
 		model.setBoard(newBoard);
 		model.setNumBombs(ois.readInt());
 		model.setDifficulty((String) ois.readObject());
-		
+
+		// set controller variables for this specific file
 		this.gameOver = ois.readBoolean();
 		this.numberOfGuesses = ois.readInt();
 		this.win = ois.readBoolean();
 		this.board = (MineSweeperTile[][]) ois.readObject();
 		model.setSecondsElapsed(ois.readInt());
-		
 		ois.close();
-		
-		model.notifyObservers();
 	}
 
 	/**
