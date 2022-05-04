@@ -11,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -43,7 +44,6 @@ import static Utils.GUESS_STATUS.UNGUESSED;
 public class MineSweeper extends Application implements Observer {
 
     // game variables
-    // TODO move executor and delta_time_ms t0 the model
     private MineSweeperController controller;
 
     // gui constants
@@ -134,12 +134,13 @@ public class MineSweeper extends Application implements Observer {
         buttonRow.setAlignment(Pos.CENTER);
 
 
-        // creating timer
-        
+        // creating timer and number of bombs
+
         // Delete the current executor for the timer; we'll make a new one in the next line
         controller.shutdownTimer();
-        Text timer = createTimer();
-        mainVBox.getChildren().addAll(timer, gridPane, buttonRow);
+        HBox timerAndMineCount = createTimerAndMineCount();
+
+        mainVBox.getChildren().addAll(timerAndMineCount, gridPane, buttonRow);
         mainVBox.setAlignment(Pos.CENTER);
 
         // creates the initial blank board
@@ -189,7 +190,6 @@ public class MineSweeper extends Application implements Observer {
         topTimeLabels[0] = topLabel;
 
         for (int i = 0; i < topTimes.length; i++) {
-            // TODO: style label
             Label label = new Label(topTimes[i]);
             label.setTextFill(GREEN_BACKGROUND);
             label.setFont(MAIN_FONT);
@@ -248,7 +248,7 @@ public class MineSweeper extends Application implements Observer {
         
         // TODO: compact these into the same event
         hex.setOnMousePressed(e -> {
-            if (e.getClickCount() == 2) {
+            if (e.getClickCount() == 2 && e.isPrimaryButtonDown()) {
                 controller.updateTilesAround(row, col);
             } else if (e.isPrimaryButtonDown()) {
                 controller.updateTileStatus(row, col, GUESSED);
@@ -267,7 +267,7 @@ public class MineSweeper extends Application implements Observer {
         });
 
         label.setOnMousePressed(e -> {
-            if (e.getClickCount() == 2) {
+            if (e.getClickCount() == 2 && e.isPrimaryButtonDown()) {
                 controller.updateTilesAround(row, col);
             } else if (e.isPrimaryButtonDown()) {
                 controller.updateTileStatus(row, col, GUESSED);
@@ -295,17 +295,26 @@ public class MineSweeper extends Application implements Observer {
     /**
      * Creates a timer that continually updates
      * @return - a text object which can be added to the screen and updated with the timer
-     * TODO: move this timer to the model
      */
-    private Text createTimer() {
+    private HBox createTimerAndMineCount() {
+        HBox gameInfo = new HBox();
+        gameInfo.setAlignment(Pos.CENTER);
+        gameInfo.setPadding(new Insets(10));
+
+        Text mineCount = new Text();
         Text timer = new Text();
+        mineCount.setFont(MAIN_FONT);
         timer.setFont(MAIN_FONT);
+        gameInfo.getChildren().addAll(mineCount, timer);
 
         // platform.runlater so this runs after javafx has initialized
-        Runnable updateTimerRunner = () -> Platform.runLater(() ->
-                timer.setText("Time: "+ String.format("%.2f", controller.getSecondsElapsed())));
+        Runnable updateTimerRunner = () -> Platform.runLater(() -> {
+            mineCount.setText(controller.getMineCount());
+            timer.setText("Time: "+ String.format("%.2f", controller.getSecondsElapsed()));
+        });
+
         controller.createTimer(updateTimerRunner);
-        return timer;
+        return gameInfo;
     }
 
     /**

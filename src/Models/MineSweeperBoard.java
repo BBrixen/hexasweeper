@@ -53,23 +53,15 @@ public class MineSweeperBoard extends Observable implements Serializable {
 		switch (difficulty) {
 			case "Very Easy" -> {
 				divider = VERY_EASY_DIVIDER;
-				rows = 16;
 				cols = 16;
 			}
 			case "Easy" -> {
 				divider = EASY_DIVIDER;
-				rows = 16;
 				cols = 20;
-			}
-			case "Normal" -> {
-				divider = NORMAL_DIVIDER;
-				rows = 16;
-				cols = 24;
 			}
 			case "Hard" -> {
 				divider = HARD_DIVIDER;
 				rows = 20;
-				cols = 24;
 			}
 			case "Very Hard" -> {
 				divider = VERY_HARD_DIVIDER;
@@ -80,10 +72,10 @@ public class MineSweeperBoard extends Observable implements Serializable {
 
 
 		numBombs = rows * cols / divider;
-		board = new MineSweeperTile[rows][cols];
 		ms_elapsed = -1;
-		this.difficulty = difficulty;
 		timeInc = DELTA_TIME_MS;
+		this.difficulty = difficulty;
+		board = new MineSweeperTile[rows][cols];
 	}
 	
 	/**
@@ -283,5 +275,18 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 */
 	public int getNumBombs() {
 		return numBombs;
+	}
+
+	/**
+	 * This function searches through all the tiles in the board and counts the number of flagged tiles
+	 * @return - the number of tiles which have been flagged
+	 */
+	public int getNumFlags() {
+		int count = 0;
+		for (MineSweeperTile[] row : board)
+			for (MineSweeperTile tile : row)
+				if (tile != null && tile.getStatus() == GUESS_STATUS.FLAGGED)
+					count ++;
+		return count;
 	}
 }
