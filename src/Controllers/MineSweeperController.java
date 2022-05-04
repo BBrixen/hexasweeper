@@ -268,7 +268,6 @@ public class MineSweeperController implements Serializable {
 
 	/**
 	 * Retrieves the top times from the scoreboard,
-	 * TODO make this dependeds on the difficulty of game being played
 	 * @return - a string representing the top times
 	 */
 	public String[] getTopTimes() {
@@ -296,16 +295,31 @@ public class MineSweeperController implements Serializable {
 	public int getCols() {
 		return model.getCols();
 	}
-	
+
+	/**
+	 * This disables the models timer (handled in the model)
+	 */
 	public void disableTimer() {
 		model.disableTimer();
 	}
-	
+
+	/**
+	 * This enables the models timer (handled in the model)
+	 */
 	public void enableTimer() {
 		model.enableTimer();
 	}
-	
+
+	/**
+	 * This checks if the game is paused by determining
+	 * if the model's timer is equal to 0 (not incrememing)
+	 * @return true if the game is paused
+	 */
 	public boolean isGamePaused() {
 		return model.isGamePaused();
+	}
+
+	public String getMineCount() {
+		return model.getNumFlags() + " / " + model.getNumBombs();
 	}
 }
