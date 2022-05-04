@@ -33,10 +33,13 @@ import javafx.stage.Screen;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Observable;
 import java.util.Observer;
 import Models.MineSweeperTile;
 import Controllers.MineSweeperController;
+import javafx.util.Pair;
+
 import static Utils.GUESS_STATUS.*; // this is fine since its 4 items
 
 @SuppressWarnings("deprecation")
@@ -78,6 +81,7 @@ public class MineSweeper extends Application implements Observer {
     // inside the update function and there is no way to pass them as parameters
     private Hexagon[][] rectGrid;
     private Label[][] labelGrid;
+    private HashSet<Pair<Integer, Integer>> animatedTiles;
     // the stage must be global since it is used and modified in many locations.
     // it is far too much pain to make it a local variable
     // also this variable makes sense to be global since it is the main display stage
@@ -175,6 +179,7 @@ public class MineSweeper extends Application implements Observer {
 
     private void createDisplayFromController() {
         generateConstants(controller.getRows(), controller.getCols());
+        animatedTiles = new HashSet<>();
         controller.setObserver(this); // add as observer for model (MineSweeperBoard)
         rectGrid = new Hexagon[controller.getRows()][controller.getCols()];
         labelGrid = new Label[controller.getRows()][controller.getCols()];
@@ -277,13 +282,14 @@ public class MineSweeper extends Application implements Observer {
                 controller.updateTileStatus(row, col, GUESSED);
 
                 if (board[row][col] != null && e.getClickCount() == 1) {
-                    if (board[row][col].getStatus() == UNGUESSED)
+                    if (board[row][col].getStatus() == GUESSED) {
                         animateTiles(row, col);
-
+                    }
                     else if (board[row][col].getStatus() == BOMB)
                         animateBombs(row, col);
 
                 }
+
             } else if (e.isSecondaryButtonDown()) {
                 controller.updateTileStatus(row, col, FLAGGED);  // flag the tile
             }
@@ -542,12 +548,17 @@ public class MineSweeper extends Application implements Observer {
 	}
 
 	private void animateTiles(int row, int col) {
+        Pair<Integer, Integer> coords = new Pair<>(row, col);
+        if (animatedTiles.contains(coords)) return;
+        animatedTiles.add(coords);
+
 		ScaleTransition big = new ScaleTransition(Duration.millis(300), rectGrid[row][col]);
     	big.setByX(.1f);
     	big.setByY(.1f);
     	big.setAutoReverse(true);
     	big.setCycleCount(2);
-    	big.play();	
+    	big.play();
+        big.setOnFinished(e -> animatedTiles.remove(coords));
 	}
 
     //////////// UPDATE THE DISPLAY ////////////
