@@ -4,6 +4,7 @@ import javafx.animation.RotateTransition;
 import javafx.animation.ScaleTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -11,6 +12,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -34,9 +36,7 @@ import java.util.Observable;
 import java.util.Observer;
 import Models.MineSweeperTile;
 import Controllers.MineSweeperController;
-import static Utils.GUESS_STATUS.FLAGGED;
-import static Utils.GUESS_STATUS.GUESSED;
-import static Utils.GUESS_STATUS.UNGUESSED;
+import static Utils.GUESS_STATUS.*; // this is fine since its 4 items
 
 
 @SuppressWarnings("deprecation")
@@ -61,6 +61,7 @@ public class MineSweeper extends Application implements Observer {
     		+ "  -fx-border-color: black;"
     		+ "  -fx-border-radius: 10;"
     		+ "  -fx-background-radius: 10;";
+    private static final Insets DEFAULT_INSETS = new Insets(10);
     private static final Paint GREEN_BACKGROUND = Color.rgb(120, 190, 120);
     private static final Paint RED_BACKGROUND =  Color.rgb(190, 120, 120);
     private static final HashMap<Integer, Color> MINE_COUNT_TO_COLOR = new HashMap<>();
@@ -97,6 +98,7 @@ public class MineSweeper extends Application implements Observer {
 
     @Override
     public void start(Stage stage) {
+        System.out.println(MAIN_FONT_SIZE);
     	this.stage = stage;
     	// initialize game
         createController("Normal");
@@ -111,9 +113,9 @@ public class MineSweeper extends Application implements Observer {
         rectGrid = new Hexagon[controller.getRows()][controller.getCols()];
         labelGrid = new Label[controller.getRows()][controller.getCols()];
         AnchorPane gridPane = new AnchorPane();
-        HBox buttonRow = new HBox(15);
+        HBox buttonRow = new HBox(MAIN_FONT_SIZE);
         HBox mainPane = new HBox();
-        VBox mainVBox = new VBox(15);
+        VBox mainVBox = new VBox(MAIN_FONT_SIZE);
 
         // creating bottom buttons
         Button saveButton = new Button("Save");
@@ -193,7 +195,7 @@ public class MineSweeper extends Application implements Observer {
             label.setTextFill(GREEN_BACKGROUND);
             label.setFont(MAIN_FONT);
             label.setTextFill(GREEN_BACKGROUND);
-            label.setPadding(new Insets(10));
+            label.setPadding(DEFAULT_INSETS);
             topTimeLabels[i+1] = label;
         }
 
@@ -244,45 +246,31 @@ public class MineSweeper extends Application implements Observer {
         label.setTranslateX(xCoord);
         label.setTranslateY(yCoord);
         label.setPadding(new Insets(HEX_HEIGHT/-8,0,0,HEX_WIDTH/3));
-        
-        // TODO: compact these into the same event
-        hex.setOnMousePressed(e -> {
+
+        EventHandler clicker = event -> {
+            MouseEvent e = (MouseEvent) event;
             if (e.getClickCount() == 2 && e.isPrimaryButtonDown()) {
+                // double click to reveal around
                 controller.updateTilesAround(row, col);
+
             } else if (e.isPrimaryButtonDown()) {
+                // "step on" the tile
                 controller.updateTileStatus(row, col, GUESSED);
+
                 if (board[row][col] != null && e.getClickCount() == 1) {
-                    if (board[row][col].getStatus().getColor() == Color.WHITE) {
+                    if (board[row][col].getStatus() == UNGUESSED)
                         animateTiles(row, col);
-                    }
-                    else if (board[row][col].getStatus().getColor() == Color.BLACK) {
+
+                    else if (board[row][col].getStatus() == BOMB)
                         animateBombs(row, col);
-                    }
-                    }
+
+                }
             } else if (e.isSecondaryButtonDown()) {
-                controller.updateTileStatus(row, col, FLAGGED);
+                controller.updateTileStatus(row, col, FLAGGED);  // flag the tile
             }
-
-        });
-
-        label.setOnMousePressed(e -> {
-            if (e.getClickCount() == 2 && e.isPrimaryButtonDown()) {
-                controller.updateTilesAround(row, col);
-            } else if (e.isPrimaryButtonDown()) {
-                controller.updateTileStatus(row, col, GUESSED);
-                if (board[row][col] != null && e.getClickCount() == 1) {
-                    if (board[row][col].getStatus().getColor() == Color.WHITE) {
-                        animateTiles(row, col);
-                    }
-                    else if (board[row][col].getStatus().getColor() == Color.BLACK) {
-                        animateBombs(row, col);
-                    }
-                    }
-            } else if (e.isSecondaryButtonDown()) {
-                controller.updateTileStatus(row, col, FLAGGED);
-            }
-
-        });
+        };
+        hex.setOnMousePressed(clicker);
+        label.setOnMousePressed(clicker);
 
         // adding it to the grids and groups
         rectGrid[row][col] = hex;
@@ -298,7 +286,7 @@ public class MineSweeper extends Application implements Observer {
     private HBox createTimerAndMineCount() {
         HBox gameInfo = new HBox(MAIN_FONT_SIZE);
         gameInfo.setAlignment(Pos.CENTER);
-        gameInfo.setPadding(new Insets(10));
+        gameInfo.setPadding(DEFAULT_INSETS);
 
         Text mineCount = new Text();
         Text timer = new Text();
@@ -322,12 +310,12 @@ public class MineSweeper extends Application implements Observer {
      */
     private Button createPauseButton() {
         Button button = new Button();
-        Image pauseImage = new Image("file:Images/pause.png", 50, 50, true, false);
+        Image pauseImage = new Image("file:Images/pause.png", 2*MAIN_FONT_SIZE, 2*MAIN_FONT_SIZE, true, false);
         ImageView view = new ImageView(pauseImage);
-        view.setFitHeight(50);
+        view.setFitHeight(2*MAIN_FONT_SIZE);
         view.setPreserveRatio(true);
         button.setGraphic(view);
-        button.setPrefSize(50, 50);
+        button.setPrefSize(2*MAIN_FONT_SIZE, 2*MAIN_FONT_SIZE);
         button.setOnMouseClicked(e -> {
             // If game is paused and button is clicked, switch image back to pause button
             if (controller.isGamePaused()) {
@@ -337,7 +325,8 @@ public class MineSweeper extends Application implements Observer {
 
 
             else {
-                Image playImage = new Image("file:Images/play.png", 50, 50, true, false);
+                Image playImage = new Image("file:Images/play.png",
+                        2*MAIN_FONT_SIZE, 2*MAIN_FONT_SIZE, true, false);
                 ImageView playView = new ImageView(playImage);
                 button.setGraphic(playView);
                 pauseGame();
@@ -424,7 +413,7 @@ public class MineSweeper extends Application implements Observer {
         label.setFont(MAIN_FONT);
         label.setMaxWidth(Double.MAX_VALUE);
         label.setAlignment(Pos.BOTTOM_CENTER);
-        label.setPadding(new Insets(20, 0, 0, 0));
+        label.setPadding(new Insets(20, 0, 0, 0));  // move down 10
         playAgainPop(root, label, btn, popUp, p);
     }
 
@@ -435,11 +424,9 @@ public class MineSweeper extends Application implements Observer {
         root.setBottom(btn);
         BorderPane.setAlignment(label, Pos.CENTER);
         BorderPane.setAlignment(btn, Pos.CENTER);
-        BorderPane.setMargin(btn, new Insets(20));
-
+        BorderPane.setMargin(btn, DEFAULT_INSETS); // this was changed from 20 to 10, shouldnt cause issues? hopefully?
 
         Scene popScene = new Scene(root, (float) SCENE_WIDTH/2, (float) SCENE_HEIGHT/6);
-
         popUp.setScene(popScene);
         popUp.setTitle("Game Over");
         popUp.show();
@@ -483,7 +470,7 @@ public class MineSweeper extends Application implements Observer {
     }
 
     private void diffPopUp(HBox buttonBox, Label label, Stage diffPop) {
-        buttonBox.setPadding(new Insets(10, 10, 10, 10));
+        buttonBox.setPadding(DEFAULT_INSETS);
         buttonBox.setAlignment(Pos.CENTER);
         buttonBox.setSpacing(10);
 
