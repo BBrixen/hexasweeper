@@ -48,20 +48,43 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 * @param difficulty A string representing the difficulty of the game, which affects board size and mine density.
 	 */
 	public MineSweeperBoard(String difficulty) {
+		// set dimensions and number of bombs
+		setBoardDimensions(difficulty);
+
+		ms_elapsed = -1;
+		timeInc = DELTA_TIME_MS;
+		this.difficulty = difficulty;
 		//initializes the board as a ROWS x COLS 2D array with null pointers for now
+		board = new MineSweeperTile[rows][cols];
+	}
+
+	/**
+	 * This takes in a difficulty and changes the board dimensions to match that
+	 * @param difficulty - the difficulty for this board
+	 * @return - an integer
+	 */
+	public void setBoardDimensions(String difficulty) {
 		int divider = NORMAL_DIVIDER;
 		switch (difficulty) {
 			case "Very Easy" -> {
 				divider = VERY_EASY_DIVIDER;
+				rows = 16;
 				cols = 16;
 			}
 			case "Easy" -> {
 				divider = EASY_DIVIDER;
+				rows = 16;
 				cols = 20;
+			}
+			case "Normal" -> {
+				divider = NORMAL_DIVIDER;
+				rows = 16;
+				cols = 24;
 			}
 			case "Hard" -> {
 				divider = HARD_DIVIDER;
 				rows = 20;
+				cols = 24;
 			}
 			case "Very Hard" -> {
 				divider = VERY_HARD_DIVIDER;
@@ -69,13 +92,7 @@ public class MineSweeperBoard extends Observable implements Serializable {
 				cols = 30;
 			}
 		}
-
-
 		numBombs = rows * cols / divider;
-		ms_elapsed = -1;
-		timeInc = DELTA_TIME_MS;
-		this.difficulty = difficulty;
-		board = new MineSweeperTile[rows][cols];
 	}
 	
 	/**
