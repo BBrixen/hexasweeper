@@ -206,6 +206,7 @@ public class MineSweeperController implements Serializable {
 		model.setBoard(newBoard);
 		model.setNumBombs(ois.readInt());
 		model.setDifficulty((String) ois.readObject());
+		model.setBoardDimensions(model.getDifficulty());
 
 		// set controller variables for this specific file
 		this.gameOver = ois.readBoolean();
