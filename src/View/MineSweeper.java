@@ -7,7 +7,9 @@ import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.chart.PieChart.Data;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -78,6 +80,8 @@ public class MineSweeper extends Application implements Observer {
     // inside the update function and there is no way to pass them as parameters
     private Hexagon[][] rectGrid;
     private Label[][] labelGrid;
+    private AnchorPane gridPane;
+    private HBox mainPane;
     // the stage must be global since it is used and modified in many locations.
     // it is far too much pain to make it a local variable
     // also this variable makes sense to be global since it is the main display stage
@@ -112,9 +116,9 @@ public class MineSweeper extends Application implements Observer {
     private Scene createScene() {
         rectGrid = new Hexagon[controller.getRows()][controller.getCols()];
         labelGrid = new Label[controller.getRows()][controller.getCols()];
-        AnchorPane gridPane = new AnchorPane();
+        gridPane = new AnchorPane();
         HBox buttonRow = new HBox(MAIN_FONT_SIZE);
-        HBox mainPane = new HBox();
+        mainPane = new HBox();
         VBox mainVBox = new VBox(MAIN_FONT_SIZE);
 
         // creating bottom buttons
@@ -184,7 +188,7 @@ public class MineSweeper extends Application implements Observer {
     }
 
     public void createScoreBoard(MineSweeperController controller, HBox mainPane) {
-        String[] topTimes = controller.getTopTimes();
+    	String[] topTimes = controller.getTopTimes();
         Label topLabel = new Label("Top Scores   ");
         topLabel.setFont(MAIN_FONT);
         Label[] topTimeLabels = new Label[topTimes.length+1];
@@ -198,12 +202,22 @@ public class MineSweeper extends Application implements Observer {
             label.setPadding(DEFAULT_INSETS);
             topTimeLabels[i+1] = label;
         }
-
+        
         VBox scoreBoard = new VBox(MAIN_FONT_SIZE / 2);
         scoreBoard.getChildren().addAll(topTimeLabels);
         scoreBoard.setAlignment(Pos.CENTER);
-        mainPane.getChildren().addAll(scoreBoard);
-        mainPane.setAlignment(Pos.CENTER);
+        scoreBoard.setUserData("Scoreboard");
+        
+        // Delete the existing scoreboard to make room for the new one
+        for (Node n : mainPane.getChildren()) {
+        	if (n.getUserData() != null && n.getUserData().equals("Scoreboard")) {
+        		mainPane.getChildren().remove(n);
+        		break;
+        	}
+        }
+        
+	    mainPane.getChildren().add(0, scoreBoard);
+	    mainPane.setAlignment(Pos.CENTER);
     }
 
     //////////// CREATING COMPONENTS FOR THE DISPLAY ////////////
@@ -592,6 +606,16 @@ public class MineSweeper extends Application implements Observer {
         if (controller.isGameOver())  {// checks with Controller if game is over
             displayGameOver(); // calls the method to display the game over msg if true
             return;
+        }
+        
+        // Regenerate the visible board if the size has changed - useful if we've just loaded
+        // from a game with a different difficulty.
+        if (board.length != rectGrid.length || board[0].length != rectGrid[0].length) {
+        	generateConstants(board.length, board[0].length);
+            rectGrid = new Hexagon[board.length][board[0].length];
+            labelGrid = new Label[board.length][board[0].length];
+            createBoard(board, gridPane);
+            createScoreBoard(controller, mainPane);
         }
 
         // if the game isn't over, all the tiles are updated according to their enum

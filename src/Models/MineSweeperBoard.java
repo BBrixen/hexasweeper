@@ -26,8 +26,8 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 */
 	private MineSweeperTile[][] board;
 	private Observer observer; // do we need a list?
-	private final int numBombs;
-	private final String difficulty;
+	private int numBombs;
+	private String difficulty;
 	private int timeInc, ms_elapsed, rows = 16, cols = 24;
 	
 	/**
@@ -288,5 +288,26 @@ public class MineSweeperBoard extends Observable implements Serializable {
 				if (tile != null && tile.getStatus() == GUESS_STATUS.FLAGGED)
 					count ++;
 		return count;
+	}
+	
+	/**
+	 * Sets the *displayed* and *calculated* number of bombs on the board, not the actual number of tiles with bombs on them!
+	 * 
+	 * This method is called when loading from a saved file, to ensure that we
+	 * keep using the saved target number of bombs to end the game,
+	 * rather than the overwritten target number.
+	 */
+	public void setNumBombs(int newNumBombs) {
+		numBombs = newNumBombs;
+	}
+	
+	/**
+	 * Sets the *written* difficulty of the board, not the actual in-game difficulty!
+	 * 
+	 * This method is called when loading from a saved file, to ensure that we
+	 * save to the correct scoreboard slot, rather than that of the game we overwrote.
+	 */
+	public void setDifficulty(String newDifficulty) {
+		difficulty = newDifficulty;
 	}
 }

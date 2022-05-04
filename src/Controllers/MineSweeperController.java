@@ -171,7 +171,9 @@ public class MineSweeperController implements Serializable {
 		
 		oos.writeObject(this.model.getBoard());
 		// We have no need to serialize the model's observers and should not try,
-		// but unfortunately that means breaking things up a bit instead of just serializing the whole Controller.
+		// but unfortunately that means breaking things up a bit instead of just serializing everything at once.
+		oos.writeInt(this.model.getNumBombs());
+		oos.writeObject(this.model.getDifficulty());
 		
 		oos.writeBoolean(this.gameOver);
 		oos.writeInt(this.numberOfGuesses);
@@ -197,6 +199,9 @@ public class MineSweeperController implements Serializable {
 		
 		MineSweeperTile[][] newBoard = (MineSweeperTile[][]) ois.readObject();
 		model.setBoard(newBoard);
+		model.setNumBombs(ois.readInt());
+		model.setDifficulty((String) ois.readObject());
+		
 		this.gameOver = ois.readBoolean();
 		this.numberOfGuesses = ois.readInt();
 		this.win = ois.readBoolean();
