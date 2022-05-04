@@ -2,7 +2,6 @@ package Controllers;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -11,34 +10,33 @@ import java.io.Serializable;
 import java.util.Observer;
 import Models.MineSweeperBoard;
 import Models.MineSweeperTile;
+import Models.ScoreBoard;
 import Utils.GUESS_STATUS;
-import static View.MineSweeper.COLS;
-import static View.MineSweeper.NUM_BOMBS;
-import static View.MineSweeper.ROWS;
+import javafx.util.Pair;
 
 public class MineSweeperController implements Serializable {
 
-	private static final long serialVersionUID = 100L;
-	
-	private MineSweeperBoard model;
-	// tracks if game is over
-	private boolean gameOver;
-	// keeps track of the total number of guesses
-	private int numberOfGuesses;
-	// total number of bombs in the board
+	private final MineSweeperBoard model;
+	private final ScoreBoard scoreBoard;
+	private boolean gameOver; // tracks if game is over
+	private int numberOfGuesses; // keeps track of the total number of guesses
 	private boolean win;
 	private MineSweeperTile[][] board;
-	
+
 	/**
-	 * Contructor for the controller.
-	 * numBombs is used as a parameter for constructing the model.
+	 * Constructor for the controller.
+	 * 
+	 * When initialized, the controller immediately creates a new board with
+	 * the size and mine density appropriate for the selected difficulty.
+	 * 
+	 * @param difficulty A string representing the difficulty of the game, which affects board size and mine density.
 	 */
-	public MineSweeperController() {
-		this.model = new MineSweeperBoard();
-		// will change to "false" if a bomb is clicked
-		win = true;
+	public MineSweeperController(String difficulty) {
+		this.model = new MineSweeperBoard(difficulty);
+		this.scoreBoard = new ScoreBoard();
+		win = true; // keeps track of the total number of guesses
 	}
-	
+
 	/**
 	 * This method determines the current status of the clicked tile, and based
 	 * on the status parameter, assigns a new status to the tile.
@@ -48,80 +46,87 @@ public class MineSweeperController implements Serializable {
 	 * @param status is an enum either GUESSED or FLAGGED, depending on the mouse button clicked.
 	 */
 	public void updateTileStatus(int row, int col, GUESS_STATUS status) {
-		if (!gameOver) { // first determines if the game is over
-			board = model.getBoard(); // gets the board from the model
-			
-			/* determines if the board is still null (indicates that this is the player's
-			 * first click of the game.
-			 */
-			if (board[row][col] == null) {
+		board = model.getBoard();
+		// this is a complex guard statement to make sure we are in bounds of the board
+		// it is needed from updateTilesAround
+		if (board != null && (row >= board.length || row < 0 || col >= board[row].length || col < 0)) return;
+		if (gameOver || board == null || board[row] == null) return; // basic guard statements
+
+		//determines if the board is still null (indicates that this is the player's first click of the game.
+
+		if (board[row][col] == null) {
+			if (!(status.equals(GUESS_STATUS.FLAGGED))) {
 				model.createBoard(row, col); // creates the board and places all bombs
-				updateTileStatus(row, col, status); // updates the board with the player's click 
+				updateTileStatus(row, col, status); // updates the board with the player's click
 				}
-			
-			/* If the tile is already flagged and the player right clicks again, the tile
-			 * if "unflagged" and set back to an "UNGUESSED" status
-			 */
-			else if (board[row][col].getStatus().equals(GUESS_STATUS.FLAGGED)) { 
-				if (status.equals(GUESS_STATUS.FLAGGED))
-					model.updateTileStatus(row, col, GUESS_STATUS.UNGUESSED);
-			}
-			/* If the player clicks on a tile that is a bomb, win is set to false and
-			 * all bombs are shown. 
-			 */
-			else if (status.equals(GUESS_STATUS.GUESSED) && board[row][col].isBomb()) {
-				win = false;
-				showAllBombs();
-			}
-			/* If the tile is set currently as UNGUESSED, it will be changed to either
-			 * GUESSED or FLAGGED, depending on which button the player clicked.
-			 */
-			else if (board[row][col].getStatus().equals(GUESS_STATUS.UNGUESSED)) {
-				model.updateTileStatus(row, col, status);
-				if (status.equals(GUESS_STATUS.GUESSED)) {
-					if (board[row][col].getMineCount() == 0)
-						checkAdjacent(row, col);
-					numberOfGuesses++;
-					}
-				}
-			/*
-			 * Checks if the game is over by checking the number of player clicks
-			 * that have not been bombs or flagging clicks.
-			 */
-			if (numberOfGuesses == (board.length*board.length) - NUM_BOMBS) {
-				showAllBombs();
-				gameIsOver();
+		}
+
+		/* If the tile is already flagged and the player right clicks again, the tile
+		 * if "unflagged" and set back to an "UNGUESSED" status
+		 */
+		else if (board[row][col].getStatus().equals(GUESS_STATUS.FLAGGED)) {
+			if (status.equals(GUESS_STATUS.FLAGGED))
+				model.updateTileStatus(row, col, GUESS_STATUS.UNGUESSED);
+		}
+		/* If the player clicks on a tile that is a bomb, win is set to false and
+		 * all bombs are shown.
+		 */
+		else if (status.equals(GUESS_STATUS.GUESSED) && board[row][col].isBomb()) {
+			win = false;
+			showAllBombs();
+		}
+		/* If the tile is set currently as UNGUESSED, it will be changed to either
+		 * GUESSED or FLAGGED, depending on which button the player clicked.
+		 */
+		else if (board[row][col].getStatus().equals(GUESS_STATUS.UNGUESSED)) {
+			model.updateTileStatus(row, col, status);
+			if (status.equals(GUESS_STATUS.GUESSED)) {
+				if (board[row][col].getMineCount() == 0)
+					checkAdjacent(row, col);
+				numberOfGuesses++;
 			}
 		}
-	}
-	
-    /* I did some strange math here. adj is cardinal directions for
-	 * coord pairs for all adjacent tiles in odd rows. 
-	 * adjEven is for even rows. I'm sure there is a cleaner/
-	 * more logical way to do this. I'll try to format it differently.
-	 * This method is used to reveal adjacent tiles. updateAdjacentTiles()
-	 * will continue to call this method automatically until there are no
-	 * longer adjacent tiles with a mineCount of 0.
-	 */
-	private void checkAdjacent(int row, int col) {
-		int[][] adj = {{0, -1},{0, 1},{1, 0},{1, 1},{-1, 0},{-1, 1}};
-    	int[][] adjEven = {{0, -1},{0, 1},{1, -1},{1, 0},{-1, -1},{-1, 0}};
-		if (row%2 == 0) 
-			adj = adjEven;
-		for (int i = 0; i < adj.length; i++) {
-			checkNonBomb(row, adj[i][0], col, adj[i][1]);
-		}	
+		/*
+		 * Checks if the game is over by checking the number of player clicks
+		 * that have not been bombs or flagging clicks.
+		 */
+		if (numberOfGuesses == (board.length*board[0].length) - model.getNumBombs() && !gameOver) {
+			showAllBombs();
+		}
+
 	}
 
-	/* Checks if adjacent tiles are bombs. If they are not, 
-	 * the tiles are revealed. 
+	/**
+	 * When the user clicks a tile, this method updates all of the tiles around it.
+	 * 
+	 * @param row The row of the tile to update around.
+	 * @param col The column of the tile to update around.
 	 */
-	private void checkNonBomb(int r, int a, int c, int b) {
-		if (r+a >= 0 && r+a < ROWS && c+b >= 0 && c+b < COLS) {
-			if (!(board[r+a][c+b].isBomb())){
-				updateTileStatus(r+a, c+b, GUESS_STATUS.GUESSED);}
-		}
-		
+	public void updateTilesAround(int row, int col) {
+		if (this.model.getBoard()[row][col] != null)
+			for (Pair<Integer, Integer> coord : this.model.getBoard()[row][col].getAdjacentTiles()) {
+				if (this.model.getBoard()[row][col].getStatus() != GUESS_STATUS.FLAGGED)
+					updateTileStatus(coord.getKey(), coord.getValue(), GUESS_STATUS.GUESSED);
+			}
+	}
+
+	/**
+	 * This method reveals all tiles adjacent to a zero tile.
+	 * This method will continue to be called by updateTileStatus() until all chained
+	 * zero tiles are revealed, as well as all tiles that are adjacent to that chain.
+	 * 
+	 * @param row The row of the tile to check.
+	 * @param col The column of the tile to check.
+	 */
+	private void checkAdjacent(int row, int col) {
+		for (Pair<Integer, Integer> coord : this.model.getBoard()[row][col].getAdjacentTiles()) {
+			int tempRow = coord.getKey();
+			int tempCol = coord.getValue();
+			if (tempRow>= 0 && tempRow < model.getRows() && tempCol >= 0 && tempCol < model.getCols()) {
+				if (!(model.getBoard()[tempRow][tempCol].isBomb())){
+					updateTileStatus(tempRow, tempCol, GUESS_STATUS.GUESSED);}
+			}
+		}	
 	}
 
 	/**
@@ -132,53 +137,33 @@ public class MineSweeperController implements Serializable {
 	private void showAllBombs() {
 		// gets the current board from the model
 		board = model.getBoard();
+
 		for (int row = 0; row < board.length; row++) {
-            for (int col = 0; col < board.length; col++) {
-            	// checks if the tile is a bomb
+            for (int col = 0; col < board[row].length; col++) {
             	if (board[row][col].isBomb())
-            		// sets the bomb tile color if true
+            		// if the tile is a bomb, set the color of the tile to a bomb
 					model.updateTileStatus(row, col, GUESS_STATUS.BOMB);
-		}
-      } // sets gameOver to true
-		gameIsOver();
-		
+			}
+      	}
+		gameIsOver(); // the game is over, so we update the controller to reflect this
 	}
 
 	/**
-	 * Adds an observer to the model's observer list
-	 * @param o is the observer to be added. Most likely a view object
+	 * Adds an observer to the model's observer list.
+	 * 
+	 * @param o The observer to be added. Most likely a view object.
 	 */
-	public void addObserver(Observer o) {
-		model.addObserver(o);
+	public void setObserver(Observer o) {
+		model.setObserver(o);
 	}
 	
-	/**
-	 * Checks if the game is over.
-	 * @return boolean indicating if the game is over
+	/*
+	 * TODO: Figure out under what circumstances this could fail.
 	 */
-	public boolean isGameOver() {
-		return gameOver;
-	}
-	
-	/**
-	 * Sets gameOver to true and call's the model's notify method.
-	 */
-	public void gameIsOver() {
-		gameOver = true;
-		model.notifyObservers();
-	}
-
-	/**
-	 * Returns a boolean indicating if the player won the game
-	 * @return boolean if the player won
-	 */
-	public boolean win() {
-		return win;
-	}
-	
 	/**
 	 * Saves the game by outputting the current state of the board and the instance variables to a file.
-	 * @throws IOException 
+	 * 
+	 * @throws IOException If the game fails to save.
 	 */
 	public void saveGame(File f) throws IOException {
 		FileOutputStream fos = new FileOutputStream(f);
@@ -186,18 +171,27 @@ public class MineSweeperController implements Serializable {
 		
 		oos.writeObject(this.model.getBoard());
 		// We have no need to serialize the model's observers and should not try,
-		// but unfortunately that means breaking things up a bit instead of just serializing the whole Controller.
+		// but unfortunately that means breaking things up a bit instead of just serializing everything at once.
+		oos.writeInt(this.model.getNumBombs());
+		oos.writeObject(this.model.getDifficulty());
 		
 		oos.writeBoolean(this.gameOver);
 		oos.writeInt(this.numberOfGuesses);
 		oos.writeBoolean(this.win);
 		oos.writeObject(this.board);
+		oos.writeInt((int)getSecondsElapsed());
 		
 		oos.close();
 	}
 	
+	/*
+	 * TODO: Figure out under what circumstances this could fail.
+	 */
 	/**
 	 * Loads the game by reading off parameters from the Controller object stored in the chosen file.
+	 * 
+	 * @throws IOException If opening the file fails
+	 * @throws ClassNotFoundException If the object we try to load is not a valid MineSweeperTile[][]
 	 */
 	public void loadGame(File f) throws IOException, ClassNotFoundException {
 		FileInputStream fis = new FileInputStream(f);
@@ -205,21 +199,132 @@ public class MineSweeperController implements Serializable {
 		
 		MineSweeperTile[][] newBoard = (MineSweeperTile[][]) ois.readObject();
 		model.setBoard(newBoard);
+		model.setNumBombs(ois.readInt());
+		model.setDifficulty((String) ois.readObject());
+		
 		this.gameOver = ois.readBoolean();
 		this.numberOfGuesses = ois.readInt();
 		this.win = ois.readBoolean();
 		this.board = (MineSweeperTile[][]) ois.readObject();
+		model.setSecondsElapsed(ois.readInt());
 		
 		ois.close();
 		
 		model.notifyObservers();
 	}
-	
+
 	/**
-	 * Returns the current board state from the model.
-	 * @return
+	 * This passes the timer creation onto the model
+	 * @param updater - the runnable to be called upon updates to the timer
+	 */
+	public void createTimer(Runnable updater) {
+		model.createBoardTimer(updater);
+	}
+
+	/**
+	 * This kills the timer executor so that it is no longer running.
+	 * This allows us to either create a new executor for a new game,
+	 * or we can exit the program
+	 */
+	public void shutdownTimer() {
+		model.shutdown();
+	}
+
+	//GETTERS AND SETTERS
+
+	/**
+	 * @return A boolean indicating if the game is over.
+	 */
+	public boolean isGameOver() {
+		return gameOver;
+	}
+
+	/**
+	 * Sets gameOver to true and calls the model's notify method.
+	 */
+	public void gameIsOver() {
+		gameOver = true;
+		if (win) scoreBoard.addNewTime(model.getSecondsElapsed(), model.getDifficulty(), true);
+		model.notifyObservers();
+	}
+
+	/**
+	 * @return A boolean indicating if the player won the game.
+	 */
+	public boolean win() {
+		return win;
+	}
+
+	/**
+	 * @return The MineSweeperTile[][] array from this controller's current model.
 	 */
 	public MineSweeperTile[][] getBoard() {
-		return model.getBoard();
+		return this.model.getBoard();
+	}
+
+	/**
+	 * When called, this method updates the model's time by some number of milliseconds and returns the new time.
+	 * 
+	 * @return The number of seconds that the current game has been going for, as a double.
+	 */
+	public double getSecondsElapsed() {
+		return model.getSecondsElapsed();
+	}
+
+	/**
+	 * Retrieves the top times from the scoreboard,
+	 * @return - a string representing the top times
+	 */
+	public String[] getTopTimes() {
+		Double[] times = scoreBoard.getTopTimes(model.getDifficulty());
+		String[] topTimes = new String[times.length];
+
+		for (int i = 0; i < topTimes.length; i++) {
+			topTimes[i] = model.getDifficulty() + ": " + times[i];
+			if (times[i] == null || times[i] == 0.0)
+				topTimes[i] = model.getDifficulty() + ": -.-";
+		}
+		return topTimes;
+	}
+
+	/**
+	 * @return The number of rows in the model's grid.
+	 */
+	public int getRows() {
+		return model.getRows();
+	}
+	
+	/**
+	 * @return The number of columns in the model's grid.
+	 */
+	public int getCols() {
+		return model.getCols();
+	}
+
+	/**
+	 * This disables the models timer (handled in the model)
+	 */
+	public void disableTimer() {
+		model.disableTimer();
+	}
+
+	/**
+	 * This enables the models timer (handled in the model)
+	 */
+	public void enableTimer() {
+		model.enableTimer();
+	}
+
+	/**
+	 * This checks if the game is paused by determining
+	 * if the model's timer is equal to 0 (not incrememing)
+	 * @return true if the game is paused
+	 */
+	public boolean isGamePaused() {
+		return model.isGamePaused();
+	}
+
+	public String getMineCount() {
+		return model.getNumFlags() + " / " + model.getNumBombs();
 	}
 }
