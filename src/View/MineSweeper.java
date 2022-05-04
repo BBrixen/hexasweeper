@@ -596,6 +596,10 @@ public class MineSweeper extends Application implements Observer {
         }
     }
     
+    /**
+     * Sets every hexagon and label to be disabled or enabled, true being disabled
+     * @param disabled True if elements are desired to be disabled
+     */
     private void setBoardDisabled(boolean disabled) {
     	for (int i = 0; i< rectGrid.length && i < labelGrid.length; i++) {
     		for (int j = 0; j < rectGrid[i].length && j < labelGrid[i].length; j++) {
