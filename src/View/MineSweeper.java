@@ -548,6 +548,7 @@ public class MineSweeper extends Application implements Observer {
 	}
 
 	private void animateTiles(int row, int col) {
+        // make sure this is not already being animated
         Pair<Integer, Integer> coords = new Pair<>(row, col);
         if (animatedTiles.contains(coords)) return;
         animatedTiles.add(coords);
@@ -558,6 +559,7 @@ public class MineSweeper extends Application implements Observer {
     	big.setAutoReverse(true);
     	big.setCycleCount(2);
     	big.play();
+        // after animation, remove it from the animated tiles
         big.setOnFinished(e -> animatedTiles.remove(coords));
 	}
 
