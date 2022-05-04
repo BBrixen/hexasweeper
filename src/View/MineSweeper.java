@@ -9,7 +9,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.chart.PieChart.Data;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -39,7 +38,6 @@ import java.util.Observer;
 import Models.MineSweeperTile;
 import Controllers.MineSweeperController;
 import static Utils.GUESS_STATUS.*; // this is fine since its 4 items
-
 
 @SuppressWarnings("deprecation")
 public class MineSweeper extends Application implements Observer {
@@ -80,8 +78,6 @@ public class MineSweeper extends Application implements Observer {
     // inside the update function and there is no way to pass them as parameters
     private Hexagon[][] rectGrid;
     private Label[][] labelGrid;
-    private AnchorPane gridPane;
-    private HBox mainPane;
     // the stage must be global since it is used and modified in many locations.
     // it is far too much pain to make it a local variable
     // also this variable makes sense to be global since it is the main display stage
@@ -102,7 +98,6 @@ public class MineSweeper extends Application implements Observer {
 
     @Override
     public void start(Stage stage) {
-        System.out.println(MAIN_FONT_SIZE);
     	this.stage = stage;
     	// initialize game
         createController("Normal");
@@ -116,9 +111,9 @@ public class MineSweeper extends Application implements Observer {
     private Scene createScene() {
         rectGrid = new Hexagon[controller.getRows()][controller.getCols()];
         labelGrid = new Label[controller.getRows()][controller.getCols()];
-        gridPane = new AnchorPane();
+        AnchorPane gridPane = new AnchorPane();
         HBox buttonRow = new HBox(MAIN_FONT_SIZE);
-        mainPane = new HBox();
+        HBox mainPane = new HBox();
         VBox mainVBox = new VBox(MAIN_FONT_SIZE);
 
         // creating bottom buttons
@@ -169,6 +164,16 @@ public class MineSweeper extends Application implements Observer {
 
     private void createController(String difficulty) {
         controller = new MineSweeperController(difficulty);
+        createDisplayFromController();
+    }
+
+    private void createController(File file) throws IOException, ClassNotFoundException {
+        controller = new MineSweeperController(file);
+        createDisplayFromController();
+        update(null, controller.getBoard()); // we need to update the view with the newly-loaded board
+    }
+
+    private void createDisplayFromController() {
         generateConstants(controller.getRows(), controller.getCols());
         controller.setObserver(this); // add as observer for model (MineSweeperBoard)
         rectGrid = new Hexagon[controller.getRows()][controller.getCols()];
@@ -355,27 +360,22 @@ public class MineSweeper extends Application implements Observer {
      */
     public void setButtonActions(Button saveButton, Button loadButton, Button resetButton) {
         saveButton.setOnAction(e -> {
-        	if (!controller.isGameOver()) {
-	        	// Call pause method in order to prevent player cheating with file dialog box
-        		pauseGame();
-        		
-        		FileChooser fileChooser = new FileChooser();
-        		 
-                //Set extension filter for text files
-                FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
-                fileChooser.getExtensionFilters().add(extFilter);
-     
-                //Show save file dialog
-                File f = fileChooser.showSaveDialog(stage);
-     
-                if (f != null) {
-                	try {
-						controller.saveGame(f);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-	        	}
-                }
+            if (controller.isGameOver()) return;
+            // Call pause method in order to prevent player cheating with file dialog box
+            pauseGame();
+
+            FileChooser fileChooser = new FileChooser();
+            //Set extension filter for text files
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
+            fileChooser.getExtensionFilters().add(extFilter);
+
+            //Show save file dialog
+            File f = fileChooser.showSaveDialog(stage);
+            if (f != null)
+                try {
+                    controller.saveGame(f);
+                } catch (IOException ignored) {} // TODO make popup showing error?
+
         	unpauseGame();
         });
     	
@@ -385,13 +385,11 @@ public class MineSweeper extends Application implements Observer {
         	FileChooser chooser = new FileChooser();
         	pauseGame();
         		File f = chooser.showOpenDialog(stage);
-        		if (f != null) {
+        		if (f != null)
                     try {
-                        controller.loadGame(f);
-                    } catch (IOException | ClassNotFoundException e1) {
-                        e1.printStackTrace();
-                    }
-                }
+                        createController(f);
+                    } catch (IOException | ClassNotFoundException ignored) {} // TODO make popup showing error?
+
         		unpauseGame();
         });
         
@@ -606,16 +604,6 @@ public class MineSweeper extends Application implements Observer {
         if (controller.isGameOver())  {// checks with Controller if game is over
             displayGameOver(); // calls the method to display the game over msg if true
             return;
-        }
-        
-        // Regenerate the visible board if the size has changed - useful if we've just loaded
-        // from a game with a different difficulty.
-        if (board.length != rectGrid.length || board[0].length != rectGrid[0].length) {
-        	generateConstants(board.length, board[0].length);
-            rectGrid = new Hexagon[board.length][board[0].length];
-            labelGrid = new Label[board.length][board[0].length];
-            createBoard(board, gridPane);
-            createScoreBoard(controller, mainPane);
         }
 
         // if the game isn't over, all the tiles are updated according to their enum
