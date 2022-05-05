@@ -42,6 +42,15 @@ import javafx.util.Pair;
 
 import static Utils.GUESS_STATUS.*; // this is fine since its 4 items
 
+/**
+ * This class is a graphical user interface for a game of Minesweeper.
+ * 
+ * The playing field is a grid of hexagonal tiles in the middle of the screen that can be clicked to reveal or flag them,
+ * while a row of buttons beneath it controls saving, loading, pausing, and starting a new game.
+ * Meanwhile, a scoreboard on the left side displays the top times for the current difficulty setting,
+ * and labels above the playing field show the time spent on the current game and the number of flags and mines.
+ *
+ */
 @SuppressWarnings("deprecation")
 public class MineSweeper extends Application implements Observer {
 
@@ -89,6 +98,9 @@ public class MineSweeper extends Application implements Observer {
 
     //////////// CREATING THE SCENE AND GAME ////////////
 
+    /**
+     * Main method, called on program startup. It allocates colors to adjacent-mine counts before starting up the view.
+     */
     public static void main(String[] args) {
         // filling hashmap, this only needs to be done once
         MINE_COUNT_TO_COLOR.put(1, ONE_MINE);
@@ -100,6 +112,9 @@ public class MineSweeper extends Application implements Observer {
         launch(args);
     }
 
+    /**
+     * Runs upon launch. It fills out and then creates the main window of the game, before prompting the user to select a difficulty for their first game.
+     */
     @Override
     public void start(Stage stage) {
     	this.stage = stage;
@@ -112,6 +127,9 @@ public class MineSweeper extends Application implements Observer {
         chooseDiff();
     }
 
+    /**
+     * Sets up the basic structure of the game screen, including the buttons, timer, and their relative locations in the panes.
+     */
     private Scene createScene() {
         rectGrid = new Hexagon[controller.getRows()][controller.getCols()];
         labelGrid = new Label[controller.getRows()][controller.getCols()];
@@ -155,6 +173,12 @@ public class MineSweeper extends Application implements Observer {
         return new Scene(mainPane, SCREEN_WIDTH, SCREEN_HEIGHT);
     }
 
+    /**
+     * Adjusts constants in the program based on the size of the game board, in order to rescale the board so it fits on screen.
+     * 
+     * @param rows The size of the game board, in rows.
+     * @param cols The size of the game board, in columns.
+     */
     private void generateConstants(int rows, int cols) {
         HEX_RADIUS = Math.min(SCREEN_HEIGHT/(rows*2), 30);
         HEX_SIZE = Math.sqrt(HEX_RADIUS * HEX_RADIUS * 0.75);
@@ -166,17 +190,34 @@ public class MineSweeper extends Application implements Observer {
         MAIN_FONT = new Font("Helvetica", MAIN_FONT_SIZE);
     }
 
+    /**
+     * Creates a new controller with the chosen difficulty, then sets up the display with it.
+     * 
+     * @param difficulty The string for the difficulty of game to set up.
+     */
     private void createController(String difficulty) {
         controller = new MineSweeperController(difficulty);
         createDisplayFromController();
     }
 
+    /**
+     * Creates a controller from a loaded file, which entails updating the board after setting up the display.
+     * 
+     * @param file The file to load the game from.
+     * @throws IOException If file loading fails.
+     * @throws ClassNotFoundException If a MineSweeperTile[][] could not be loaded from the file information.
+     */
     private void createController(File file) throws IOException, ClassNotFoundException {
         controller = new MineSweeperController(file);
         createDisplayFromController();
         update(null, controller.getBoard()); // we need to update the view with the newly-loaded board
     }
 
+    /**
+     * Uses the information in the controller (namely the size of the board) to create an initial grid of hexagons of that size.
+     * 
+     * This method also sets the current view to be the observer for the controller's stored model.
+     */
     private void createDisplayFromController() {
         generateConstants(controller.getRows(), controller.getCols());
         animatedTiles = new HashSet<>();
@@ -197,6 +238,12 @@ public class MineSweeper extends Application implements Observer {
         }
     }
 
+    /**
+     * Creates a scoreboard from the top times for the current difficulty.
+     * 
+     * @param controller
+     * @param mainPane
+     */
     public void createScoreBoard(MineSweeperController controller, HBox mainPane) {
     	String[] topTimes = controller.getTopTimes();
         Label topLabel = new Label("Top Scores   ");
@@ -216,15 +263,6 @@ public class MineSweeper extends Application implements Observer {
         VBox scoreBoard = new VBox(MAIN_FONT_SIZE / 2);
         scoreBoard.getChildren().addAll(topTimeLabels);
         scoreBoard.setAlignment(Pos.CENTER);
-        scoreBoard.setUserData("Scoreboard");
-        
-        // Delete the existing scoreboard to make room for the new one
-        for (Node n : mainPane.getChildren()) {
-        	if (n.getUserData() != null && n.getUserData().equals("Scoreboard")) {
-        		mainPane.getChildren().remove(n);
-        		break;
-        	}
-        }
         
 	    mainPane.getChildren().add(0, scoreBoard);
 	    mainPane.setAlignment(Pos.CENTER);
@@ -362,7 +400,7 @@ public class MineSweeper extends Application implements Observer {
     }
 
     /**
-     * Sets the functionality of the buttons on the screen.
+     * Sets the functionality of the save, load, and reset buttons on the screen.
      */
     public void setButtonActions(Button saveButton, Button loadButton, Button resetButton) {
         saveButton.setOnAction(e -> {
@@ -405,8 +443,8 @@ public class MineSweeper extends Application implements Observer {
     //////////// POP UP DISPLAYS ////////////
 
     /**
-     * This method displays the game over message in the middle of the board
-     * when the game is over.
+     * This method sets up the game over message in the middle of the board
+     * when the game is over, then calls its display method, playAgainPop().
      */
     public void displayGameOver() {
     	controller.disableTimer();
@@ -435,6 +473,15 @@ public class MineSweeper extends Application implements Observer {
         playAgainPop(root, label, btn, popUp, p);
     }
 
+    /**
+     * Displays the play-again message in the view.
+     * 
+     * @param root
+     * @param label
+     * @param btn
+     * @param popUp
+     * @param p
+     */
     private void playAgainPop(BorderPane root, Label label, Button btn, Stage popUp, Paint p) {
         root.setBackground(
                 new Background(new BackgroundFill(p, new CornerRadii(6.0), Insets.EMPTY)));
@@ -455,6 +502,9 @@ public class MineSweeper extends Application implements Observer {
         });
     }
 
+    /**
+     * Sets up buttons and labels for the difficulty select popup, then calls their display methods.
+     */
     public void chooseDiff() {
         Stage diffPop = new Stage();
 
@@ -487,6 +537,13 @@ public class MineSweeper extends Application implements Observer {
         diffListener(veryEasy, easy, normal, hard, veryHard, diffPop);
     }
 
+    /**
+     * Draws the difficulty-select popup.
+     * 
+     * @param buttonBox
+     * @param label
+     * @param diffPop
+     */
     private void diffPopUp(HBox buttonBox, Label label, Stage diffPop) {
         buttonBox.setPadding(DEFAULT_INSETS);
         buttonBox.setAlignment(Pos.CENTER);
@@ -507,6 +564,16 @@ public class MineSweeper extends Application implements Observer {
         diffPop.show();
     }
 
+    /**
+     * Allocates mouse-press responses to each of the difficulty-select buttons.
+     * 
+     * @param veryEasy
+     * @param easy
+     * @param normal
+     * @param hard
+     * @param veryHard
+     * @param diffPop
+     */
     private void diffListener(Button veryEasy, Button easy, Button normal, Button hard, Button veryHard, Stage diffPop) {
         veryEasy.setOnMousePressed(me -> {
             createController("Very Easy");
@@ -532,6 +599,12 @@ public class MineSweeper extends Application implements Observer {
 
     //////////// ANIMATIONS ////////////
 
+    /**
+     * Animates the reveal of a bomb tile by scaling and spinning it.
+     * 
+     * @param row The row of the bomb to animate.
+     * @param col The column of the bomb to animate.
+     */
 	private void animateBombs(int row, int col) {
 		rectGrid[row][col].toFront();
     	ScaleTransition big = new ScaleTransition(Duration.millis(400), rectGrid[row][col]);
@@ -547,6 +620,12 @@ public class MineSweeper extends Application implements Observer {
     	rt.play();
 	}
 
+	/**
+	 * Animates the reveal of a tile by scaling it up and down in a "popping" motion.
+	 * 
+	 * @param row The row of the tile to animate.
+	 * @param col The column of the tile to animate.
+	 */
 	private void animateTiles(int row, int col) {
         // make sure this is not already being animated
         Pair<Integer, Integer> coords = new Pair<>(row, col);
@@ -612,6 +691,7 @@ public class MineSweeper extends Application implements Observer {
     }
 
     /**
+     * Updates the view with the new board state, including calling game-over messages if the game has ended.
      *
      * @param o     the model
      * @param arg   the MineSweeperTile[][] board from the model

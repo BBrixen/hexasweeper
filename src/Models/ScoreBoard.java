@@ -7,12 +7,21 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Scanner;
 
+/**
+ * This class stores a scoreboard for Minesweeper, which tracks the best times for each difficulty.
+ * 
+ * It loads its information from a text file ("scores.txt") by default, which is stored in the top-level directory with the README.
+ * The five best times for each difficulty are stored by default.
+ */
 public class ScoreBoard {
 
     private static final int NUM_TOP_TIMES = 5;
     private static final String fileName = "scores.txt";
     private static HashMap<String, Double[]> topTimes;
 
+    /**
+     * Loads a scoreboard from the file if applicable, allocating NUM_TOP_TIMES slots to each difficulty.
+     */
     public ScoreBoard() {
         // create the top times
         topTimes = new HashMap<>();
@@ -39,6 +48,13 @@ public class ScoreBoard {
         } catch (FileNotFoundException ignored) {}
     }
 
+    /**
+     * Registers a time on the scoreboard and updates the file if needed.
+     * 
+     * @param time The successful game's time, expressed in seconds.
+     * @param difficulty The successful game's difficulty.
+     * @param saving Whether to re-save the scoreboard file.
+     */
     public void addNewTime(double time, String difficulty, boolean saving) {
         boolean changed = false;
         Double[] times = topTimes.get(difficulty);

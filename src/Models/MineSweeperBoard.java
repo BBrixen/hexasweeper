@@ -316,6 +316,8 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 * This method is called when loading from a saved file, to ensure that we
 	 * keep using the saved target number of bombs to end the game,
 	 * rather than the overwritten target number.
+	 * 
+	 * @param newNumBombs The new such number of bombs.
 	 */
 	public void setNumBombs(int newNumBombs) {
 		numBombs = newNumBombs;
@@ -326,6 +328,8 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 * 
 	 * This method is called when loading from a saved file, to ensure that we
 	 * save to the correct scoreboard slot, rather than that of the game we overwrote.
+	 * 
+	 * @param newDifficulty The new such difficulty.
 	 */
 	public void setDifficulty(String newDifficulty) {
 		difficulty = newDifficulty;

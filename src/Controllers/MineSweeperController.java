@@ -14,6 +14,14 @@ import Models.ScoreBoard;
 import Utils.GUESS_STATUS;
 import javafx.util.Pair;
 
+/**
+ * This class stores the controller for the Minesweeper game.
+ * 
+ * The controller's responsibility is to organize the updating of a board according to user inputs,
+ * and to relay information to and from the model, especially for the purpose of save/load functionality
+ * and checking whether the game is over.
+ *
+ */
 public class MineSweeperController implements Serializable {
 
 	private final MineSweeperBoard model;
@@ -37,6 +45,13 @@ public class MineSweeperController implements Serializable {
 		win = true; // keeps track of the total number of guesses
 	}
 
+	/**
+	 * Constructs a controller from a saved file.
+	 * 
+	 * @param savedController The file in which the saved game is stored.
+	 * @throws IOException If file loading failed.
+	 * @throws ClassNotFoundException If a MineSweeperTile[][] could not be loaded from the file information.
+	 */
 	public MineSweeperController(File savedController) throws IOException, ClassNotFoundException {
 		this("Normal");
 		this.loadGame(savedController);
@@ -162,9 +177,6 @@ public class MineSweeperController implements Serializable {
 		model.setObserver(o);
 	}
 	
-	/*
-	 * TODO: Figure out under what circumstances this could fail.
-	 */
 	/**
 	 * Saves the game by outputting the current state of the board and the instance variables to a file.
 	 * 
@@ -189,9 +201,6 @@ public class MineSweeperController implements Serializable {
 		oos.close();
 	}
 	
-	/*
-	 * TODO: Figure out under what circumstances this could fail.
-	 */
 	/**
 	 * Loads the game by reading off parameters from the Controller object stored in the chosen file.
 	 * 
@@ -276,7 +285,8 @@ public class MineSweeperController implements Serializable {
 	}
 
 	/**
-	 * Retrieves the top times from the scoreboard,
+	 * Retrieves the top times from the scoreboard for this game's difficulty.
+	 * 
 	 * @return - a string representing the top times
 	 */
 	public String[] getTopTimes() {
@@ -328,6 +338,9 @@ public class MineSweeperController implements Serializable {
 		return model.isGamePaused();
 	}
 
+	/**
+	 * @return A string representation of the number of flags and mines on the board, to be displayed in the view.
+	 */
 	public String getMineCount() {
 		return model.getNumFlags() + " / " + model.getNumBombs();
 	}
