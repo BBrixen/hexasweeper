@@ -3,6 +3,7 @@ package Models;
 import java.io.Serializable;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -101,13 +102,13 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 * @param row is the y coord of the first tile clicked
 	 * @param col is the x coord of the first tile clicked
 	 */
-	public void createBoard(int row, int col) {
+	public void createBoard(int row, int col, Random random) {
 		// Start the timer
 		ms_elapsed = 0;
 		/* row and col are for the first clicked tile to
 		 * make sure a bomb isn't placed there */
 		board[row][col] = new MineSweeperTile(row, col);
-		createBombs(row, col); // places all the bombs in the board after the first press
+		createBombs(row, col, random); // places all the bombs in the board after the first press
 
 		// now places unguessed tiles without bombs
         for (int r= 0; r < rows; r++)
@@ -141,26 +142,29 @@ public class MineSweeperBoard extends Observable implements Serializable {
 
 		observer.update(this, this.board);
 	}
-	
+
 	/**
 	 * This method places bombs in random locations once the user clicks on the board for the first time.
-	 * 
+	 *
 	 * It will never place them within 2 hexes of the user's first click, to ensure the game is playable
 	 * and that the first click gives useful information.
-	 * 
+	 *
+	 * This is either called from the method above, using a new random,
+	 * or it is used in testing with a seeded random number generator
 	 * @param startRow The row that the user originally clicked.
 	 * @param startCol The column that the user originally clicked.
+	 * @param random - either unique random from gameplay, or seeded from testing
 	 */
-	public void createBombs(int startRow, int startCol) {
+	public void createBombs(int startRow, int startCol, Random random) {
 		int i = 0;
 		while (i < numBombs) {
-			int row = (int)(Math.random() * rows );
-			int col = (int)(Math.random() * cols);
+			int row = (int)(random.nextFloat() * rows );
+			int col = (int)(random.nextFloat() * cols);
 
 			int diffRow = Math.abs(startRow - row);
 			int diffCol = Math.abs(startCol - col); // make sure we start with a 0
 			if (board[row][col] != null || (diffRow < 2 && diffCol < 2)) continue;
-			
+
 			board[row][col] = new MineSweeperTile(row, col, GUESS_STATUS.UNGUESSED);
 			board[row][col].setBomb();
 			i++;

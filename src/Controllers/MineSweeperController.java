@@ -8,6 +8,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Observer;
+import java.util.Random;
+
 import Models.MineSweeperBoard;
 import Models.MineSweeperTile;
 import Models.ScoreBoard;
@@ -76,7 +78,7 @@ public class MineSweeperController implements Serializable {
 
 		if (board[row][col] == null) {
 			if (!(status.equals(GUESS_STATUS.FLAGGED))) {
-				model.createBoard(row, col); // creates the board and places all bombs
+				model.createBoard(row, col, new Random()); // creates the board and places all bombs
 				updateTileStatus(row, col, status); // updates the board with the player's click
 				}
 		}
@@ -243,6 +245,16 @@ public class MineSweeperController implements Serializable {
 		model.shutdown();
 	}
 
+	/**
+	 * This takes a seeded random and uses it to generate a known board
+	 * @param row - the starting row
+	 * @param col - the starting col
+	 * @param random - a seeded random from a testcase
+	 */
+	public void seedBoardGeneration(int row, int col, Random random) {
+		model.createBoard(row, col, random);
+	}
+
 	//GETTERS AND SETTERS
 
 	/**
@@ -357,5 +369,13 @@ public class MineSweeperController implements Serializable {
 	 */
 	public int getBombCount() {
 		return model.getNumBombs();
+	}
+
+	/**
+	 * This is used to test if the scoreboard workd
+	 * @return - the scoreboard for testing
+	 */
+	public ScoreBoard getScoreBoard() {
+		return scoreBoard;
 	}
 }
