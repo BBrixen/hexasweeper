@@ -26,7 +26,7 @@ The top five scores for each difficulty are saved in the file "scores.txt", whic
 Creating testcases for this was extremely difficult.
 Most of our testing was done by us, by playing the game. 
 The controller and model are tested as much as possible, but there are some parts that rely on ineractions with the view. 
-I tried my best to test save/load, and a devent portion of it is tested using testcases. 
+I tried my best to test save/load, and a decent portion of it is tested using testcases. 
 
 There are 2 error messages for saving and loading. These probably dont look pretty and should hopefully never trigger (especially the saving error). 
 Loading should trigger if the user attempts to load an invalid file
