@@ -23,11 +23,10 @@ The top five scores for each difficulty are saved in the file "scores.txt", whic
 
 ### Notes
 
-Creating testcases for this was extremely difficult. 
-This is primarily due to the fact that the board is completely randomized after the first click, and afterwards it relies mainly on educated gameplay. 
-Thus, our testcases did not cover as many branches inside the model as we would hope. 
+Creating testcases for this was extremely difficult.
 Most of our testing was done by us, by playing the game. 
-Obviously this is not ideal, but also creating intelligent testcases to properly guess which tiles are which seemed far too difficult. 
+The controller and model are tested as much as possible, but there are some parts that rely on ineractions with the view. 
+I tried my best to test save/load, and a devent portion of it is tested using testcases. 
 
 There are 2 error messages for saving and loading. These probably dont look pretty and should hopefully never trigger (especially the saving error). 
 Loading should trigger if the user attempts to load an invalid file

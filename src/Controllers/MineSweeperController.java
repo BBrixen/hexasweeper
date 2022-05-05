@@ -18,7 +18,7 @@ import javafx.util.Pair;
 
 /**
  * This class stores the controller for the Minesweeper game.
- * 
+ *
  * The controller's responsibility is to organize the updating of a board according to user inputs,
  * and to relay information to and from the model, especially for the purpose of save/load functionality
  * and checking whether the game is over.
@@ -35,10 +35,10 @@ public class MineSweeperController implements Serializable {
 
 	/**
 	 * Constructor for the controller.
-	 * 
+	 *
 	 * When initialized, the controller immediately creates a new board with
 	 * the size and mine density appropriate for the selected difficulty.
-	 * 
+	 *
 	 * @param difficulty A string representing the difficulty of the game, which affects board size and mine density.
 	 */
 	public MineSweeperController(String difficulty) {
@@ -49,7 +49,7 @@ public class MineSweeperController implements Serializable {
 
 	/**
 	 * Constructs a controller from a saved file.
-	 * 
+	 *
 	 * @param savedController The file in which the saved game is stored.
 	 * @throws IOException If file loading failed.
 	 * @throws ClassNotFoundException If a MineSweeperTile[][] could not be loaded from the file information.
@@ -62,7 +62,7 @@ public class MineSweeperController implements Serializable {
 	/**
 	 * This method determines the current status of the clicked tile, and based
 	 * on the status parameter, assigns a new status to the tile.
-	 * 
+	 *
 	 * @param row is the y coord of the tile
 	 * @param col is the x coord of the tile
 	 * @param status is an enum either GUESSED or FLAGGED, depending on the mouse button clicked.
@@ -80,7 +80,7 @@ public class MineSweeperController implements Serializable {
 			if (!(status.equals(GUESS_STATUS.FLAGGED))) {
 				model.createBoard(row, col, new Random()); // creates the board and places all bombs
 				updateTileStatus(row, col, status); // updates the board with the player's click
-				}
+			}
 		}
 
 		/* If the tile is already flagged and the player right clicks again, the tile
@@ -120,7 +120,7 @@ public class MineSweeperController implements Serializable {
 
 	/**
 	 * When the user clicks a tile, this method updates all of the tiles around it.
-	 * 
+	 *
 	 * @param row The row of the tile to update around.
 	 * @param col The column of the tile to update around.
 	 */
@@ -136,7 +136,7 @@ public class MineSweeperController implements Serializable {
 	 * This method reveals all tiles adjacent to a zero tile.
 	 * This method will continue to be called by updateTileStatus() until all chained
 	 * zero tiles are revealed, as well as all tiles that are adjacent to that chain.
-	 * 
+	 *
 	 * @param row The row of the tile to check.
 	 * @param col The column of the tile to check.
 	 */
@@ -148,7 +148,7 @@ public class MineSweeperController implements Serializable {
 				if (!(model.getBoard()[tempRow][tempCol].isBomb())){
 					updateTileStatus(tempRow, tempCol, GUESS_STATUS.GUESSED);}
 			}
-		}	
+		}
 	}
 
 	/**
@@ -161,24 +161,24 @@ public class MineSweeperController implements Serializable {
 		board = model.getBoard();
 
 		for (int row = 0; row < board.length; row++) {
-            for (int col = 0; col < board[row].length; col++) {
-            	if (board[row][col].isBomb())
-            		// if the tile is a bomb, set the color of the tile to a bomb
+			for (int col = 0; col < board[row].length; col++) {
+				if (board[row][col].isBomb())
+					// if the tile is a bomb, set the color of the tile to a bomb
 					model.updateTileStatus(row, col, GUESS_STATUS.BOMB);
 			}
-      	}
+		}
 		gameIsOver(); // the game is over, so we update the controller to reflect this
 	}
 
 	/**
 	 * Adds an observer to the model's observer list.
-	 * 
+	 *
 	 * @param o The observer to be added. Most likely a view object.
 	 */
 	public void setObserver(Observer o) {
 		model.setObserver(o);
 	}
-	
+
 	/**
 	 * Saves the game by outputting the current state of the board and the instance variables to a file.
 	 * @param f - the file to save the game into
@@ -187,22 +187,22 @@ public class MineSweeperController implements Serializable {
 	public void saveGame(File f) throws IOException {
 		FileOutputStream fos = new FileOutputStream(f);
 		ObjectOutputStream oos = new ObjectOutputStream(fos);
-		
+
 		oos.writeObject(this.model.getBoard());
 		// We have no need to serialize the model's observers and should not try,
 		// but unfortunately that means breaking things up a bit instead of just serializing everything at once.
 		oos.writeInt(this.model.getNumBombs());
 		oos.writeObject(this.model.getDifficulty());
-		
+
 		oos.writeBoolean(this.gameOver);
 		oos.writeInt(this.numberOfGuesses);
 		oos.writeBoolean(this.win);
 		oos.writeObject(this.board);
 		oos.writeInt((int)getSecondsElapsed());
-		
+
 		oos.close();
 	}
-	
+
 	/**
 	 * Loads the game by reading off parameters from the Controller object stored in the chosen file.
 	 * @param f - the file to read the game from
@@ -212,7 +212,7 @@ public class MineSweeperController implements Serializable {
 	public void loadGame(File f) throws IOException, ClassNotFoundException {
 		FileInputStream fis = new FileInputStream(f);
 		ObjectInputStream ois = new ObjectInputStream(fis);
-		
+
 		MineSweeperTile[][] newBoard = (MineSweeperTile[][]) ois.readObject();
 		model.setBoard(newBoard);
 		model.setNumBombs(ois.readInt());
@@ -292,7 +292,7 @@ public class MineSweeperController implements Serializable {
 
 	/**
 	 * When called, this method updates the model's time by some number of milliseconds and returns the new time.
-	 * 
+	 *
 	 * @return The number of seconds that the current game has been going for, as a double.
 	 */
 	public double getSecondsElapsed() {
@@ -301,7 +301,7 @@ public class MineSweeperController implements Serializable {
 
 	/**
 	 * Retrieves the top times from the scoreboard for this game's difficulty.
-	 * 
+	 *
 	 * @return - a string representing the top times
 	 */
 	public String[] getTopTimes() {
@@ -323,7 +323,7 @@ public class MineSweeperController implements Serializable {
 	public int getRows() {
 		return model.getRows();
 	}
-	
+
 	/**
 	 * Gets the cols of the current board
 	 * @return The number of columns in the model's grid.
@@ -362,7 +362,7 @@ public class MineSweeperController implements Serializable {
 	public String getMineCount() {
 		return model.getNumFlags() + " / " + model.getNumBombs();
 	}
-	
+
 	/**
 	 * Returns how many bombs are on the current board
 	 * @return The number of bombs on the current board
