@@ -77,7 +77,6 @@ public class MineSweeperBoard extends Observable implements Serializable {
 				cols = 20;
 			}
 			case "Normal" -> {
-				divider = NORMAL_DIVIDER;
 				rows = 16;
 				cols = 24;
 			}

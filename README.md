@@ -20,3 +20,14 @@ Doing this preserves the state of that game's timer, and all of the progress you
 
 At the left side of the screen is a scoreboard for the current difficulty of the game you're playing.
 The top five scores for each difficulty are saved in the file "scores.txt", which is in the same directory as this readme.
+
+### Notes
+
+Creating testcases for this was extremely difficult. 
+This is primarily due to the fact that the board is completely randomized after the first click, and afterwards it relies mainly on educated gameplay. 
+Thus, our testcases did not cover as many branches inside the model as we would hope. 
+Most of our testing was done by us, by playing the game. 
+Obviously this is not ideal, but also creating intelligent testcases to properly guess which tiles are which seemed far too difficult. 
+
+There are 2 error messages for saving and loading. These probably dont look pretty and should hopefully never trigger (especially the saving error). 
+Loading should trigger if the user attempts to load an invalid file

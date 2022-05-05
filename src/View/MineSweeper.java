@@ -8,6 +8,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -122,7 +123,7 @@ public class MineSweeper extends Application implements Observer {
     	// initialize game
         createController("Normal");
 
-        stage.setTitle("Mine Sweeper");
+        stage.setTitle("Hex Sweeper");
         stage.show();
         stage.setOnCloseRequest(e -> controller.shutdownTimer());
         chooseDiff();
@@ -438,7 +439,14 @@ public class MineSweeper extends Application implements Observer {
             if (f != null)
                 try {
                     controller.saveGame(f);
-                } catch (IOException ignored) {} // TODO make popup showing error?
+                } catch (IOException ex) {
+                    // alert for bad saving
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("HexSweeper");
+                    alert.setContentText(ex.getMessage());
+                    alert.setHeaderText("Error with Saving");
+                    alert.showAndWait();
+                }
 
         	unpauseGame();
         });
@@ -452,7 +460,14 @@ public class MineSweeper extends Application implements Observer {
         		if (f != null)
                     try {
                         createController(f);
-                    } catch (IOException | ClassNotFoundException ignored) {} // TODO make popup showing error?
+                    } catch (IOException | ClassNotFoundException ex) {
+                        // alert for loading
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("HexSweeper");
+                        alert.setContentText(ex.getMessage());
+                        alert.setHeaderText("Error with Loading");
+                        alert.showAndWait();
+                    }
 
         		unpauseGame();
         });
