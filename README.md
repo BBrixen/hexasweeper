@@ -7,7 +7,7 @@ You will be prompted to select a difficulty; higher difficulties of the game hav
 At the top of the board is a timer for the current game; the pause/play button at the bottom will stop the timer but also obscure the screen, to prevent cheating.
 
 Left-clicking a hexagon will reveal the tile underneath, which will display the number of adjacent mines.
-The first click is guaranteed to have no adjacent mines, and will thus reveal more nearby mines in a chain.
+The first click is guaranteed to have no adjacent mines, and will thus reveal more nearby tiles in a chain.
 
 Right-clicking a hexagon will mark it with a flag, a useful indicator that you believe a mine might be there.
 The number of flags you've placed is tracked at the top of the screen, next to the number of mines.
