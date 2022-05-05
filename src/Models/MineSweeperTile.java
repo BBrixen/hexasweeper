@@ -23,7 +23,6 @@ public class MineSweeperTile implements Serializable{
      * The number of tiles adjacent to this one that contain mines.
      */
     private int mineCount;
-    
     private final int row, col;
     
     /** Indicates if the tile contains a bomb,
@@ -81,10 +80,6 @@ public class MineSweeperTile implements Serializable{
 
     // GETTERS AND SETTERS
 
-    /*
-     * TODO: maybe make this check the bounds of the board first, that way we dont have to check each other time.
-     *  idk this might be needed tho
-     */
     /**
      * Returns the coordinates of all tiles adjacent to this one.
      * These coordinates CAN be outside the bounds of the board,
@@ -106,6 +101,7 @@ public class MineSweeperTile implements Serializable{
     }
 
     /**
+     * Sets the current status of this specific tile
      * @param status The new guess status of this tile (guessed, unguessed, flagged, mine revealed).
      */
 	public void setStatus(GUESS_STATUS status) {
@@ -113,6 +109,7 @@ public class MineSweeperTile implements Serializable{
     }
     
 	/**
+     * Gets the current status of this specific tile
 	 * @return The guess status of this tile (guessed, unguessed, flagged, mine revealed).
 	 */
     public GUESS_STATUS getStatus() {
@@ -120,7 +117,8 @@ public class MineSweeperTile implements Serializable{
     }
     
     /**
-     * @return A boolean indicating whether there is a mine here.
+     * Checks if this tile is a bomb
+     * @return true if this is a bomb, false otherwise
      */
     public boolean isBomb() {
     	return bomb;
@@ -137,6 +135,7 @@ public class MineSweeperTile implements Serializable{
     }
 
     /**
+     * Gets the number of bombs around this tile
      * @return The number of adjacent mines.
      */
     public int getMineCount() {

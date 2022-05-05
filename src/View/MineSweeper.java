@@ -89,6 +89,7 @@ public class MineSweeper extends Application implements Observer {
     // inside the update function and there is no way to pass them as parameters
     private Hexagon[][] rectGrid;
     private Label[][] labelGrid;
+    // so no tile is being animated multiple times at once
     private HashSet<Pair<Integer, Integer>> animatedTiles;
     // the stage must be global since it is used and modified in many locations.
     // it is far too much pain to make it a local variable
@@ -112,7 +113,8 @@ public class MineSweeper extends Application implements Observer {
     }
 
     /**
-     * Runs upon launch. It fills out and then creates the main window of the game, before prompting the user to select a difficulty for their first game.
+     * Runs upon launch. It fills out and then creates the main window of the game,
+     * before prompting the user to select a difficulty for their first game.
      */
     @Override
     public void start(Stage stage) {
@@ -127,7 +129,8 @@ public class MineSweeper extends Application implements Observer {
     }
 
     /**
-     * Sets up the basic structure of the game screen, including the buttons, timer, and their relative locations in the panes.
+     * Sets up the basic structure of the game screen, including the buttons, timer,
+     * and their relative locations in the panes.
      */
     private Scene createScene() {
         rectGrid = new Hexagon[controller.getRows()][controller.getCols()];
@@ -173,7 +176,8 @@ public class MineSweeper extends Application implements Observer {
     }
 
     /**
-     * Adjusts constants in the program based on the size of the game board, in order to rescale the board so it fits on screen.
+     * Adjusts constants in the program based on the size of the game board,
+     * in order to rescale the board so it fits on screen.
      * 
      * @param rows The size of the game board, in rows.
      * @param cols The size of the game board, in columns.
@@ -190,7 +194,8 @@ public class MineSweeper extends Application implements Observer {
     }
 
     /**
-     * Creates a new controller with the chosen difficulty, then sets up the display with it.
+     * Creates a new controller with the chosen difficulty,
+     * then sets up the display with it.
      * 
      * @param difficulty The string for the difficulty of game to set up.
      */
@@ -200,7 +205,8 @@ public class MineSweeper extends Application implements Observer {
     }
 
     /**
-     * Creates a controller from a loaded file, which entails updating the board after setting up the display.
+     * Creates a controller from a loaded file, which entails updating the board
+     * after setting up the display.
      * 
      * @param file The file to load the game from.
      * @throws IOException If file loading fails.
@@ -213,9 +219,11 @@ public class MineSweeper extends Application implements Observer {
     }
 
     /**
-     * Uses the information in the controller (namely the size of the board) to create an initial grid of hexagons of that size.
+     * Uses the information in the controller (namely the size of the board)
+     * to create an initial grid of hexagons of that size.
      * 
-     * This method also sets the current view to be the observer for the controller's stored model.
+     * This method also sets the current view to be the observer for the
+     * controller's stored model.
      */
     private void createDisplayFromController() {
         generateConstants(controller.getRows(), controller.getCols());
@@ -228,8 +236,10 @@ public class MineSweeper extends Application implements Observer {
 
     /**
      *  Creates the blank game board of ROW x COL hexagons
+     * @param board - the board which we add tiles to
+     * @param gridPane - the central grid on the view to add hexagons to
      */
-    public void createBoard(MineSweeperTile[][] board, AnchorPane gridPane) {
+    private void createBoard(MineSweeperTile[][] board, AnchorPane gridPane) {
         for (int row = 0; row < board.length; row++) {
             for (int col = 0; col < board[row].length; col++) {
                 addHex(row, col, board, gridPane);
@@ -240,10 +250,10 @@ public class MineSweeper extends Application implements Observer {
     /**
      * Creates a scoreboard from the top times for the current difficulty.
      * 
-     * @param controller
-     * @param mainPane
+     * @param controller - the controller for the game, used for getting the times
+     * @param mainPane - the main pane which we add the times labels to
      */
-    public void createScoreBoard(MineSweeperController controller, HBox mainPane) {
+    private void createScoreBoard(MineSweeperController controller, HBox mainPane) {
     	String[] topTimes = controller.getTopTimes();
         Label topLabel = new Label("Top Scores   ");
         topLabel.setFont(MAIN_FONT);
@@ -275,6 +285,12 @@ public class MineSweeper extends Application implements Observer {
      * This generates a new polygon with the needed hex points
      */
     private static class Hexagon extends Polygon {
+        /**
+         * This is the constructor for a hexagon.
+         * It will create a hexagon to be placed at the given coordinates
+         * @param x - the x coordinate of the hexagon
+         * @param y - the y coordinate of the hexagon
+         */
         Hexagon(double x, double y) {
             // creates the polygon using the corner coordinates
             getPoints().addAll(
@@ -295,6 +311,8 @@ public class MineSweeper extends Application implements Observer {
      *
      * @param row is the y coord
      * @param col is the x coord
+     * @param board - the board of tiles, where each hex is a tile
+     * @param gridPane - the grid on the view full of hexagons
      */
     private void addHex(int row, int col, MineSweeperTile[][] board, AnchorPane gridPane) {
         double yCoord = (row+1) * HEX_HEIGHT * 0.75;
@@ -400,8 +418,11 @@ public class MineSweeper extends Application implements Observer {
 
     /**
      * Sets the functionality of the save, load, and reset buttons on the screen.
+     * @param saveButton - saves the current game
+     * @param loadButton - attempts to load a new game
+     * @param resetButton - allows the user to restart the game
      */
-    public void setButtonActions(Button saveButton, Button loadButton, Button resetButton) {
+    private void setButtonActions(Button saveButton, Button loadButton, Button resetButton) {
         saveButton.setOnAction(e -> {
             if (controller.isGameOver()) return;
             // Call pause method in order to prevent player cheating with file dialog box
@@ -445,7 +466,7 @@ public class MineSweeper extends Application implements Observer {
      * This method sets up the game over message in the middle of the board
      * when the game is over, then calls its display method, playAgainPop().
      */
-    public void displayGameOver() {
+    private void displayGameOver() {
     	controller.disableTimer();
         String msg = "YOU WIN!";
         Paint p = GREEN_BACKGROUND;
@@ -475,11 +496,11 @@ public class MineSweeper extends Application implements Observer {
     /**
      * Displays the play-again message in the view.
      * 
-     * @param root
-     * @param label
-     * @param btn
-     * @param popUp
-     * @param p
+     * @param root - the borderpane to draw everything to
+     * @param label - the label with the pop up message
+     * @param btn - the button for playing again
+     * @param popUp - the stage for this popup menu
+     * @param p - the color for the background of this popup
      */
     private void playAgainPop(BorderPane root, Label label, Button btn, Stage popUp, Paint p) {
         root.setBackground(
@@ -504,7 +525,7 @@ public class MineSweeper extends Application implements Observer {
     /**
      * Sets up buttons and labels for the difficulty select popup, then calls their display methods.
      */
-    public void chooseDiff() {
+    private void chooseDiff() {
         Stage diffPop = new Stage();
 
         Label label = new Label();
@@ -539,9 +560,9 @@ public class MineSweeper extends Application implements Observer {
     /**
      * Draws the difficulty-select popup.
      * 
-     * @param buttonBox
-     * @param label
-     * @param diffPop
+     * @param buttonBox - the HBox for the difficulty buttons
+     * @param label - the label with difficulty message
+     * @param diffPop - the stage for this popup menu
      */
     private void diffPopUp(HBox buttonBox, Label label, Stage diffPop) {
         buttonBox.setPadding(DEFAULT_INSETS);
@@ -566,12 +587,12 @@ public class MineSweeper extends Application implements Observer {
     /**
      * Allocates mouse-press responses to each of the difficulty-select buttons.
      * 
-     * @param veryEasy
-     * @param easy
-     * @param normal
-     * @param hard
-     * @param veryHard
-     * @param diffPop
+     * @param veryEasy - the button for very easy
+     * @param easy - the button for easy
+     * @param normal - the button for normal
+     * @param hard - the button for hard
+     * @param veryHard - the button for very hard
+     * @param diffPop - the stage for this popup (we need to close on every button press)
      */
     private void diffListener(Button veryEasy, Button easy, Button normal, Button hard, Button veryHard, Stage diffPop) {
         veryEasy.setOnMousePressed(me -> {
@@ -664,8 +685,8 @@ public class MineSweeper extends Application implements Observer {
     
     /**
      * Sets every hexagon's opacity to the value given in the arguments
-     * @param opacity the opacity to set each hexagon to, 0.0 being translucent, and 1.0 being fully
-     * opaque
+     * @param opacity the opacity to set each hexagon to,
+     *                0.0 being translucent, and 1.0 being fully opaque
      */
     private void setBoardOpacity(double opacity) {
         for (int i = 0; i< rectGrid.length && i < labelGrid.length; i++) {

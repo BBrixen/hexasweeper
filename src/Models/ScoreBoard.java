@@ -80,9 +80,9 @@ public class ScoreBoard {
     }
 
     /**
-     * This returns a mapping from the game difficulty to the time achieved
-     * It still retuns the top times, it just returns the top times with each difficulty
-     * @return - a mapping which includes the difficulty and time
+     * This returns the top times for the current game difficulty
+     * @param difficulty - the difficulty which we use to filter the top times by
+     * @return - a list of times for only the given difficulty
      */
     public Double[] getTopTimes(String difficulty) {
         return topTimes.get(difficulty);

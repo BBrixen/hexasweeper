@@ -59,9 +59,9 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	}
 
 	/**
-	 * This takes in a difficulty and changes the board dimensions to match that
+	 * This takes in a difficulty and changes the
+	 * board dimensions and number of bombs to match that
 	 * @param difficulty - the difficulty for this board
-	 * @return - an integer
 	 */
 	public void setBoardDimensions(String difficulty) {
 		int divider = NORMAL_DIVIDER;
@@ -137,9 +137,9 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	 * This method notifies observers when the board has changed.
 	 */
 	public void notifyObservers() {
-		if (observer == null) {
+		if (observer == null)
 			return;
-		}
+
 		observer.update(this, this.board);
 	}
 	
@@ -205,6 +205,7 @@ public class MineSweeperBoard extends Observable implements Serializable {
 
 	/**
 	 * Sets the board to an existing board, from a loaded file.
+	 * @param newBoard - the new board from a file to replace the old one
 	 */
 	public void setBoard(MineSweeperTile[][] newBoard) {
 		board = newBoard;
@@ -265,6 +266,7 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	}
 
 	/**
+	 * Gets the current game difficulty
 	 * @return This game's difficulty setting, expressed as a string (like "Easy" or "Very Hard").
 	 */
 	public String getDifficulty() {
@@ -272,6 +274,7 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	}
 
 	/**
+	 * Gets the rows of this board
 	 * @return The number of rows in the Minesweeper board.
 	 */
 	public int getRows() {
@@ -279,6 +282,7 @@ public class MineSweeperBoard extends Observable implements Serializable {
 	}
 
 	/**
+	 * Gets the columns of this board
 	 * @return The number of columns in the Minesweeper board.
 	 */
 	public int getCols() {

@@ -179,7 +179,7 @@ public class MineSweeperController implements Serializable {
 	
 	/**
 	 * Saves the game by outputting the current state of the board and the instance variables to a file.
-	 * 
+	 * @param f - the file to save the game into
 	 * @throws IOException If the game fails to save.
 	 */
 	public void saveGame(File f) throws IOException {
@@ -203,7 +203,7 @@ public class MineSweeperController implements Serializable {
 	
 	/**
 	 * Loads the game by reading off parameters from the Controller object stored in the chosen file.
-	 * 
+	 * @param f - the file to read the game from
 	 * @throws IOException If opening the file fails
 	 * @throws ClassNotFoundException If the object we try to load is not a valid MineSweeperTile[][]
 	 */
@@ -246,7 +246,8 @@ public class MineSweeperController implements Serializable {
 	//GETTERS AND SETTERS
 
 	/**
-	 * @return A boolean indicating if the game is over.
+	 * Checks if the game is over
+	 * @return true if the game is over, false if we are still playing
 	 */
 	public boolean isGameOver() {
 		return gameOver;
@@ -262,13 +263,15 @@ public class MineSweeperController implements Serializable {
 	}
 
 	/**
-	 * @return A boolean indicating if the player won the game.
+	 * Checks if the user won
+	 * @return true if the user won, false if they lost
 	 */
 	public boolean win() {
 		return win;
 	}
 
 	/**
+	 * Gets the current board for this game
 	 * @return The MineSweeperTile[][] array from this controller's current model.
 	 */
 	public MineSweeperTile[][] getBoard() {
@@ -302,6 +305,7 @@ public class MineSweeperController implements Serializable {
 	}
 
 	/**
+	 * Gets the rows of the current board
 	 * @return The number of rows in the model's grid.
 	 */
 	public int getRows() {
@@ -309,6 +313,7 @@ public class MineSweeperController implements Serializable {
 	}
 	
 	/**
+	 * Gets the cols of the current board
 	 * @return The number of columns in the model's grid.
 	 */
 	public int getCols() {
@@ -339,7 +344,8 @@ public class MineSweeperController implements Serializable {
 	}
 
 	/**
-	 * @return A string representation of the number of flags and mines on the board, to be displayed in the view.
+	 * Gets a nice string in the form of "CURRENT/TOTAL" for the number of flags places and mines
+	 * @return A string representation of the number of flags and mines on the board
 	 */
 	public String getMineCount() {
 		return model.getNumFlags() + " / " + model.getNumBombs();
